@@ -9,6 +9,17 @@ import sys
 SCALE = 0.16
 SVG_DIR = 'derived'
 
+def augment_glyph(glyph):
+  print get_glyph_data(glyph), '\n'
+
+def get_glyph_data(glyph):
+  left = ' d="'
+  start = max(glyph.find(left), glyph.find(left.replace(' ', '\n')))
+  assert start >= 0, 'Glyph missing d=".*" block:\n{0}'.format(repr(glyph))
+  end = glyph.find('"', start + len(left))
+  assert end >= 0, 'Glyph missing d=".*" block:\n{0}'.format(repr(glyph))
+  return glyph[start + len(left):end].replace('\n', ' ')
+
 if __name__ == '__main__':
   assert len(sys.argv) > 1, 'Usage: ./getchar.py <unicode_codepoint>+'
   svgs = [file_name for file_name in os.listdir(SVG_DIR)
@@ -35,6 +46,7 @@ if __name__ == '__main__':
     for row in glyphs:
       f.write('      <div>\n')
       for glyph in row:
+        augment_glyph(glyph)
         size = int(1024*SCALE)
         f.write('        <svg width="{0}" height="{0}">\n'.format(size))
         f.write('          {0}\n'.format(glyph.replace(
