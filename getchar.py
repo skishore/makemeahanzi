@@ -4,91 +4,27 @@ Extracts one or more characters from each of the svg fonts in the SVG directory
 and packages them into a 'chars.html' output file.
 '''
 import os
+import svg.path
 import sys
 
 SCALE = 0.16
 SVG_DIR = 'derived'
 
 
-class Point(object):
-  def __init__(self, x=0, y=0):
-    self.x = x
-    self.y = y
-
-  def __repr__(self):
-    return 'Point({0}, {1})'.format(self.x, self.y)
-
-
-class StrokeExtractor(object):
-  def __init__(self):
-
-
-class SVGPathDecoder(object):
-  NUM_NEXT_POINTS = {'m': 1, 'l': 1, 'q': 2, 't': 1, 'h': 0, 'v': 0, 'z': 0}
-
-  def __init__(self, d):
-    self.d = d
-    self.index = 0
-    self.position = Point(0, 0)
-    while self.index < len(d):
-      code = self._next_code()
-      lower = code.lower()
-      if lower not in self.NUM_NEXT_POINTS:
-        raise ValueError('Unsupported SVG d code {0} at index {1}:\n{2}'.format(
-            code, self.index - 1, self.d))
-      next_points = self._get_next_points(code)
-      if next_points:
-        self.position = next_points[-1]
-      if lower == 'm':
-        print 'Start:', self.position
-      elif lower == 'z':
-        print 'End:', self.position
-
-  def _get_next_points(self, code):
-    result = []
-    lower = code.lower()
-    for _ in xrange(self.NUM_NEXT_POINTS.get(lower, 0)):
-      result.append(Point(self._next_value(), self._next_value()))
-    if lower == 'h':
-      result.append(Point(self._next_value(), 0))
-    elif lower == 'v':
-      result.append(Point(0, self._next_value()))
-    if lower == code:
-      for point in result:
-        point.x += self.position.x
-        point.y += self.position.y
-    return result
-
-  def _get_next_token(self, name, predicate, max_length=None):
-    index = self.index
-    max_index = len(self.d)
-    if max_length:
-      max_index = min(max_index, index + max_length)
-    while index < max_index and predicate(self.d[index]):
-      index += 1
-    result = self.d[self.index:index]
-    if not result:
-      raise ValueError('Error scanning for {0} at index {1}:\n{2}'.format(
-          name, self.index, self.d))
-    while index < len(self.d) and self.d[index] == ' ':
-      index += 1
-    self.index = index
-    return result
-
-  def _next_code(self):
-    return self._get_next_token('code', lambda x: x.isalpha(), 1)
-
-  def _next_value(self):
-    return int(self._get_next_token('value', lambda x: x.isdigit() or x == '-'))
-
-
 def augment_glyph(glyph):
-  decoder = SVGPathDecoder(get_glyph_data(glyph))
-  print ''
+  path = svg.path.parse_path(get_svg_path_data(glyph))
+  assert path, 'Got empty path for glyph:\n{0}'.format(glyph)
+  subpaths = [[path[0]]]
+  for element in path[1:]:
+    if element.start == element.end:
+      continue
+    if element.start != subpaths[-1][-1].end:
+      subpaths.append([])
+    subpaths[-1].append(element)
+  subpaths = map(svg.path.Path, subpaths)
+  print len(subpaths)
 
-def get_glyph_data(glyph):
-  # Returns a list of SVG path d-values for this glyph's outline. Each of these
-  # d values has exactly one close-path 'z' instruction at the end of the path.
+def get_svg_path_data(glyph):
   left = ' d="'
   start = max(glyph.find(left), glyph.find(left.replace(' ', '\n')))
   assert start >= 0, 'Glyph missing d=".*" block:\n{0}'.format(repr(glyph))
