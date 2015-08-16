@@ -11,18 +11,27 @@ SCALE = 0.16
 SVG_DIR = 'derived'
 TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
+# Constants controlling our stroke extraction algorithm.
+MAX_CROSSING_DISTANCE = 64
+
 
 def augment_glyph(glyph):
   path = svg.path.parse_path(get_svg_path_data(glyph))
   assert path, 'Got empty path for glyph:\n{0}'.format(glyph)
-  subpaths = break_path(path)
-  # Actually augment the glyph. For now, we just mark stroke endpoints.
-  colors = ['red', 'blue', 'green', 'purple']
-  return [
-    '<circle cx="{0}" cy="{1}" r="4" fill="{2}" stroke="{2}"/>'.format(
-        int(element.end.real), int(element.end.imag), colors[i % len(colors)])
-    for (i, subpath) in enumerate(subpaths) for element in subpath
-  ]
+  # Actually augment the glyph. For now, we draw a line between pairs of curve
+  # endpoints that are sufficiently close.
+  result = []
+  for i, element in enumerate(path):
+    for j, neighbor in enumerate(path):
+      if j == i or j + 1 % len(path) == i or j == i + 1 % len(path):
+        continue
+      if abs(element.start - neighbor.start) < MAX_CROSSING_DISTANCE:
+        result.append(
+            '<line x1="{0}" y1="{1}" x2="{2}" y2="{3}" style="{4}"/>'.format(
+                int(element.start.real), int(element.start.imag),
+                int(neighbor.start.real), int(neighbor.start.imag),
+                'stroke:red;stroke-width:4'))
+  return result
 
 def break_path(path):
   subpaths = [[path[0]]]
