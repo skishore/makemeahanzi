@@ -9,11 +9,22 @@ import sys
 
 SCALE = 0.16
 SVG_DIR = 'derived'
+TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
 
 def augment_glyph(glyph):
   path = svg.path.parse_path(get_svg_path_data(glyph))
   assert path, 'Got empty path for glyph:\n{0}'.format(glyph)
+  subpaths = break_path(path)
+  # Actually augment the glyph. For now, we just mark stroke endpoints.
+  colors = ['red', 'blue', 'green', 'purple']
+  return [
+    '<circle cx="{0}" cy="{1}" r="4" fill="{2}" stroke="{2}"/>'.format(
+        int(element.end.real), int(element.end.imag), colors[i % len(colors)])
+    for (i, subpath) in enumerate(subpaths) for element in subpath
+  ]
+
+def break_path(path):
   subpaths = [[path[0]]]
   for element in path[1:]:
     if element.start == element.end:
@@ -21,8 +32,7 @@ def augment_glyph(glyph):
     if element.start != subpaths[-1][-1].end:
       subpaths.append([])
     subpaths[-1].append(element)
-  subpaths = map(svg.path.Path, subpaths)
-  print len(subpaths)
+  return [svg.path.Path(*subpath) for subpath in subpaths]
 
 def get_svg_path_data(glyph):
   left = ' d="'
@@ -59,12 +69,13 @@ if __name__ == '__main__':
     for row in glyphs:
       f.write('      <div>\n')
       for glyph in row:
-        augment_glyph(glyph)
         size = int(1024*SCALE)
         f.write('        <svg width="{0}" height="{0}">\n'.format(size))
-        f.write('          {0}\n'.format(glyph.replace(
-            '<glyph', '<path transform="scale({0:.2g}, -{0:0.2g}) '
-            'translate(0, -900)"'.format(SCALE))))
+        f.write('          <g transform="{0}">\n'.format(TRANSFORM))
+        f.write(glyph.replace('<glyph', '<path'))
+        for extra in augment_glyph(glyph):
+          f.write(extra)
+        f.write('          </g>\n')
         f.write('        </svg>\n')
       f.write('      </div>\n')
     f.write('    </body>\n  </html>')
