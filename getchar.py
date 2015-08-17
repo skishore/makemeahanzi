@@ -82,7 +82,7 @@ class Cusp(object):
       return True
     diff = other.point - self.point
     length = abs(diff)
-    if length > MAX_CROSSING_DISTANCE:
+    if length > 2*MAX_CROSSING_DISTANCE:
       return False
     (other1, other2) = (other.tangent1, other.tangent2)
     if reverse:
@@ -97,10 +97,7 @@ class Cusp(object):
     # TODO(skishore): Replace this set of inequalities with a machine-learned
     # classifier such as a neural net.
     result = (features[2]*features[3] > 0 and
-              abs(features[0]) < 0.3*math.pi and
-              abs(features[1]) < 0.3*math.pi and
-              abs(features[2]) > 0.3*math.pi and
-              abs(features[3]) > 0.3*math.pi)
+              2*(abs(features[0]) + abs(features[1])) + abs(abs(features[2]) + abs(features[3]) - math.pi) < 0.4*MAX_CROSSING_DISTANCE*math.pi/length)
     print (self.point, other.point, features, int(result))
     return result
 
