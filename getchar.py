@@ -13,8 +13,9 @@ SVG_DIR = 'derived'
 TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
 # Constants controlling our stroke extraction algorithm.
-MIN_CROSSING_ANGLE = 0.1*math.pi
 MAX_CROSSING_DISTANCE = 64
+MAX_CUSP_MERGE_DISTANCE = 15
+MIN_CUSP_ANGLE = 0.1*math.pi
 
 
 class Cusp(object):
@@ -27,11 +28,35 @@ class Cusp(object):
     self.angle = self._get_angle(self.tangent1, self.tangent2)
 
   def connect(self, other):
+    # Returns true if a troke continues from this cusp point to the other.
     if other.index == self.index:
       return False
     if other.index[0] == self.index[0]:
       return self._try_connect(other)
     return self._try_connect(other) or self._try_connect(other, True)
+
+  def merge(self, other):
+    # Returns true if this cusp point is close enough to the next one that
+    # they should be combined into one cusp point. If this method returns
+    # true, other will be populated with the merged cusp data.
+    assert other.index[0] == self.index[0], 'merge called for different paths!'
+    if abs(other.point - self.point) > MAX_CUSP_MERGE_DISTANCE:
+      return False
+    distance = 0
+    j = self.index[1]
+    path = self.paths[self.index[0]]
+    while j != other.index[1]:
+      j = (j + 1) % len(path)
+      distance += abs(path[j].end - path[j].start)
+    if distance > MAX_CUSP_MERGE_DISTANCE:
+      return False
+    # We should merge. Check which point is the real cusp and update other.
+    if abs(self.angle) > abs(other.angle):
+      other.index = self.index
+      other.point = self.point
+    other.tangent1 = self.tangent1
+    other.angle = other._get_angle(other.tangent1, other.tangent2)
+    return True
 
   def _get_angle(self, vector1, vector2):
     if not vector1 or not vector2:
@@ -113,10 +138,18 @@ def break_path(path):
 def get_cusps(paths):
   result = []
   for i, path in enumerate(paths):
+    cusps = []
     for j, element in enumerate(path):
       cusp = Cusp(paths, (i, j))
-      if abs(cusp.angle) > MIN_CROSSING_ANGLE:
-        result.append(cusp)
+      if abs(cusp.angle) > MIN_CUSP_ANGLE:
+        cusps.append(cusp)
+    j = 0
+    while j < len(cusps):
+      if cusps[j].merge(cusps[(j + 1) % len(cusps)]):
+        cusps.pop(j)
+      else:
+        j += 1
+    result.extend(cusps)
   return result
 
 def get_svg_path_data(glyph):
