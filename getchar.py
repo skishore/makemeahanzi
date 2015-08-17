@@ -8,7 +8,7 @@ import os
 import svg.path
 import sys
 
-SCALE = 1
+SCALE = 0.16
 SVG_DIR = 'derived'
 TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
@@ -96,21 +96,25 @@ class Cusp(object):
     )
     # TODO(skishore): Replace this set of inequalities with a machine-learned
     # classifier such as a neural net.
-    return (features[2]*features[3] > 0 and
-            abs(features[0]) < 0.3*math.pi and
-            abs(features[1]) < 0.3*math.pi and
-            abs(features[2]) > 0.3*math.pi and
-            abs(features[3]) > 0.3*math.pi)
+    result = (features[2]*features[3] > 0 and
+              abs(features[0]) < 0.3*math.pi and
+              abs(features[1]) < 0.3*math.pi and
+              abs(features[2]) > 0.3*math.pi and
+              abs(features[3]) > 0.3*math.pi)
+    print (self.point, other.point, features, int(result))
+    return result
 
 
 def augment_glyph(glyph):
+  names = [token for token in glyph.split() if 'glyph-name' in token]
+  print '\n#{0}'.format(names[0] if names else 'glyph-name="unknown"')
   path = svg.path.parse_path(get_svg_path_data(glyph))
   path = svg.path.Path(
       *[element for element in path if element.start != element.end])
   assert path, 'Got empty path for glyph:\n{0}'.format(glyph)
   paths = break_path(path)
   cusps = get_cusps(paths)
-  # Actually augment the glyph. For now, we just mark all detected cusps.
+  # Actually augment the glyph with stroke-aligned cuts.
   result = []
   for cusp in cusps:
     result.append(
@@ -124,7 +128,7 @@ def augment_glyph(glyph):
             '<line x1="{0}" y1="{1}" x2="{2}" y2="{3}" style="{4}"/>'.format(
                 int(cusp.point.real), int(cusp.point.imag),
                 int(other.point.real), int(other.point.imag),
-                'stroke:green;stroke-width:2'))
+                'stroke:white;stroke-width:8'))
   return result
 
 def break_path(path):
