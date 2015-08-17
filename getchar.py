@@ -3,6 +3,7 @@
 Extracts one or more characters from each of the svg fonts in the SVG directory
 and packages them into a 'chars.html' output file.
 '''
+import collections
 import math
 import os
 import svg.path
@@ -147,6 +148,25 @@ def break_path(path):
     subpaths[-1].append(element)
   return [svg.path.Path(*subpath) for subpath in subpaths]
 
+def drop_middle_edges(cusps, edges):
+  # If there is a triple of edges (i, j), (j, k), (k, l) where i and l are
+  # leaf nodes in the edge graph, drops the edge (j, k). That edge would create
+  # a stroke that ends in the middle but that should continue along the other
+  # two edges instead.
+  adjacency = collections.defaultdict(list)
+  for (index1, index2) in edges:
+    adjacency[index1].append(index2)
+  leaves = set(index for (index, neighbors) in adjacency.iteritems()
+               if len(neighbors) == 1)
+  edges_to_remove = set()
+  for (index1, index2) in edges:
+    if (any(neighbor != index2 and neighbor in leaves
+            for neighbor in adjacency[index1]) and
+        any(neighbor != index1 and neighbor in leaves
+            for neighbor in adjacency[index2])):
+      edges_to_remove.add((index1, index2))
+  return edges.difference(edges_to_remove)
+
 def get_cusps(paths):
   result = {}
   for i, path in enumerate(paths):
@@ -177,11 +197,11 @@ def get_edges(cusps):
   for (confidence, index1, index2) in edges:
     other1 = set(b for (a, b) in result if a == index1)
     other2 = set(b for (a, b) in result if a == index2)
-    if other1.intersection(other2):
+    if other1.intersection(other2) or should_split(cusps, index1, index2):
       continue
     result.add((index1, index2))
     result.add((index2, index1))
-  return result
+  return drop_middle_edges(cusps, result)
 
 def get_svg_path_data(glyph):
   left = ' d="'
@@ -190,6 +210,18 @@ def get_svg_path_data(glyph):
   end = glyph.find('"', start + len(left))
   assert end >= 0, 'Glyph missing d=".*" block:\n{0}'.format(repr(glyph))
   return glyph[start + len(left):end].replace('\n', ' ')
+
+def should_split(cusps, index1, index2):
+  diff = cusps[index2].point - cusps[index1].point
+  for cusp in cusps.itervalues():
+    if cusp.index in (index1, index2):
+      continue
+    t = ((cusp.point.real - cusps[index1].point.real)*diff.real +
+         (cusp.point.imag - cusps[index1].point.imag)*diff.imag)/(abs(diff)**2)
+    distance_to_line = abs(cusps[index1].point + t*diff - cusp.point)
+    if 0 < t < 1 and distance_to_line < MAX_CUSP_MERGE_DISTANCE:
+      return True
+  return False
 
 
 if __name__ == '__main__':
