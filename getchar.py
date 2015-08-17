@@ -17,6 +17,64 @@ MIN_CROSSING_ANGLE = 0.1*math.pi
 MAX_CROSSING_DISTANCE = 64
 
 
+class Cusp(object):
+  def __init__(self, paths, index):
+    self.paths = paths
+    self.index = index
+    (i, j) = index
+    self.point = paths[i][j].end
+    (self.tangent1, self.tangent2) = self._get_tangents(self.paths[i], j)
+    self.angle = self._get_angle(self.tangent1, self.tangent2)
+
+  def connect(self, other):
+    if other.index == self.index:
+      return False
+    if other.index[0] == self.index[0]:
+      return self._try_connect(other)
+    return self._try_connect(other) or self._try_connect(other, True)
+
+  def _get_angle(self, vector1, vector2):
+    if not vector1 or not vector2:
+      return 0
+    ratio = vector1/vector2
+    return math.atan2(ratio.imag, ratio.real)
+
+  def _get_tangents(self, path, index):
+    segment1 = path[index]
+    tangent1 = segment1.end - segment1.start
+    if (type(segment1) == svg.path.QuadraticBezier and
+        segment1.end != segment1.control):
+      tangent1 = segment1.end - segment1.control
+    segment2 = path[(index + 1) % len(path)]
+    tangent2 = segment2.end - segment2.start
+    if (type(segment2) == svg.path.QuadraticBezier and
+        segment2.control != segment2.end):
+      tangent2 = segment2.control - segment2.start
+    return (tangent1, tangent2)
+
+  def _try_connect(self, other, reverse=False):
+    if other.point == self.point:
+      return True
+    diff = other.point - self.point
+    (other1, other2) = (other.tangent1, other.tangent2)
+    if reverse:
+      (other1, other2) = (other2, other1)
+    features = (
+      self._get_angle(self.tangent1, diff),
+      self._get_angle(diff, other2),
+      self._get_angle(diff, self.tangent2),
+      self._get_angle(other1, diff),
+      abs(diff)
+    )
+    return (features[0]*features[1] > 0 and
+            features[2]*features[3] > 0 and
+            abs(features[0]) < 0.4*math.pi and
+            abs(features[1]) < 0.4*math.pi and
+            abs(features[2]) > 0.4*math.pi and
+            abs(features[3]) > 0.4*math.pi and
+            features[4] < MAX_CROSSING_DISTANCE)
+
+
 def augment_glyph(glyph):
   path = svg.path.parse_path(get_svg_path_data(glyph))
   path = svg.path.Path(
@@ -26,10 +84,18 @@ def augment_glyph(glyph):
   cusps = get_cusps(paths)
   # Actually augment the glyph. For now, we just mark all detected cusps.
   result = []
-  for (i, j, point) in cusps:
+  for cusp in cusps:
     result.append(
         '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red"/>'.format(
-            int(point.real), int(point.imag)))
+            int(cusp.point.real), int(cusp.point.imag)))
+  for cusp in cusps:
+    for other in cusps:
+      if cusp.connect(other):
+        result.append(
+            '<line x1="{0}" y1="{1}" x2="{2}" y2="{3}" style="{4}"/>'.format(
+                int(cusp.point.real), int(cusp.point.imag),
+                int(other.point.real), int(other.point.imag),
+                'stroke:green;stroke-width:2'))
   return result
 
 def break_path(path):
@@ -40,27 +106,13 @@ def break_path(path):
     subpaths[-1].append(element)
   return [svg.path.Path(*subpath) for subpath in subpaths]
 
-def get_angle(path, index):
-  segment1 = path[index]
-  tangent1 = segment1.end - segment1.start
-  if (type(segment1) == svg.path.QuadraticBezier and
-      segment1.end != segment1.control):
-    tangent1 = segment1.end - segment1.control
-  segment2 = path[(index + 1) % len(path)]
-  tangent2 = segment2.end - segment2.start
-  if (type(segment2) == svg.path.QuadraticBezier and
-      segment2.control != segment2.end):
-    tangent2 = segment2.control - segment2.start
-  assert tangent1 and tangent2, 'Computing angle for trivial segment!'
-  ratio = tangent1/tangent2
-  return math.atan2(ratio.imag, ratio.real)
-
 def get_cusps(paths):
   result = []
   for i, path in enumerate(paths):
     for j, element in enumerate(path):
-      if abs(get_angle(path, j)) > MIN_CROSSING_ANGLE:
-        result.append((i, j, element.end))
+      cusp = Cusp(paths, (i, j))
+      if abs(cusp.angle) > MIN_CROSSING_ANGLE:
+        result.append(cusp)
   return result
 
 def get_svg_path_data(glyph):
