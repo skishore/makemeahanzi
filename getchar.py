@@ -105,7 +105,7 @@ class Cusp(object):
       features[0]*features[1] > 0,
       features[0]*features[2] < 0,
       alignment < math.pi,
-      abs(features[2]) + abs(features[3]) > math.pi,
+      abs(features[2]) + abs(features[3]) > 0.5*math.pi,
     ])
     result = 0
     if features[2]*features[3] > 0 and (clean or (short and cross)):
