@@ -8,7 +8,7 @@ import os
 import svg.path
 import sys
 
-SCALE = 0.2
+SCALE = 1
 SVG_DIR = 'derived'
 TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
@@ -56,6 +56,9 @@ class Cusp(object):
     if other.point == self.point:
       return True
     diff = other.point - self.point
+    length = abs(diff)
+    if length > MAX_CROSSING_DISTANCE:
+      return False
     (other1, other2) = (other.tangent1, other.tangent2)
     if reverse:
       (other1, other2) = (other2, other1)
@@ -64,15 +67,15 @@ class Cusp(object):
       self._get_angle(diff, other2),
       self._get_angle(diff, self.tangent2),
       self._get_angle(other1, diff),
-      abs(diff)
+      length,
     )
-    return (features[0]*features[1] > 0 and
-            features[2]*features[3] > 0 and
-            abs(features[0]) < 0.4*math.pi and
-            abs(features[1]) < 0.4*math.pi and
-            abs(features[2]) > 0.4*math.pi and
-            abs(features[3]) > 0.4*math.pi and
-            features[4] < MAX_CROSSING_DISTANCE)
+    # TODO(skishore): Replace this set of inequalities with a machine-learned
+    # classifier such as a neural net.
+    return (features[2]*features[3] > 0 and
+            abs(features[0]) < 0.3*math.pi and
+            abs(features[1]) < 0.3*math.pi and
+            abs(features[2]) > 0.3*math.pi and
+            abs(features[3]) > 0.3*math.pi)
 
 
 def augment_glyph(glyph):
@@ -86,8 +89,9 @@ def augment_glyph(glyph):
   result = []
   for cusp in cusps:
     result.append(
-        '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red"/>'.format(
-            int(cusp.point.real), int(cusp.point.imag)))
+        '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red" '
+        'data-angle="{2}"/>'.format(
+            int(cusp.point.real), int(cusp.point.imag), cusp.angle))
   for cusp in cusps:
     for other in cusps:
       if cusp.connect(other):
