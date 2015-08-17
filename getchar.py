@@ -3,45 +3,65 @@
 Extracts one or more characters from each of the svg fonts in the SVG directory
 and packages them into a 'chars.html' output file.
 '''
+import math
 import os
 import svg.path
 import sys
 
-SCALE = 0.16
+SCALE = 0.2
 SVG_DIR = 'derived'
 TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
 # Constants controlling our stroke extraction algorithm.
+MIN_CROSSING_ANGLE = 0.1*math.pi
 MAX_CROSSING_DISTANCE = 64
 
 
 def augment_glyph(glyph):
   path = svg.path.parse_path(get_svg_path_data(glyph))
+  path = svg.path.Path(
+      *[element for element in path if element.start != element.end])
   assert path, 'Got empty path for glyph:\n{0}'.format(glyph)
-  # Actually augment the glyph. For now, we draw a line between pairs of curve
-  # endpoints that are sufficiently close.
+  paths = break_path(path)
+  cusps = get_cusps(paths)
+  # Actually augment the glyph. For now, we just mark all detected cusps.
   result = []
-  for i, element in enumerate(path):
-    for j, neighbor in enumerate(path):
-      if j == i or j + 1 % len(path) == i or j == i + 1 % len(path):
-        continue
-      if abs(element.start - neighbor.start) < MAX_CROSSING_DISTANCE:
-        result.append(
-            '<line x1="{0}" y1="{1}" x2="{2}" y2="{3}" style="{4}"/>'.format(
-                int(element.start.real), int(element.start.imag),
-                int(neighbor.start.real), int(neighbor.start.imag),
-                'stroke:red;stroke-width:4'))
+  for (i, j, point) in cusps:
+    result.append(
+        '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red"/>'.format(
+            int(point.real), int(point.imag)))
   return result
 
 def break_path(path):
   subpaths = [[path[0]]]
   for element in path[1:]:
-    if element.start == element.end:
-      continue
     if element.start != subpaths[-1][-1].end:
       subpaths.append([])
     subpaths[-1].append(element)
   return [svg.path.Path(*subpath) for subpath in subpaths]
+
+def get_angle(path, index):
+  segment1 = path[index]
+  tangent1 = segment1.end - segment1.start
+  if (type(segment1) == svg.path.QuadraticBezier and
+      segment1.end != segment1.control):
+    tangent1 = segment1.end - segment1.control
+  segment2 = path[(index + 1) % len(path)]
+  tangent2 = segment2.end - segment2.start
+  if (type(segment2) == svg.path.QuadraticBezier and
+      segment2.control != segment2.end):
+    tangent2 = segment2.control - segment2.start
+  assert tangent1 and tangent2, 'Computing angle for trivial segment!'
+  ratio = tangent1/tangent2
+  return math.atan2(ratio.imag, ratio.real)
+
+def get_cusps(paths):
+  result = []
+  for i, path in enumerate(paths):
+    for j, element in enumerate(path):
+      if abs(get_angle(path, j)) > MIN_CROSSING_ANGLE:
+        result.append((i, j, element.end))
+  return result
 
 def get_svg_path_data(glyph):
   left = ' d="'
