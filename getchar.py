@@ -13,7 +13,7 @@ SVG_DIR = 'derived'
 TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
 # Constants controlling our stroke extraction algorithm.
-MAX_CROSSING_DISTANCE = 64
+MAX_CROSSING_DISTANCE = 128
 MAX_CUSP_MERGE_DISTANCE = 15
 MIN_CUSP_ANGLE = 0.1*math.pi
 
@@ -33,7 +33,7 @@ class Cusp(object):
       return False
     if other.index[0] == self.index[0]:
       return self._try_connect(other)
-    return self._try_connect(other) or self._try_connect(other, True)
+    return max(self._try_connect(other), self._try_connect(other, True))
 
   def merge(self, other):
     # Returns true if this cusp point is close enough to the next one that
@@ -82,7 +82,7 @@ class Cusp(object):
       return True
     diff = other.point - self.point
     length = abs(diff)
-    if length > 2*MAX_CROSSING_DISTANCE:
+    if length > MAX_CROSSING_DISTANCE:
       return False
     (other1, other2) = (other.tangent1, other.tangent2)
     if reverse:
@@ -96,9 +96,20 @@ class Cusp(object):
     )
     # TODO(skishore): Replace this set of inequalities with a machine-learned
     # classifier such as a neural net.
-    result = (features[2]*features[3] > 0 and
-              2*(abs(features[0]) + abs(features[1])) + abs(abs(features[2]) + abs(features[3]) - math.pi) < 0.4*MAX_CROSSING_DISTANCE*math.pi/length)
-    print (self.point, other.point, features, int(result))
+    alignment = abs(features[0]) + abs(features[1])
+    incidence = abs(abs(features[2]) + abs(features[3]) - math.pi)
+    short = length < MAX_CROSSING_DISTANCE/2
+    clean = alignment < 0.1*math.pi or alignment + incidence < 0.2*math.pi
+    cross = all([
+      features[0]*features[1] > 0,
+      features[0]*features[2] < 0,
+      alignment < math.pi,
+      abs(features[2]) + abs(features[3]) > math.pi,
+    ])
+    result = 0
+    if features[2]*features[3] > 0 and (clean or (short and cross)):
+      result = (1 if short else 0.75) if clean else 0.5
+    print (self.point, other.point, features, result)
     return result
 
 
@@ -111,21 +122,21 @@ def augment_glyph(glyph):
   assert path, 'Got empty path for glyph:\n{0}'.format(glyph)
   paths = break_path(path)
   cusps = get_cusps(paths)
+  edges = get_edges(cusps)
   # Actually augment the glyph with stroke-aligned cuts.
   result = []
-  for cusp in cusps:
+  for cusp in cusps.itervalues():
     result.append(
         '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red" '
         'data-angle="{2}"/>'.format(
             int(cusp.point.real), int(cusp.point.imag), cusp.angle))
-  for cusp in cusps:
-    for other in cusps:
-      if cusp.connect(other):
-        result.append(
-            '<line x1="{0}" y1="{1}" x2="{2}" y2="{3}" style="{4}"/>'.format(
-                int(cusp.point.real), int(cusp.point.imag),
-                int(other.point.real), int(other.point.imag),
-                'stroke:white;stroke-width:8'))
+  for (index1, index2) in edges:
+    if index1 < index2:
+      result.append(
+          '<line x1="{0}" y1="{1}" x2="{2}" y2="{3}" style="{4}"/>'.format(
+              int(cusps[index1].point.real), int(cusps[index1].point.imag),
+              int(cusps[index2].point.real), int(cusps[index2].point.imag),
+              'stroke:white;stroke-width:8'))
   return result
 
 def break_path(path):
@@ -137,7 +148,7 @@ def break_path(path):
   return [svg.path.Path(*subpath) for subpath in subpaths]
 
 def get_cusps(paths):
-  result = []
+  result = {}
   for i, path in enumerate(paths):
     cusps = []
     for j, element in enumerate(path):
@@ -150,7 +161,26 @@ def get_cusps(paths):
         cusps.pop(j)
       else:
         j += 1
-    result.extend(cusps)
+    for cusp in cusps:
+      result[cusp.index] = cusp
+  return result
+
+def get_edges(cusps):
+  edges = []
+  for cusp in cusps.itervalues():
+    for other in cusps.itervalues():
+      confidence = cusp.connect(other)
+      if confidence > 0:
+        edges.append((confidence, cusp.index, other.index))
+  edges.sort(reverse=True)
+  result = set()
+  for (confidence, index1, index2) in edges:
+    other1 = set(b for (a, b) in result if a == index1)
+    other2 = set(b for (a, b) in result if a == index2)
+    if other1.intersection(other2):
+      continue
+    result.add((index1, index2))
+    result.add((index2, index1))
   return result
 
 def get_svg_path_data(glyph):
