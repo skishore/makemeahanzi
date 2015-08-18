@@ -78,6 +78,24 @@ class Cusp(object):
       tangent2 = segment2.control - segment2.start
     return (tangent1, tangent2)
 
+  def _run_classifier(self, features):
+    # TODO(skishore): Replace this set of inequalities with a machine-learned
+    # classifier such as a neural net.
+    alignment = abs(features[0]) + abs(features[1])
+    incidence = abs(abs(features[2]) + abs(features[3]) - math.pi)
+    short = features[6] < MAX_CROSSING_DISTANCE/2
+    clean = alignment < 0.1*math.pi or alignment + incidence < 0.2*math.pi
+    cross = all([
+      features[0]*features[1] > 0,
+      features[0]*features[2] < 0,
+      alignment < math.pi,
+      abs(features[2]) + abs(features[3]) > 0.5*math.pi,
+    ])
+    result = 0
+    if features[2]*features[3] > 0 and (clean or (short and cross)):
+      result = (1 if short else 0.75) if clean else 0.5
+    return result
+
   def _try_connect(self, other, reverse=False):
     if other.point == self.point:
       return True
@@ -93,23 +111,11 @@ class Cusp(object):
       self._get_angle(diff, other2),
       self._get_angle(diff, self.tangent2),
       self._get_angle(other1, diff),
+      self.angle,
+      other.angle,
       length,
     )
-    # TODO(skishore): Replace this set of inequalities with a machine-learned
-    # classifier such as a neural net.
-    alignment = abs(features[0]) + abs(features[1])
-    incidence = abs(abs(features[2]) + abs(features[3]) - math.pi)
-    short = length < MAX_CROSSING_DISTANCE/2
-    clean = alignment < 0.1*math.pi or alignment + incidence < 0.2*math.pi
-    cross = all([
-      features[0]*features[1] > 0,
-      features[0]*features[2] < 0,
-      alignment < math.pi,
-      abs(features[2]) + abs(features[3]) > 0.5*math.pi,
-    ])
-    result = 0
-    if features[2]*features[3] > 0 and (clean or (short and cross)):
-      result = (1 if short else 0.75) if clean else 0.5
+    result = self._run_classifier(features)
     print (self.point, other.point, features, result)
     return result
 
@@ -148,25 +154,6 @@ def break_path(path):
     subpaths[-1].append(element)
   return [svg.path.Path(*subpath) for subpath in subpaths]
 
-def drop_middle_edges(cusps, edges):
-  # If there is a triple of edges (i, j), (j, k), (k, l) where i and l are
-  # leaf nodes in the edge graph, drops the edge (j, k). That edge would create
-  # a stroke that ends in the middle but that should continue along the other
-  # two edges instead.
-  adjacency = collections.defaultdict(list)
-  for (index1, index2) in edges:
-    adjacency[index1].append(index2)
-  leaves = set(index for (index, neighbors) in adjacency.iteritems()
-               if len(neighbors) == 1)
-  edges_to_remove = set()
-  for (index1, index2) in edges:
-    if (any(neighbor != index2 and neighbor in leaves
-            for neighbor in adjacency[index1]) and
-        any(neighbor != index1 and neighbor in leaves
-            for neighbor in adjacency[index2])):
-      edges_to_remove.add((index1, index2))
-  return edges.difference(edges_to_remove)
-
 def get_cusps(paths):
   result = {}
   for i, path in enumerate(paths):
@@ -201,7 +188,7 @@ def get_edges(cusps):
       continue
     result.add((index1, index2))
     result.add((index2, index1))
-  return drop_middle_edges(cusps, result)
+  return result
 
 def get_svg_path_data(glyph):
   left = ' d="'
