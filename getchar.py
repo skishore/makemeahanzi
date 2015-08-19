@@ -30,11 +30,28 @@ class Corner(object):
 
   def connect(self, other):
     # Returns true if a troke continues from this corner point to the other.
-    if other.index == self.index:
+    if other.point == self.point:
       return False
-    if other.index[0] == self.index[0]:
-      return self._try_connect(other)
-    return max(self._try_connect(other), self._try_connect(other, True))
+    diff = other.point - self.point
+    length = abs(diff)
+    if length > MAX_BRIDGE_DISTANCE:
+      return False
+    # NOTE: These angle features make sense even if points are on different
+    # subpaths of the glyph path! In a TTF font, exterior paths are recorded
+    # counter-clockwise while interior paths are clockwise, so angle features
+    # at a bridge are the same whether or not the glyph is simply connected.
+    features = (
+      self._get_angle(self.tangent1, diff),
+      self._get_angle(diff, other.tangent2),
+      self._get_angle(diff, self.tangent2),
+      self._get_angle(other.tangent1, diff),
+      self.angle,
+      other.angle,
+      length,
+    )
+    result = self._run_classifier(features)
+    print (self.point, other.point, features, result)
+    return result
 
   def merge(self, other):
     # Returns true if this corner point is close enough to the next one that
@@ -94,29 +111,6 @@ class Corner(object):
     result = 0
     if features[2]*features[3] > 0 and (clean or (short and cross)):
       result = (1 if short else 0.75) if clean else 0.5
-    return result
-
-  def _try_connect(self, other, reverse=False):
-    if other.point == self.point:
-      return True
-    diff = other.point - self.point
-    length = abs(diff)
-    if length > MAX_BRIDGE_DISTANCE:
-      return False
-    (other1, other2) = (other.tangent1, other.tangent2)
-    if reverse:
-      (other1, other2) = (other2, other1)
-    features = (
-      self._get_angle(self.tangent1, diff),
-      self._get_angle(diff, other2),
-      self._get_angle(diff, self.tangent2),
-      self._get_angle(other1, diff),
-      self.angle,
-      other.angle,
-      length,
-    )
-    result = self._run_classifier(features)
-    print (self.point, other.point, features, result)
     return result
 
 
