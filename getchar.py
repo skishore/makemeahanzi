@@ -6,6 +6,7 @@ and packages them into a 'chars.html' output file.
 import collections
 import math
 import os
+import random
 import svg.path
 import sys
 
@@ -116,7 +117,7 @@ class Corner(object):
 
 def augment_glyph(glyph):
   names = [token for token in glyph.split() if 'glyph-name' in token]
-  print '\n#{0}'.format(names[0] if names else 'glyph-name="unknown"')
+  print '\n# {0}'.format(names[0] if names else 'glyph-name="unknown"')
   path = svg.path.parse_path(get_svg_path_data(glyph))
   path = svg.path.Path(
       *[element for element in path if element.start != element.end])
@@ -124,8 +125,16 @@ def augment_glyph(glyph):
   paths = break_path(path)
   corners = get_corners(paths)
   bridges = get_bridges(corners)
+  (strokes, failed) = extract_strokes(paths, corners, bridges)
+  if failed:
+    print '# WARNING: stroke extraction failed for {0}'.format(
+        names[0] if names else 'glyph-name="unknown"')
   # Actually augment the glyph with stroke-aligned cuts.
   result = []
+  rand256 = lambda: random.randint(0,255)
+  for stroke in strokes:
+    result.append('<path fill="{0}" d="{1}" />'.format(
+        '#%02X%02X%02X' % (rand256(), rand256(), rand256()), stroke.d()))
   for corner in corners.itervalues():
     result.append(
         '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red" '
@@ -147,6 +156,52 @@ def break_path(path):
       subpaths.append([])
     subpaths[-1].append(element)
   return [svg.path.Path(*subpath) for subpath in subpaths]
+
+def extract_stroke(paths, corners, adjacency, extracted, start):
+  current = start
+  result = svg.path.Path()
+  visited = set()
+
+  def advance(index):
+    return (index[0], (index[1] + 1) % len(paths[index[0]]))
+
+  def angle(index, bridge):
+    tangent = corners[index].tangent2
+    ratio = (corners[bridge].point - corners[index].point)/tangent
+    return abs(math.atan2(ratio.imag, ratio.real))
+
+  while True:
+    result.append(paths[current[0]][current[1]])
+    visited.add(current)
+    if current in adjacency:
+      next = sorted(adjacency[current], key=lambda x: angle(current, x))[0]
+      result.append(svg.path.Line(
+          start=corners[current].point, end=corners[next].point))
+      current = next
+    current = advance(current)
+    if current == start:
+      extracted.update(visited)
+      return result
+    elif current in visited or current in extracted:
+      return False
+
+def extract_strokes(paths, corners, bridges):
+  adjacency = collections.defaultdict(list)
+  for (index1, index2) in bridges:
+    adjacency[index1].append(index2)
+  extracted = set()
+  result = []
+  failed = False
+  for i, path in enumerate(paths):
+    for j, element in enumerate(path):
+      index = (i, j)
+      if index not in extracted:
+        stroke = extract_stroke(paths, corners, adjacency, extracted, index)
+        if stroke:
+          result.append(stroke)
+        else:
+          failed = True
+  return (result, failed)
 
 def get_bridges(corners):
   candidates = []
@@ -235,9 +290,9 @@ if __name__ == '__main__':
         size = int(1024*SCALE)
         f.write('        <svg width="{0}" height="{0}">\n'.format(size))
         f.write('          <g transform="{0}">\n'.format(TRANSFORM))
-        f.write(glyph.replace('<glyph', '<path'))
+        f.write(glyph.replace('<glyph', '<path') + '\n')
         for extra in augment_glyph(glyph):
-          f.write(extra)
+          f.write(extra + '\n')
         f.write('          </g>\n')
         f.write('        </svg>\n')
       f.write('      </div>\n')
