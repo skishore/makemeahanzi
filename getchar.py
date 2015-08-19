@@ -14,12 +14,12 @@ SVG_DIR = 'derived'
 TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
 # Constants controlling our stroke extraction algorithm.
-MAX_CROSSING_DISTANCE = 128
-MAX_CUSP_MERGE_DISTANCE = 15
-MIN_CUSP_ANGLE = 0.1*math.pi
+MAX_BRIDGE_DISTANCE = 128
+MAX_CORNER_MERGE_DISTANCE = 15
+MIN_CORNER_ANGLE = 0.1*math.pi
 
 
-class Cusp(object):
+class Corner(object):
   def __init__(self, paths, index):
     self.paths = paths
     self.index = index
@@ -29,7 +29,7 @@ class Cusp(object):
     self.angle = self._get_angle(self.tangent1, self.tangent2)
 
   def connect(self, other):
-    # Returns true if a troke continues from this cusp point to the other.
+    # Returns true if a troke continues from this corner point to the other.
     if other.index == self.index:
       return False
     if other.index[0] == self.index[0]:
@@ -37,11 +37,11 @@ class Cusp(object):
     return max(self._try_connect(other), self._try_connect(other, True))
 
   def merge(self, other):
-    # Returns true if this cusp point is close enough to the next one that
-    # they should be combined into one cusp point. If this method returns
-    # true, other will be populated with the merged cusp data.
+    # Returns true if this corner point is close enough to the next one that
+    # they should be combined into one corner point. If this method returns
+    # true, other will be populated with the merged corner data.
     assert other.index[0] == self.index[0], 'merge called for different paths!'
-    if abs(other.point - self.point) > MAX_CUSP_MERGE_DISTANCE:
+    if abs(other.point - self.point) > MAX_CORNER_MERGE_DISTANCE:
       return False
     distance = 0
     j = self.index[1]
@@ -49,9 +49,9 @@ class Cusp(object):
     while j != other.index[1]:
       j = (j + 1) % len(path)
       distance += abs(path[j].end - path[j].start)
-    if distance > MAX_CUSP_MERGE_DISTANCE:
+    if distance > MAX_CORNER_MERGE_DISTANCE:
       return False
-    # We should merge. Check which point is the real cusp and update other.
+    # We should merge. Check which point is the real corner and update other.
     if abs(self.angle) > abs(other.angle):
       other.index = self.index
       other.point = self.point
@@ -83,7 +83,7 @@ class Cusp(object):
     # classifier such as a neural net.
     alignment = abs(features[0]) + abs(features[1])
     incidence = abs(abs(features[2]) + abs(features[3]) - math.pi)
-    short = features[6] < MAX_CROSSING_DISTANCE/2
+    short = features[6] < MAX_BRIDGE_DISTANCE/2
     clean = alignment < 0.1*math.pi or alignment + incidence < 0.2*math.pi
     cross = all([
       features[0]*features[1] > 0,
@@ -101,7 +101,7 @@ class Cusp(object):
       return True
     diff = other.point - self.point
     length = abs(diff)
-    if length > MAX_CROSSING_DISTANCE:
+    if length > MAX_BRIDGE_DISTANCE:
       return False
     (other1, other2) = (other.tangent1, other.tangent2)
     if reverse:
@@ -128,21 +128,21 @@ def augment_glyph(glyph):
       *[element for element in path if element.start != element.end])
   assert path, 'Got empty path for glyph:\n{0}'.format(glyph)
   paths = break_path(path)
-  cusps = get_cusps(paths)
-  edges = get_edges(cusps)
+  corners = get_corners(paths)
+  bridges = get_bridges(corners)
   # Actually augment the glyph with stroke-aligned cuts.
   result = []
-  for cusp in cusps.itervalues():
+  for corner in corners.itervalues():
     result.append(
         '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red" '
         'data-angle="{2}"/>'.format(
-            int(cusp.point.real), int(cusp.point.imag), cusp.angle))
-  for (index1, index2) in edges:
+            int(corner.point.real), int(corner.point.imag), corner.angle))
+  for (index1, index2) in bridges:
     if index1 < index2:
       result.append(
           '<line x1="{0}" y1="{1}" x2="{2}" y2="{3}" style="{4}"/>'.format(
-              int(cusps[index1].point.real), int(cusps[index1].point.imag),
-              int(cusps[index2].point.real), int(cusps[index2].point.imag),
+              int(corners[index1].point.real), int(corners[index1].point.imag),
+              int(corners[index2].point.real), int(corners[index2].point.imag),
               'stroke:white;stroke-width:8'))
   return result
 
@@ -154,40 +154,40 @@ def break_path(path):
     subpaths[-1].append(element)
   return [svg.path.Path(*subpath) for subpath in subpaths]
 
-def get_cusps(paths):
-  result = {}
-  for i, path in enumerate(paths):
-    cusps = []
-    for j, element in enumerate(path):
-      cusp = Cusp(paths, (i, j))
-      if abs(cusp.angle) > MIN_CUSP_ANGLE:
-        cusps.append(cusp)
-    j = 0
-    while j < len(cusps):
-      if cusps[j].merge(cusps[(j + 1) % len(cusps)]):
-        cusps.pop(j)
-      else:
-        j += 1
-    for cusp in cusps:
-      result[cusp.index] = cusp
-  return result
-
-def get_edges(cusps):
-  edges = []
-  for cusp in cusps.itervalues():
-    for other in cusps.itervalues():
-      confidence = cusp.connect(other)
+def get_bridges(corners):
+  candidates = []
+  for corner in corners.itervalues():
+    for other in corners.itervalues():
+      confidence = corner.connect(other)
       if confidence > 0:
-        edges.append((confidence, cusp.index, other.index))
-  edges.sort(reverse=True)
+        candidates.append((confidence, corner.index, other.index))
+  candidates.sort(reverse=True)
   result = set()
-  for (confidence, index1, index2) in edges:
+  for (confidence, index1, index2) in candidates:
     other1 = set(b for (a, b) in result if a == index1)
     other2 = set(b for (a, b) in result if a == index2)
-    if other1.intersection(other2) or should_split(cusps, index1, index2):
+    if other1.intersection(other2) or should_split(corners, index1, index2):
       continue
     result.add((index1, index2))
     result.add((index2, index1))
+  return result
+
+def get_corners(paths):
+  result = {}
+  for i, path in enumerate(paths):
+    corners = []
+    for j, element in enumerate(path):
+      corner = Corner(paths, (i, j))
+      if abs(corner.angle) > MIN_CORNER_ANGLE:
+        corners.append(corner)
+    j = 0
+    while j < len(corners):
+      if corners[j].merge(corners[(j + 1) % len(corners)]):
+        corners.pop(j)
+      else:
+        j += 1
+    for corner in corners:
+      result[corner.index] = corner
   return result
 
 def get_svg_path_data(glyph):
@@ -198,15 +198,16 @@ def get_svg_path_data(glyph):
   assert end >= 0, 'Glyph missing d=".*" block:\n{0}'.format(repr(glyph))
   return glyph[start + len(left):end].replace('\n', ' ')
 
-def should_split(cusps, index1, index2):
-  diff = cusps[index2].point - cusps[index1].point
-  for cusp in cusps.itervalues():
-    if cusp.index in (index1, index2):
+def should_split(corners, index1, index2):
+  start = corners[index1].point
+  diff = corners[index2].point - start
+  for corner in corners.itervalues():
+    if corner.index in (index1, index2):
       continue
-    t = ((cusp.point.real - cusps[index1].point.real)*diff.real +
-         (cusp.point.imag - cusps[index1].point.imag)*diff.imag)/(abs(diff)**2)
-    distance_to_line = abs(cusps[index1].point + t*diff - cusp.point)
-    if 0 < t < 1 and distance_to_line < MAX_CUSP_MERGE_DISTANCE:
+    t = ((corner.point.real - start.real)*diff.real +
+         (corner.point.imag - start.imag)*diff.imag)/(abs(diff)**2)
+    distance_to_line = abs(corners[index1].point + t*diff - corner.point)
+    if 0 < t < 1 and distance_to_line < MAX_CORNER_MERGE_DISTANCE:
       return True
   return False
 
