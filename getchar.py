@@ -161,7 +161,21 @@ def break_path(path):
     if element.start != subpaths[-1][-1].end:
       subpaths.append([])
     subpaths[-1].append(element)
-  return [svg.path.Path(*subpath) for subpath in subpaths]
+  result = [svg.path.Path(*subpath) for subpath in subpaths]
+  # If the largest path is clockwise, reverse all paths. Positive space in TTF
+  # glyphs should always be oriented counter-clockwise.
+  def area(path):
+    return sum(int(x.end.real - x.start.real)*int(x.end.imag + x.start.imag)
+               for x in path)
+  def reverse(path):
+    for element in path:
+      (element.start, element.end) = (element.end, element.start)
+    return svg.path.Path(*reversed([element for element in path]))
+  areas = [area(path) for path in result]
+  max_area = max((abs(area), area) for area in areas)[1]
+  if max_area < 0:
+    result = map(reverse, result)
+  return result
 
 def extract_stroke(paths, corners, adjacency, extracted, start):
   current = start
