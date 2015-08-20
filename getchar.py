@@ -23,20 +23,42 @@ MIN_CORNER_TANGENT_DISTANCE = 4
 
 class Corner(object):
   def __init__(self, paths, index):
-    self.paths = paths
     self.index = index
     (i, j) = index
+    self.path = paths[i]
     self.point = paths[i][j].end
-    (self.tangent1, self.tangent2) = self._get_tangents(self.paths[i], j)
+    (self.tangent1, self.tangent2) = self._get_tangents()
     self.angle = self._get_angle(self.tangent1, self.tangent2)
 
-  def connect(self, other):
-    # Returns true if a troke continues from this corner point to the other.
-    if other.point == self.point:
-      return False
+  def bridge(self, other):
+    '''
+    Returns true if a stroke continues from this corner point to the other.
+    Internally, this function builds a 7-dimensional feature vector and then
+    calls a classifier. The 7 features are:
+      features[0]: The angle between the edge in and the bridge
+      features[1]: The angle between the bridge and the edge out
+      features[2]: The angle between the cross stroke out and the bridge
+      features[3]: The angle between the cross stroke in and the bridge
+      features[4]: The angle at this corner
+      features[5]: The angle at the other corner
+      features[6]: The length of the bridge
+
+    At an ideal bridge, features[0] and features[1] should be very close to 0,
+    meaning that the stroke can continue smoothly from this corner to the other.
+    features[2] + features[3] is close to pi, meaning that the stroke in
+    is straight, and features[6], the distance, is small.
+
+    This ideal configuration might look like this diagram:
+
+            /  /
+           /  /
+        --S  O--
+
+    where S is this corner and O is the other.
+    '''
     diff = other.point - self.point
     length = abs(diff)
-    if length > MAX_BRIDGE_DISTANCE:
+    if length == 0 or length > MAX_BRIDGE_DISTANCE:
       return False
     # NOTE: These angle features make sense even if points are on different
     # subpaths of the glyph path! In a TTF font, exterior paths are recorded
@@ -52,6 +74,7 @@ class Corner(object):
       length,
     )
     result = self._run_classifier(features)
+    # Log this sample so that we can later use it as training data.
     print (self.point, other.point, features, result)
     return result
 
@@ -78,28 +101,25 @@ class Corner(object):
       return False
     distance = 0
     j = self.index[1]
-    path = self.paths[self.index[0]]
     while j != other.index[1]:
-      j = (j + 1) % len(path)
-      distance += abs(path[j].end - path[j].start)
+      j = (j + 1) % len(self.path)
+      distance += abs(self.path[j].end - self.path[j].start)
     return distance < MAX_CORNER_MERGE_DISTANCE
 
   def _get_angle(self, vector1, vector2):
-    if not vector1 or not vector2:
-      return 0
-    ratio = vector1/vector2
+    ratio = vector1/vector2 if vector2 else 0
     return math.atan2(ratio.imag, ratio.real)
 
-  def _get_tangents(self, path, index):
-    segment1 = path[index]
+  def _get_tangents(self):
+    segment1 = self.path[self.index[1]]
     tangent1 = segment1.end - segment1.start
     if (type(segment1) == svg.path.QuadraticBezier and
         abs(segment1.control - segment1.end) > MIN_CORNER_TANGENT_DISTANCE):
       tangent1 = segment1.end - segment1.control
-    segment2 = path[(index + 1) % len(path)]
+    segment2 = self.path[(self.index[1] + 1) % len(self.path)]
     tangent2 = segment2.end - segment2.start
     if (type(segment2) == svg.path.QuadraticBezier and
-        abs(segment2.control - segment2.end) > MIN_CORNER_TANGENT_DISTANCE):
+        abs(segment2.control - segment2.start) > MIN_CORNER_TANGENT_DISTANCE):
       tangent2 = segment2.control - segment2.start
     return (tangent1, tangent2)
 
@@ -240,7 +260,7 @@ def get_bridges(corners):
   candidates = []
   for corner in corners.itervalues():
     for other in corners.itervalues():
-      confidence = corner.connect(other)
+      confidence = corner.bridge(other)
       if confidence > 0:
         candidates.append((confidence, corner.index, other.index))
   candidates.sort(reverse=True)
