@@ -61,9 +61,10 @@ class Corner(object):
     if length == 0 or length > MAX_BRIDGE_DISTANCE:
       return False
     # NOTE: These angle features make sense even if points are on different
-    # subpaths of the glyph path! In a TTF font, exterior paths are recorded
-    # counter-clockwise while interior paths are clockwise, so angle features
-    # at a bridge are the same whether or not the glyph is simply connected.
+    # subpaths of the glyph path! Because of our preprocessing, exterior glyph
+    # paths are clockwise while interior paths are counter-clockwise, so angle
+    # features around a bridge are the same whether or not the two sides of
+    # the bridge are on the same path.
     features = (
       self._get_angle(self.tangent1, diff),
       self._get_angle(diff, other.tangent2),
@@ -83,7 +84,7 @@ class Corner(object):
     Merges this corner into the other corner, updating the other's data.
     The merged corner takes the position of the sharper corner of the two.
     '''
-    if abs(self.angle) > abs(other.angle):
+    if self.angle > other.angle:
       other.index = self.index
       other.point = self.point
     other.tangent1 = self.tangent1
@@ -127,17 +128,16 @@ class Corner(object):
     # TODO(skishore): Replace this set of inequalities with a machine-learned
     # classifier such as a neural net.
     alignment = abs(features[0]) + abs(features[1])
-    incidence = abs(abs(features[2]) + abs(features[3]) - math.pi)
+    incidence = abs(features[2] + features[3] - math.pi)
     short = features[6] < MAX_BRIDGE_DISTANCE/2
     clean = alignment < 0.1*math.pi or alignment + incidence < 0.2*math.pi
     cross = all([
-      features[0]*features[1] > 0,
-      features[0]*features[2] < 0,
-      alignment < math.pi,
-      abs(features[2]) + abs(features[3]) > 0.5*math.pi,
+      features[0] < 0,
+      features[1] < 0,
+      features[2] + features[3] > 0.5*math.pi,
     ])
     result = 0
-    if features[2]*features[3] > 0 and (clean or (short and cross)):
+    if features[2] > 0 and features[3] > 0 and (clean or (short and cross)):
       result = (1 if short else 0.75) if clean else 0.5
     return result
 
@@ -186,8 +186,11 @@ def split_and_orient_path(path):
   Takes a non-empty svg.path.Path object that may contain multiple closed.
   Returns a list of svg.path.Path objects that are all minimal closed curve.
 
-  The returned paths will be oriented as a TTF glyph should be: exterior curves
-  will be counter-clockwise and interior curves will be clockwise.
+  The returned paths will be oriented opposite the way a TTF glyph should be:
+  exterior curves will be clockwise, while interior curves will be
+  counter-clockwise. We choose this orientation so the curves generally have
+  a small negative angle, but at sharp corners, which we really care about,
+  the curves have a large positive angle.
   '''
   paths = [[path[0]]]
   for element in path[1:]:
@@ -206,7 +209,7 @@ def split_and_orient_path(path):
     return reversed(path)
   areas = [area(path) for path in paths]
   max_area = max((abs(area), area) for area in areas)[1]
-  if max_area < 0:
+  if max_area > 0:
     paths = map(reverse, paths)
   return [svg.path.Path(*path) for path in paths]
 
@@ -286,7 +289,7 @@ def get_corners(paths):
         candidates.pop(j)
       else:
         j += 1
-    for corner in filter(lambda x: abs(x.angle) > MIN_CORNER_ANGLE, candidates):
+    for corner in filter(lambda x: x.angle > MIN_CORNER_ANGLE, candidates):
       result[corner.index] = corner
   return result
 
