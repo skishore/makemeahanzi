@@ -123,7 +123,7 @@ def augment_glyph(glyph):
   path = svg.path.Path(
       *[element for element in path if element.start != element.end])
   assert path, 'Got empty path for glyph:\n{0}'.format(glyph)
-  paths = break_path(path)
+  paths = split_and_orient_path(path)
   corners = get_corners(paths)
   bridges = get_bridges(corners)
   (strokes, failed) = extract_strokes(paths, corners, bridges)
@@ -155,27 +155,34 @@ def augment_glyph(glyph):
               'stroke:white;stroke-width:8'))
   return result
 
-def break_path(path):
-  subpaths = [[path[0]]]
+def split_and_orient_path(path):
+  '''
+  Takes a non-empty svg.path.Path object that may contain multiple closed.
+  Returns a list of svg.path.Path objects that are all minimal closed curve.
+
+  The returned paths will be oriented as a TTF glyph should be: exterior curves
+  will be counter-clockwise and interior curves will be clockwise.
+  '''
+  paths = [[path[0]]]
   for element in path[1:]:
-    if element.start != subpaths[-1][-1].end:
-      subpaths.append([])
-    subpaths[-1].append(element)
-  result = [svg.path.Path(*subpath) for subpath in subpaths]
-  # If the largest path is clockwise, reverse all paths. Positive space in TTF
-  # glyphs should always be oriented counter-clockwise.
+    if element.start != paths[-1][-1].end:
+      paths.append([])
+    paths[-1].append(element)
+  # Determine if this glyph is oriented in the wrong direction by computing the
+  # area of each glyph. The glyph with maximum |area| should have positive area,
+  # because it must be an exterior path.
   def area(path):
     return sum(int(x.end.real - x.start.real)*int(x.end.imag + x.start.imag)
                for x in path)
   def reverse(path):
     for element in path:
       (element.start, element.end) = (element.end, element.start)
-    return svg.path.Path(*reversed([element for element in path]))
-  areas = [area(path) for path in result]
+    return reversed(path)
+  areas = [area(path) for path in paths]
   max_area = max((abs(area), area) for area in areas)[1]
   if max_area < 0:
-    result = map(reverse, result)
-  return result
+    paths = map(reverse, paths)
+  return [svg.path.Path(*path) for path in paths]
 
 def extract_stroke(paths, corners, adjacency, extracted, start):
   current = start
