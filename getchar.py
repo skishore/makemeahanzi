@@ -78,9 +78,9 @@ class Corner(object):
     print (self.point, other.point, features, result)
     return result
 
-  def merge(self, other):
+  def merge_into(self, other):
     '''
-    Merges this corner with the other corner, updating the other's data.
+    Merges this corner into the other corner, updating the other's data.
     The merged corner takes the position of the sharper corner of the two.
     '''
     if abs(self.angle) > abs(other.angle):
@@ -277,16 +277,16 @@ def get_bridges(corners):
 def get_corners(paths):
   result = {}
   for i, path in enumerate(paths):
-    corners = [Corner(paths, (i, j)) for j in xrange(len(path))]
+    candidates = [Corner(paths, (i, j)) for j in xrange(len(path))]
     j = 0
-    while j < len(corners):
-      if corners[j].should_merge(corners[(j + 1) % len(corners)]):
-        corners[j].merge(corners[(j + 1) % len(corners)])
-        corners.pop(j)
+    while j < len(candidates):
+      next_j = (j + 1) % len(candidates)
+      if candidates[j].should_merge(candidates[next_j]):
+        candidates[j].merge_into(candidates[next_j])
+        candidates.pop(j)
       else:
         j += 1
-    corners = filter(lambda x: abs(x.angle) > MIN_CORNER_ANGLE, corners)
-    for corner in corners:
+    for corner in filter(lambda x: abs(x.angle) > MIN_CORNER_ANGLE, candidates):
       result[corner.index] = corner
   return result
 
@@ -299,13 +299,13 @@ def get_svg_path_data(glyph):
   return glyph[start + len(left):end].replace('\n', ' ')
 
 def should_split(corners, index1, index2):
-  start = corners[index1].point
-  diff = corners[index2].point - start
+  base = corners[index1].point
+  diff = corners[index2].point - base
   for corner in corners.itervalues():
     if corner.index in (index1, index2):
       continue
-    t = ((corner.point.real - start.real)*diff.real +
-         (corner.point.imag - start.imag)*diff.imag)/(abs(diff)**2)
+    t = ((corner.point.real - base.real)*diff.real +
+         (corner.point.imag - base.imag)*diff.imag)/(abs(diff)**2)
     distance_to_line = abs(corners[index1].point + t*diff - corner.point)
     if 0 < t < 1 and distance_to_line < MAX_CORNER_MERGE_DISTANCE:
       return True
