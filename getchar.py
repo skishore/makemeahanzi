@@ -16,7 +16,7 @@ TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 
 # Constants controlling our stroke extraction algorithm.
 MAX_BRIDGE_DISTANCE = 128
-MAX_CORNER_MERGE_DISTANCE = 15
+MAX_CORNER_MERGE_DISTANCE = 16
 MIN_CORNER_ANGLE = 0.1*math.pi
 MIN_CORNER_TANGENT_DISTANCE = 4
 
@@ -257,11 +257,7 @@ def get_bridges(corners):
 def get_corners(paths):
   result = {}
   for i, path in enumerate(paths):
-    corners = []
-    for j, element in enumerate(path):
-      corner = Corner(paths, (i, j))
-      if abs(corner.angle) > MIN_CORNER_ANGLE:
-        corners.append(corner)
+    corners = [Corner(paths, (i, j)) for j in xrange(len(path))]
     j = 0
     while j < len(corners):
       if corners[j].should_merge(corners[(j + 1) % len(corners)]):
@@ -269,6 +265,7 @@ def get_corners(paths):
         corners.pop(j)
       else:
         j += 1
+    corners = filter(lambda x: abs(x.angle) > MIN_CORNER_ANGLE, corners)
     for corner in corners:
       result[corner.index] = corner
   return result
