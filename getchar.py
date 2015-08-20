@@ -18,6 +18,7 @@ TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
 MAX_BRIDGE_DISTANCE = 128
 MAX_CORNER_MERGE_DISTANCE = 15
 MIN_CORNER_ANGLE = 0.1*math.pi
+MIN_CORNER_TANGENT_DISTANCE = 4
 
 
 class Corner(object):
@@ -87,12 +88,12 @@ class Corner(object):
     segment1 = path[index]
     tangent1 = segment1.end - segment1.start
     if (type(segment1) == svg.path.QuadraticBezier and
-        segment1.end != segment1.control):
+        abs(segment1.control - segment1.end) > MIN_CORNER_TANGENT_DISTANCE):
       tangent1 = segment1.end - segment1.control
     segment2 = path[(index + 1) % len(path)]
     tangent2 = segment2.end - segment2.start
     if (type(segment2) == svg.path.QuadraticBezier and
-        segment2.control != segment2.end):
+        abs(segment2.control - segment2.end) > MIN_CORNER_TANGENT_DISTANCE):
       tangent2 = segment2.control - segment2.start
     return (tangent1, tangent2)
 
@@ -135,6 +136,11 @@ def augment_glyph(glyph):
   for stroke in strokes:
     result.append('<path fill="{0}" d="{1}" />'.format(
         '#%02X%02X%02X' % (rand256(), rand256(), rand256()), stroke.d()))
+  for path in paths:
+    for element in path:
+      result.append(
+          '<circle cx="{0}" cy="{1}" r="4" fill="blue" stroke="blue"/>'.format(
+              int(element.end.real), int(element.end.imag)))
   for corner in corners.itervalues():
     result.append(
         '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red" '
