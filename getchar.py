@@ -56,10 +56,24 @@ class Corner(object):
     return result
 
   def merge(self, other):
-    # Returns true if this corner point is close enough to the next one that
-    # they should be combined into one corner point. If this method returns
-    # true, other will be populated with the merged corner data.
-    assert other.index[0] == self.index[0], 'merge called for different paths!'
+    '''
+    Merges this corner with the other corner, updating the other's data.
+    The merged corner takes the position of the sharper corner of the two.
+    '''
+    if abs(self.angle) > abs(other.angle):
+      other.index = self.index
+      other.point = self.point
+    other.tangent1 = self.tangent1
+    other.angle = other._get_angle(other.tangent1, other.tangent2)
+
+  def should_merge(self, other):
+    '''
+    Returns true if this corner point is close enough to the next one that
+    they should be combined into one corner point. Note that the next corner
+    should have an index that occurs soon after this corner's.
+    '''
+    assert other.index[0] == self.index[0], \
+           'merge called for corners on different curves!'
     if abs(other.point - self.point) > MAX_CORNER_MERGE_DISTANCE:
       return False
     distance = 0
@@ -68,15 +82,7 @@ class Corner(object):
     while j != other.index[1]:
       j = (j + 1) % len(path)
       distance += abs(path[j].end - path[j].start)
-    if distance > MAX_CORNER_MERGE_DISTANCE:
-      return False
-    # We should merge. Check which point is the real corner and update other.
-    if abs(self.angle) > abs(other.angle):
-      other.index = self.index
-      other.point = self.point
-    other.tangent1 = self.tangent1
-    other.angle = other._get_angle(other.tangent1, other.tangent2)
-    return True
+    return distance < MAX_CORNER_MERGE_DISTANCE
 
   def _get_angle(self, vector1, vector2):
     if not vector1 or not vector2:
@@ -258,7 +264,8 @@ def get_corners(paths):
         corners.append(corner)
     j = 0
     while j < len(corners):
-      if corners[j].merge(corners[(j + 1) % len(corners)]):
+      if corners[j].should_merge(corners[(j + 1) % len(corners)]):
+        corners[j].merge(corners[(j + 1) % len(corners)])
         corners.pop(j)
       else:
         j += 1
