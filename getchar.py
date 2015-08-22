@@ -50,11 +50,12 @@ class Corner(object):
 
     This ideal configuration might look like this diagram:
 
-            /  /
+            /  ^
            /  /
-        --S  O--
+        <-O  S--
 
-    where S is this corner and O is the other.
+    where S is this corner and O is the other and the arrows indicate the
+    direction of the curve.
     '''
     diff = other.point - self.point
     length = abs(diff)
@@ -83,8 +84,10 @@ class Corner(object):
     '''
     Merges this corner into the other corner, updating the other's data.
     The merged corner takes the position of the sharper corner of the two.
+    Because the path curves slightly in the positive direction on average, a
+    curve is sharper if its angle is more negative.
     '''
-    if self.angle > other.angle:
+    if self.angle < other.angle:
       other.index = self.index
       other.point = self.point
     other.tangent1 = self.tangent1
@@ -108,7 +111,7 @@ class Corner(object):
     return distance < MAX_CORNER_MERGE_DISTANCE
 
   def _get_angle(self, vector1, vector2):
-    ratio = vector1/vector2 if vector2 else 0
+    ratio = vector2/vector1 if vector1 else 0
     return math.atan2(ratio.imag, ratio.real)
 
   def _get_tangents(self):
@@ -128,16 +131,16 @@ class Corner(object):
     # TODO(skishore): Replace this set of inequalities with a machine-learned
     # classifier such as a neural net.
     alignment = abs(features[0]) + abs(features[1])
-    incidence = abs(features[2] + features[3] - math.pi)
+    incidence = abs(features[2] + features[3] + math.pi)
     short = features[6] < MAX_BRIDGE_DISTANCE/2
     clean = alignment < 0.1*math.pi or alignment + incidence < 0.2*math.pi
     cross = all([
-      features[0] < 0,
-      features[1] < 0,
-      features[2] + features[3] > 0.5*math.pi,
+      features[0] > 0,
+      features[1] > 0,
+      features[2] + features[3] < -0.5*math.pi,
     ])
     result = 0
-    if features[2] > 0 and features[3] > 0 and (clean or (short and cross)):
+    if features[2] < 0 and features[3] < 0 and (clean or (short and cross)):
       result = (1 if short else 0.75) if clean else 0.5
     return result
 
@@ -185,12 +188,8 @@ def split_and_orient_path(path):
   '''
   Takes a non-empty svg.path.Path object that may contain multiple closed.
   Returns a list of svg.path.Path objects that are all minimal closed curve.
-
-  The returned paths will be oriented opposite the way a TTF glyph should be:
-  exterior curves will be clockwise, while interior curves will be
-  counter-clockwise. We choose this orientation so the curves generally have
-  a small negative angle, but at sharp corners, which we really care about,
-  the curves have a large positive angle.
+  The returned paths will be the way a TTF glyph should be: exterior curves
+  will be counter-clockwise and interior curves will be clockwise.
   '''
   paths = [[path[0]]]
   for element in path[1:]:
@@ -289,7 +288,9 @@ def get_corners(paths):
         candidates.pop(j)
       else:
         j += 1
-    for corner in filter(lambda x: x.angle > MIN_CORNER_ANGLE, candidates):
+    # We keep corners which have a sharp negative angle because the path curves
+    # slightly in the positive direction on average.
+    for corner in filter(lambda x: x.angle < -MIN_CORNER_ANGLE, candidates):
       result[corner.index] = corner
   return result
 
