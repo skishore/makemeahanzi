@@ -5,6 +5,7 @@ and packages them into a 'chars.html' output file.
 '''
 import os
 import random
+import shapely.geometry
 import sys
 
 import stroke_extractor
@@ -56,7 +57,78 @@ def augment_glyph(glyph):
               int(corners[index1].point.real), int(corners[index1].point.imag),
               int(corners[index2].point.real), int(corners[index2].point.imag),
               'stroke:white;stroke-width:8'))
+  # Switch to an augmentation that attempts to find a medial line approximation.
+  polygons = get_polygon_approximation(extractor.strokes, 64)
+  medians = find_medians(polygons, 256)
+  result = []
+  for polygon in polygons:
+    for point in polygon.coords:
+      result.append(
+          '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red"/>'.format(
+              int(point[0]), int(point[1])))
+  for median in medians:
+    color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())
+    for point in median:
+      result.append(
+          '<circle cx="{0}" cy="{1}" r="4" fill="{2}" stroke="{2}"/>'.format(
+              int(point.real), int(point.imag), color))
   return result
+
+
+def convert_to_complex(pair):
+  return pair[0] + 1j*pair[1]
+
+def convert_to_pair(complex):
+  return (int(complex.real), int(complex.imag))
+
+def find_medians(polygons, max_distance):
+  result = []
+  for polygon in polygons.geoms:
+    result.append([])
+    for i in xrange(len(polygon.coords) - 1):
+      # Compute the midpoint of this polygon edge and then construct a ray that
+      # starts and that midpoint and is perpendicular to the segment.
+      point1 = convert_to_complex(polygon.coords[i])
+      point2 = convert_to_complex(polygon.coords[i + 1])
+      midpoint = (point1 + point2)/2
+      diff = point2 - point1
+      if not diff:
+        continue
+      left = 1j*max_distance*diff/abs(diff)
+      ray = shapely.geometry.LineString(
+          map(convert_to_pair, [midpoint, midpoint + left]))
+      # Compute the closest point of intersection between that ray and the rest
+      # of the approximating polygon. Ignore the midpoint intersection.
+      shapely_midpoint = shapely.geometry.Point(*convert_to_pair(midpoint))
+      (best, best_distance) = (None, 0)
+      intersection = [polygons.intersection(ray)]
+      if (type(intersection[0]) in
+          (shapely.geometry.GeometryCollection, shapely.geometry.MultiPoint)):
+        intersection = list(intersection[0])
+      for element in intersection:
+        if type(element) != shapely.geometry.Point:
+          continue
+        distance = shapely_midpoint.distance(element)
+        if distance < 4:
+          continue
+        if best is None or distance < best_distance:
+          (best, best_distance) = (element, distance)
+      if best is None:
+        continue
+      result[-1].append((midpoint + best.x + 1j*best.y)/2)
+  return result
+
+def get_polygon_approximation(paths, error):
+  coordinates = []
+  for path in paths:
+    coordinates.append([])
+    for i, element in enumerate(path):
+      num_interpolating_points = max(int(element.length()/error), 1)
+      for i in xrange(num_interpolating_points):
+        coordinates[-1].append(convert_to_pair(
+            element.point(1.0*i/num_interpolating_points)))
+    coordinates[-1].append(convert_to_pair(path[0].start))
+  return shapely.geometry.MultiLineString(coordinates)
 
 
 def get_html_attribute(glyph, attribute):
