@@ -146,6 +146,10 @@ class Corner(object):
 
 
 def augment_glyph(glyph):
+  '''
+  Takes an HTML SVG object and returns a list of addition SVG elements that
+  should be added to the glyph to show diagnostic data for our algorithm.
+  '''
   names = [token for token in glyph.split() if 'glyph-name' in token]
   print '\n# {0}'.format(names[0] if names else 'glyph-name="unknown"')
   path = svg.path.parse_path(get_svg_path_data(glyph))
@@ -159,6 +163,10 @@ def augment_glyph(glyph):
   if failed:
     print '# WARNING: stroke extraction failed for {0}'.format(
         names[0] if names else 'glyph-name="unknown"')
+  # We augment the glyph with three types of information:
+  #  - The extracted strokes. Each one is drawn in a random color.
+  #  - The endpoints of the original paths, with corners in red, others in blue.
+  #  - The detected bridges, line segments drawn in white.
   result = []
   rand256 = lambda: random.randint(0,255)
   for stroke in strokes:
@@ -257,6 +265,10 @@ def extract_stroke(paths, corners, adjacency, extracted, start):
       return None
 
 def extract_strokes(paths, corners, bridges):
+  '''
+  Return pair ([*svg.path.Path], failed) where the first element is a list of
+  path objects that decompose the given glyph and the second is a failure code.
+  '''
   adjacency = collections.defaultdict(list)
   for (index1, index2) in bridges:
     adjacency[index1].append(index2)
@@ -275,6 +287,10 @@ def extract_strokes(paths, corners, bridges):
   return (result, failed)
 
 def get_bridges(corners):
+  '''
+  Returns a set of bridges. Each bridge is a pair of corner indices that should
+  be connected. The set is undirected: if (a, b) is included, so is (b, a).
+  '''
   candidates = []
   for corner in corners.itervalues():
     for other in corners.itervalues():
@@ -293,6 +309,11 @@ def get_bridges(corners):
   return result
 
 def get_corners(paths):
+  '''
+  Returns a dict mapping indices to Corner objects. Each Corner is a point on
+  the curve where the path has a sharp negative angle. Since the the path curves
+  in the positive direction on average, these are points where it is nonconvex.
+  '''
   result = {}
   for i, path in enumerate(paths):
     candidates = [Corner(paths, (i, j)) for j in xrange(len(path))]
@@ -304,13 +325,14 @@ def get_corners(paths):
         candidates.pop(j)
       else:
         j += 1
-    # We keep corners which have a sharp negative angle because the path curves
-    # slightly in the positive direction on average.
     for corner in filter(lambda x: x.angle < -MIN_CORNER_ANGLE, candidates):
       result[corner.index] = corner
   return result
 
 def get_svg_path_data(glyph):
+  '''
+  Takes an HTML SVG object and returns the path data from the "d" field.
+  '''
   left = ' d="'
   start = max(glyph.find(left), glyph.find(left.replace(' ', '\n')))
   assert start >= 0, 'Glyph missing d=".*" block:\n{0}'.format(repr(glyph))
@@ -319,6 +341,11 @@ def get_svg_path_data(glyph):
   return glyph[start + len(left):end].replace('\n', ' ')
 
 def should_split(corners, index1, index2):
+  '''
+  Returns true if the bridge at (index1, index2) is too close to some corner.
+  When this occurs, the gap between these indices should usually be spanned by
+  multiple bridges.
+  '''
   base = corners[index1].point
   diff = corners[index2].point - base
   for corner in corners.itervalues():
