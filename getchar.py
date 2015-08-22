@@ -26,7 +26,7 @@ class Corner(object):
     self.index = index
     (i, j) = index
     self.path = paths[i]
-    self.point = paths[i][j].end
+    self.point = paths[i][j].start
     (self.tangent1, self.tangent2) = self._get_tangents()
     self.angle = self._get_angle(self.tangent1, self.tangent2)
 
@@ -106,8 +106,8 @@ class Corner(object):
     distance = 0
     j = self.index[1]
     while j != other.index[1]:
-      j = (j + 1) % len(self.path)
       distance += abs(self.path[j].end - self.path[j].start)
+      j = (j + 1) % len(self.path)
     return distance < MAX_CORNER_MERGE_DISTANCE
 
   def _get_angle(self, vector1, vector2):
@@ -115,12 +115,12 @@ class Corner(object):
     return math.atan2(ratio.imag, ratio.real)
 
   def _get_tangents(self):
-    segment1 = self.path[self.index[1]]
+    segment1 = self.path[self.index[1] - 1]
     tangent1 = segment1.end - segment1.start
     if (type(segment1) == svg.path.QuadraticBezier and
-        abs(segment1.control - segment1.end) > MIN_CORNER_TANGENT_DISTANCE):
+        abs(segment1.end - segment1.control) > MIN_CORNER_TANGENT_DISTANCE):
       tangent1 = segment1.end - segment1.control
-    segment2 = self.path[(self.index[1] + 1) % len(self.path)]
+    segment2 = self.path[self.index[1]]
     tangent2 = segment2.end - segment2.start
     if (type(segment2) == svg.path.QuadraticBezier and
         abs(segment2.control - segment2.start) > MIN_CORNER_TANGENT_DISTANCE):
@@ -159,7 +159,6 @@ def augment_glyph(glyph):
   if failed:
     print '# WARNING: stroke extraction failed for {0}'.format(
         names[0] if names else 'glyph-name="unknown"')
-  # Actually augment the glyph with stroke-aligned cuts.
   result = []
   rand256 = lambda: random.randint(0,255)
   for stroke in strokes:
@@ -213,6 +212,18 @@ def split_and_orient_path(path):
   return [svg.path.Path(*path) for path in paths]
 
 def extract_stroke(paths, corners, adjacency, extracted, start):
+  '''
+  Given a path, a list of corners, and an adjacency list representation of
+  bridges between then, extract a stroke that starts at the given index
+  and add the indices of all elements on that stroke to extracted.
+
+  This method will fail if, when following edges from that stroke, we cross
+  a bridge and enter a stroke that has already been extracted. It returns an
+  svg.path.Path object on success and None on failure.
+
+  NOTE: We deliberately avoid using bridge directionality in this algorithm
+  so that we can handle manually added bridges.
+  '''
   current = start
   result = svg.path.Path()
   visited = set()
@@ -221,24 +232,29 @@ def extract_stroke(paths, corners, adjacency, extracted, start):
     return (index[0], (index[1] + 1) % len(paths[index[0]]))
 
   def angle(index, bridge):
-    tangent = corners[index].tangent2
+    tangent = corners[index].tangent1
     ratio = (corners[bridge].point - corners[index].point)/tangent
     return abs(math.atan2(ratio.imag, ratio.real))
 
   while True:
+    # Add the current stroke element to the path and advance along it.
     result.append(paths[current[0]][current[1]])
     visited.add(current)
+    current = advance(current)
+    # If there is a bridge aligned with the stroke element that we advanced
+    # over, advance over that bridge as well. If there are multiple bridges,
+    # choose the one that is most aligned.
     if current in adjacency:
       next = sorted(adjacency[current], key=lambda x: angle(current, x))[0]
       result.append(svg.path.Line(
           start=corners[current].point, end=corners[next].point))
       current = next
-    current = advance(current)
+    # Check if we've either closed the loop or entered a previously closed loop.
     if current == start:
       extracted.update(visited)
       return result
     elif current in visited or current in extracted:
-      return False
+      return None
 
 def extract_strokes(paths, corners, bridges):
   adjacency = collections.defaultdict(list)
