@@ -3,6 +3,7 @@
 Extracts one or more characters from each of the svg fonts in the SVG directory
 and packages them into a 'chars.html' output file.
 '''
+import math
 import os
 import random
 import sys
@@ -120,8 +121,17 @@ def find_median(polygon, max_distance):
     # If the perpendicular bisector intersects a segment opposite this one in
     # the polygon, we compute a point between the midpoint and the intersection
     # point as a candidate for our median line.
-    if best is not None:
-      result.append((midpoint + best)/2)
+    #
+    # We do NOT take (midpoint + best)/2. If this segment is not parallel to the
+    # opposite segment, that point could be far from the median. Instead, we
+    # compute the angle bisector of this segment and the opposte one and find
+    # its intersection with the segment (midpoint, best).
+    if best is None or not diff:
+      continue
+    ratio = best_tangent/diff
+    cosine = abs(math.cos(math.atan2(ratio.imag, ratio.real)))
+    t = cosine/(1 + cosine)
+    result.append((1 - t)*midpoint + t*best)
   return result
 
 def get_polygon_approximation(path, error):
