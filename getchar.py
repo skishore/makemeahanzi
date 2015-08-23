@@ -61,7 +61,7 @@ def augment_glyph(glyph):
   polygons = []
   medians = []
   for path in extractor.strokes:
-    polygons.append(get_polygon_approximation(path, 64))
+    polygons.append(get_polygon_approximation(path, 32))
     medians.append(find_median(polygons[-1], 128))
   result = []
   for polygon in polygons:
@@ -126,7 +126,7 @@ def find_median(polygon, max_distance):
     # opposite segment, that point could be far from the median. Instead, we
     # compute the angle bisector of this segment and the opposte one and find
     # its intersection with the segment (midpoint, best).
-    if best is None or not diff:
+    if best is None or best_distance > max_distance or not diff:
       continue
     ratio = best_tangent/diff
     cosine = abs(math.cos(math.atan2(ratio.imag, ratio.real)))
