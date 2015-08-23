@@ -5,7 +5,6 @@ and packages them into a 'chars.html' output file.
 '''
 import os
 import random
-import shapely.geometry
 import sys
 
 import stroke_extractor
@@ -58,14 +57,17 @@ def augment_glyph(glyph):
               int(corners[index2].point.real), int(corners[index2].point.imag),
               'stroke:white;stroke-width:8'))
   # Switch to an augmentation that attempts to find a medial line approximation.
-  polygons = get_polygon_approximation(extractor.strokes, 64)
-  medians = find_medians(polygons, 256)
+  polygons = []
+  medians = []
+  for path in extractor.strokes:
+    polygons.append(get_polygon_approximation(path, 64))
+    medians.append(find_median(polygons[-1], 128))
   result = []
   for polygon in polygons:
-    for point in polygon.coords:
+    for point in polygon:
       result.append(
           '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red"/>'.format(
-              int(point[0]), int(point[1])))
+              int(point.real), int(point.imag)))
   for median in medians:
     color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())
     for point in median:
@@ -75,60 +77,51 @@ def augment_glyph(glyph):
   return result
 
 
-def convert_to_complex(pair):
-  return pair[0] + 1j*pair[1]
-
-def convert_to_pair(complex):
-  return (int(complex.real), int(complex.imag))
-
-def find_medians(polygons, max_distance):
+def find_median(polygon, max_distance):
   result = []
-  for polygon in polygons.geoms:
-    result.append([])
-    for i in xrange(len(polygon.coords) - 1):
-      # Compute the midpoint of this polygon edge and then construct a ray that
-      # starts and that midpoint and is perpendicular to the segment.
-      point1 = convert_to_complex(polygon.coords[i])
-      point2 = convert_to_complex(polygon.coords[i + 1])
-      midpoint = (point1 + point2)/2
-      diff = point2 - point1
-      if not diff:
+  for i, point2 in enumerate(polygon):
+    # Compute the midpoint of this polygon edge and then construct a ray that
+    # starts and that midpoint and is perpendicular to the segment.
+    point1 = polygon[i - 1]
+    midpoint = (point1 + point2)/2
+    diff = point2 - point1
+    dot = lambda point: diff.real*point.real + diff.imag*point.imag
+    sid = lambda point: -diff.imag*point.real + diff.real*point.imag
+    dotmid = dot(midpoint)
+    sidmid = sid(midpoint)
+    # Iterate over other segments of the polygon and see if the perpendicular
+    # ray intersects any of those segments. Track the closest intersection.
+    (best, best_distance) = (None, float('Inf'))
+    for j, other2 in enumerate(polygon):
+      if j == i:
         continue
-      left = 1j*max_distance*diff/abs(diff)
-      ray = shapely.geometry.LineString(
-          map(convert_to_pair, [midpoint, midpoint + left]))
-      # Compute the closest point of intersection between that ray and the rest
-      # of the approximating polygon. Ignore the midpoint intersection.
-      shapely_midpoint = shapely.geometry.Point(*convert_to_pair(midpoint))
-      (best, best_distance) = (None, 0)
-      intersection = [polygons.intersection(ray)]
-      if (type(intersection[0]) in
-          (shapely.geometry.GeometryCollection, shapely.geometry.MultiPoint)):
-        intersection = list(intersection[0])
-      for element in intersection:
-        if type(element) != shapely.geometry.Point:
-          continue
-        distance = shapely_midpoint.distance(element)
-        if distance < 4:
-          continue
-        if best is None or distance < best_distance:
-          (best, best_distance) = (element, distance)
-      if best is None:
+      other1 = polygon[j - 1]
+      (dot1, dot2) = (dot(other1) - dotmid, dot(other2) - dotmid)
+      if dot1 == dot2 == 0:
+        if abs(other1 - diff) > abs(other2 - diff):
+          (other1, other2) = (other2, other1)
+        intersection = other1 if dot1 == 0 else other2
+      elif cmp(dot1, 0) == cmp(dot2, 0):
         continue
-      result[-1].append((midpoint + best.x + 1j*best.y)/2)
+      else:
+        t = dot1/(dot1 - dot2)
+        intersection = (1 - t)*other1 + t*other2
+      distance = abs(intersection - midpoint)
+      if sid(intersection) > sidmid and distance < best_distance:
+        (best, best_distance) = (intersection, distance)
+    # If we've found a closest point of intersection, compute the point halfway
+    # to that point and add it to the heuristic median.
+    if best is not None:
+      result.append((midpoint + best)/2)
   return result
 
-def get_polygon_approximation(paths, error):
-  coordinates = []
-  for path in paths:
-    coordinates.append([])
-    for i, element in enumerate(path):
-      num_interpolating_points = max(int(element.length()/error), 1)
-      for i in xrange(num_interpolating_points):
-        coordinates[-1].append(convert_to_pair(
-            element.point(1.0*i/num_interpolating_points)))
-    coordinates[-1].append(convert_to_pair(path[0].start))
-  return shapely.geometry.MultiLineString(coordinates)
+def get_polygon_approximation(path, error):
+  result = []
+  for i, element in enumerate(path):
+    num_interpolating_points = max(int(element.length()/error), 1)
+    for i in xrange(num_interpolating_points):
+      result.append(element.point(1.0*i/num_interpolating_points))
+  return result
 
 
 def get_html_attribute(glyph, attribute):
