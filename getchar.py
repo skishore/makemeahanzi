@@ -80,8 +80,15 @@ def augment_glyph(glyph):
 def find_median(polygon, max_distance):
   result = []
   for i, point2 in enumerate(polygon):
-    # Compute the midpoint of this polygon edge and then construct a ray that
-    # starts and that midpoint and is perpendicular to the segment.
+    # For each polygon edge, we compute its midpoint and consider the portion
+    # of its perpendicular bisector that extends into the polygon. We prepare
+    # a few functions to compute dot products against this bisector:
+    #   - dot measures which side of the bisector points are on. Note that
+    #     dot(point) - dotmid is 0 if the point is on the perpendicular
+    #     bisector, negative if it is on one side, and positive on the other.
+    #   - sid measures whether the point is inside our outside the polygon.
+    #     sid(point) - sidmid is 0 if the point is on this segment, positive
+    #     if the point is within the polygon, and negative if it is outside.
     point1 = polygon[i - 1]
     midpoint = (point1 + point2)/2
     diff = point2 - point1
@@ -89,9 +96,9 @@ def find_median(polygon, max_distance):
     sid = lambda point: -diff.imag*point.real + diff.real*point.imag
     dotmid = dot(midpoint)
     sidmid = sid(midpoint)
-    # Iterate over other segments of the polygon and see if the perpendicular
-    # ray intersects any of those segments. Track the closest intersection.
-    (best, best_distance) = (None, float('Inf'))
+    # For each other segment, we compute its intersection with the perpendicular
+    # bisector and track the closest one overall.
+    (best, best_distance, best_tangent) = (None, float('Inf'), None)
     for j, other2 in enumerate(polygon):
       if j == i:
         continue
@@ -108,9 +115,11 @@ def find_median(polygon, max_distance):
         intersection = (1 - t)*other1 + t*other2
       distance = abs(intersection - midpoint)
       if sid(intersection) > sidmid and distance < best_distance:
-        (best, best_distance) = (intersection, distance)
-    # If we've found a closest point of intersection, compute the point halfway
-    # to that point and add it to the heuristic median.
+        tangent = other2 - other1
+        (best, best_distance, best_tangent) = (intersection, distance, tangent)
+    # If the perpendicular bisector intersects a segment opposite this one in
+    # the polygon, we compute a point between the midpoint and the intersection
+    # point as a candidate for our median line.
     if best is not None:
       result.append((midpoint + best)/2)
   return result
