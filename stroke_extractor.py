@@ -35,6 +35,16 @@ MIN_CORNER_ANGLE = 0.1*math.pi
 MIN_CORNER_TANGENT_DISTANCE = 4
 
 
+def area(path):
+  '''
+  Returns the area of the path. The result is positive iff the path winds in
+  the counter-clockwise direction.
+  '''
+  def area_under_curve(x):
+    return (x.start.real - x.end.real)*(x.start.imag + x.end.imag)
+  return int(sum(map(area_under_curve, path))/2)
+
+
 def split_and_orient_path(path):
   '''
   Takes a non-empty svg.path.Path object that may contain multiple closed loops.
@@ -52,16 +62,13 @@ def split_and_orient_path(path):
   # Determine if this glyph is oriented in the wrong direction by computing the
   # area of each glyph. The glyph with maximum |area| should have positive area,
   # because it must be an exterior path.
-  def area(path):
-    return sum(int(x.end.real - x.start.real)*int(x.end.imag + x.start.imag)
-               for x in path)
   def reverse(path):
     for element in path:
       (element.start, element.end) = (element.end, element.start)
     return reversed(path)
   areas = [area(path) for path in paths]
   max_area = max((abs(area), area) for area in areas)[1]
-  if max_area > 0:
+  if max_area < 0:
     paths = map(reverse, paths)
   return [svg.path.Path(*path) for path in paths]
 
