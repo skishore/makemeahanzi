@@ -202,7 +202,7 @@ class StrokeExtractor(object):
     self.paths = split_and_orient_path(svg.path.parse_path(d))
     self.corners = self.get_corners()
     self.bridges = self.get_bridges()
-    self.strokes = self.extract_strokes()
+    (self.strokes, self.stroke_adjacency) = self.extract_strokes()
 
   def extract_stroke(self, extracted, start):
     '''
@@ -210,15 +210,21 @@ class StrokeExtractor(object):
     bridges between then, extract a stroke that starts at the given index
     and add the indices of all elements on that stroke to extracted.
 
-    This method will fail if, when following edges from that stroke, we cross
-    a bridge and enter a stroke that has already been extracted. It returns an
-    svg.path.Path object on success and None on failure.
+    This method will return a pair (path, corners), where the first element is
+    an svg.path.Path object representing the stroke and the second is a list of
+    corners that appear on that stroke. The corners list will have duplicates if
+    the stroke loops back on itself, which indicates a mistake somewhere.
+
+    This method will fail if, when following edges the the initial path element,
+    we cross a bridge and enter a stroke that has already been extracted. If so,
+    the path we return will be None.
 
     NOTE: We deliberately avoid using bridge directionality in this algorithm
     so that we can handle manually added bridges.
     '''
     current = start
-    result = svg.path.Path()
+    corners = []
+    path = svg.path.Path()
     visited = set()
 
     def advance(index):
@@ -231,7 +237,7 @@ class StrokeExtractor(object):
 
     while True:
       # Add the current stroke element to the path and advance along it.
-      result.append(self.paths[current[0]][current[1]])
+      path.append(self.paths[current[0]][current[1]])
       visited.add(current)
       current = advance(current)
       # If there is a bridge aligned with the stroke element that we advanced
@@ -239,32 +245,49 @@ class StrokeExtractor(object):
       # choose the one that is most aligned.
       if current in self.bridges:
         next = sorted(self.bridges[current], key=lambda x: angle(current, x))[0]
-        result.append(svg.path.Line(
+        corners.extend([self.corners[current], self.corners[next]])
+        path.append(svg.path.Line(
             start=self.corners[current].point, end=self.corners[next].point))
         current = next
       # Check if we either closed the loop or hit an already extracted stroke.
       if current == start:
         extracted.update(visited)
-        return result
+        return (path, corners)
       elif current in visited or current in extracted:
-        return None
+        return (None, [])
 
   def extract_strokes(self):
     '''
-    Return a list of svg.path.Path objects that decompose the path into strokes.
-    Will log an error if some path elements do not appear on any stroke.
+    Returns a pair (strokes, stroke_adjacency), where the first element is a
+    list of svg.path.Path objects that decompose this glyph into strokes and the
+    second is an adjacency-list representation of the indices of strokes which
+    share corner points.
+
+    This method will log if some path elements do not appear on any stroke.
     '''
     extracted = set()
     strokes = []
+    stroke_adjacency = collections.defaultdict(set)
+    corner_adjacency = collections.defaultdict(set)
     for i, path in enumerate(self.paths):
       for j, element in enumerate(path):
         index = (i, j)
         if index not in extracted:
-          strokes.append(self.extract_stroke(extracted, index))
-    result = filter(lambda x: x, strokes)
-    if len(result) < len(strokes):
-      self.log('Stroke extraction missed some path elements!')
-    return result
+          (stroke, corners) = self.extract_stroke(extracted, index)
+          if stroke is None:
+            self.log('Stroke extraction missed some path elements!')
+            continue
+          stroke_index = len(strokes)
+          strokes.append(stroke)
+          corner_indices = set(corner.index for corner in corners)
+          if len(corner_indices) < len(corners):
+            self.log('Stroke {0} is self-intersecting!'.format(stroke_index))
+          for corner_index in corner_indices:
+            for other_index in corner_adjacency[corner_index]:
+              stroke_adjacency[other_index].add(stroke_index)
+              stroke_adjacency[stroke_index].add(other_index)
+            corner_adjacency[corner_index].add(stroke_index)
+    return (strokes, stroke_adjacency)
 
   def get_bridges(self):
     '''
