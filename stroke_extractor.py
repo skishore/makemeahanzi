@@ -127,9 +127,8 @@ class Corner(object):
       other.angle,
       length,
     )
+    # TODO(skishore): Log this sample and use it to train the classifier.
     result = self._run_classifier(features)
-    # Log this sample so that we can later use it as training data.
-    print (self.point, other.point, features, result)
     return result
 
   def merge_into(self, other):
@@ -180,8 +179,7 @@ class Corner(object):
     return (tangent1, tangent2)
 
   def _run_classifier(self, features):
-    # TODO(skishore): Replace this set of inequalities with a machine-learned
-    # classifier such as a neural net.
+    # TODO(skishore): Replace these inequalities with a trained classifier.
     alignment = abs(features[0]) + abs(features[1])
     incidence = abs(features[2] + features[3] + math.pi)
     short = features[6] < MAX_BRIDGE_DISTANCE/2

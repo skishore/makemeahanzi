@@ -24,10 +24,7 @@ def augment_glyph(glyph):
   name = get_html_attribute(glyph, 'glyph-name')
   d = get_html_attribute(glyph, 'd')
   assert name and d, 'Missing glyph-name or d for glyph:\n{0}'.format(glyph)
-  print '\n# {0}'.format(name)
   extractor = stroke_extractor.StrokeExtractor(name, d)
-  for message in extractor.messages:
-    print '# {0}'.format(message)
   # We augment the glyph with three types of information:
   #  - The extracted strokes. Each one is drawn in a random color.
   #  - The endpoints of the original paths, with corners in red, others in blue.
