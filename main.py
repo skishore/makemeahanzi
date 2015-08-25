@@ -8,9 +8,12 @@ import os
 import random
 import sys
 
+import median
 import stroke_extractor
 
 
+COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
+          '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B']
 SCALE = 0.16
 SVG_DIR = 'derived'
 TRANSFORM = 'scale({0:.2g}, -{0:0.2g}) translate(0, -900)'.format(SCALE)
@@ -30,10 +33,9 @@ def augment_glyph(glyph):
   #  - The endpoints of the original paths, with corners in red, others in blue.
   #  - The detected bridges, line segments drawn in white.
   result = []
-  rand256 = lambda: random.randint(0,255)
-  for stroke in extractor.strokes:
-    result.append('<path fill="{0}" d="{1}" />'.format(
-        '#%02X%02X%02X' % (rand256(), rand256(), rand256()), stroke.d()))
+  for i, stroke in enumerate(extractor.strokes):
+    result.append('<path fill="{0}" {1} d="{2}" />'.format(
+        COLORS[i % len(COLORS)], 'stroke="black" stroke-width="2"', stroke.d()))
   for path in extractor.paths:
     for element in path:
       result.append(

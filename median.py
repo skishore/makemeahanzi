@@ -1,3 +1,5 @@
+import math
+
 def augment_glyph(strokes):
   '''
   Takes a list of svg.path.Path objects that represent strokes and returns
@@ -16,11 +18,10 @@ def augment_glyph(strokes):
           '<circle cx="{0}" cy="{1}" r="4" fill="red" stroke="red"/>'.format(
               int(point.real), int(point.imag)))
   for median in medians:
-    color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())
     for point in median:
       result.append(
           '<circle cx="{0}" cy="{1}" r="4" fill="{2}" stroke="{2}"/>'.format(
-              int(point.real), int(point.imag), color))
+              int(point.real), int(point.imag), 'black'))
   return result
 
 
