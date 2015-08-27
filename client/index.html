@@ -4,10 +4,13 @@
 <body>
   {{> navbar}}
   {{> progress}}
+  <div class="centered">
+    {{> glyph}}
+  </div>
 </body>
 
 <template name="navbar">
-  <div class="navbar navbar-default navbar-static-top">
+  <div id="navbar" class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
       <div class="navbar-header">
         <div class="navbar-brand">zh-Hans character decomposition</div>
@@ -35,5 +38,18 @@
         </div>
       </div>
     </div>
+  </div>
+</template>
+
+<template name="glyph">
+  <div id="glyph">
+    <svg width="{{size}}" height="{{size}}">
+      <g transform="{{transform}}">
+        <path d="{{d}}"></path>
+        {{#each strokes}}
+          <path fill="{{color}}" stroke="{{color}}" d="{{stroke}}"></path>
+        {{/each}}
+      </g>
+    </svg>
   </div>
 </template>
