@@ -46,11 +46,11 @@ if __name__ == '__main__':
     if start < 0 or end < 0:
       print >> sys.stderr, '{0}: malformed {1}'.format(options.font, codepoint)
       continue
-    glyphs.append(data[start:end + len(right)])
+    glyphs.append((codepoint, data[start:end + len(right)]))
   # Print data for each of the extracted glyphs in JSON format.
   result = []
-  for glyph in glyphs:
-    name = get_html_attribute(glyph, 'glyph-name')
+  for (codepoint, glyph) in glyphs:
+    name = "U{0}".format(codepoint.upper())
     d = get_html_attribute(glyph, 'd')
     assert name and d, 'Missing glyph-name or d for glyph:\n{0}'.format(glyph)
     extractor = stroke_extractor.StrokeExtractor(name, d)
