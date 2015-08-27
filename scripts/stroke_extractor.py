@@ -346,6 +346,27 @@ class StrokeExtractor(object):
         result[corner.index] = corner
     return result
 
+  def get_data(self):
+    '''
+    Returns a representation of the data extracted from this glyph that can be
+    serialized to JSON. The result is a dictionary with the following keys:
+      - points: list of [x, y] pairs of endpoints on the glyph's SVG path
+      - corners: list of [x, y] pairs of points that are also corners
+      - bridges: list of pairs of corners [[x1, y1], [x2, y2]] that are bridges
+      - strokes: list of SVG path data strings for the extracted strokes
+    '''
+    pair = lambda point: [int(point.real), int(point.imag)]
+    return {
+      'points': [pair(element.end) for path in self.paths for element in path],
+      'corners': [pair(corner.point) for corner in self.corners.itervalues()],
+      'bridges': [
+        [pair(self.corners[index1].point), pair(self.corners[index2].point)]
+        for (index1, others) in self.bridges.iteritems() for index2 in others
+        if index1 < index2
+      ],
+      'strokes': [stroke.d() for stroke in self.strokes],
+    }
+
   def log(self, message):
     self.messages.append(message)
 
