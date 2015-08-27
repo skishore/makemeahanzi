@@ -1,0 +1,25 @@
+.navbar {
+  cursor: default !important;
+  -webkit-user-select: none !important;
+}
+
+.navbar .navbar-brand:hover {
+  color: #ffffff !important;
+}
+
+.btn {
+  outline: 0 !important;
+  padding: 4px 12px !important;
+}
+
+#reload-button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#progress .progress {
+  height: 18px;
+  margin-bottom: 0;
+}

@@ -2,21 +2,38 @@
   <title>zh-Hans</title>
 </head>
 <body>
-  {{> nav}}
-  {{> hello}}
+  {{> navbar}}
+  {{> progress}}
 </body>
 
-<template name="nav">
-  <div class="navbar navbar-default navbar-fixed-top">
+<template name="navbar">
+  <div class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
       <div class="navbar-header">
         <div class="navbar-brand">zh-Hans character decomposition</div>
       </div>
+      <ul class="nav navbar navbar-nav navbar-right">
+        <button id="reload-button" class="btn btn-danger">Reload</button>
+      </ul>
     </div>
   </div>
 </template>
 
-<template name="hello">
-  <button>Click me!</button>
-  <p>You've pressed the button {{counter}} times.</p>
+<template name="progress">
+  <div id="progress" class="modal fade" tabIndex="2"
+       data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">Reloading glyph data...</div>
+        <div class="modal-footer">
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped active"
+                 role="progressbar" style="width: {{percent}}%"
+                 aria-valuenow="{{percent}}"
+                 aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
