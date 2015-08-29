@@ -4,9 +4,7 @@
 <body>
   {{> navbar}}
   {{> progress}}
-  <div class="centered">
-    {{> glyph}}
-  </div>
+  {{> glyph}}
 </body>
 
 <template name="navbar">
@@ -43,12 +41,24 @@
 
 <template name="glyph">
   <div id="glyph">
-    <svg width="{{size}}" height="{{size}}">
-      <g transform="{{transform}}">
-        <path d="{{d}}"></path>
-        {{#each strokes}}
-          <path fill="{{color}}" stroke="{{color}}" d="{{stroke}}"></path>
-        {{/each}}
+    <svg viewbox="0 0 1024 1024" class="svg">
+      <g transform="scale(1, -1) translate(0, -900)">
+        {{#if glyph}}
+          <path d="{{d}}"></path>
+          {{#each strokes}}
+            <path fill="{{color}}" stroke="{{color}}" d="{{stroke}}"></path>
+          {{/each}}
+          {{#each bridges}}
+            <line x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
+                  style="stroke:red; stroke-width:4"></line>
+          {{/each}}
+          {{#each points}}
+            <circle cx={{x}} cy={{y}} r="4"></circle>
+          {{/each}}
+          {{#each corners}}
+            <circle fill="red" stroke="red" cx={{x}} cy={{y}} r="4"></circle>
+          {{/each}}
+        {{/if}}
       </g>
     </svg>
   </div>

@@ -25,10 +25,19 @@
 }
 
 .centered {
-  text-align: center;
 }
 
 #glyph {
-  display: inline-block;
+  position: absolute;
+  top: 60px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+#glyph .svg {
+  height: 100%;
   margin: 0 auto;
 }

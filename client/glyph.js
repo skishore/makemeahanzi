@@ -2,35 +2,38 @@ Session.setDefault('glyph.data', undefined);
 
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
-var SCALE = 0.16;
-var SIZE = Math.floor(1024*SCALE);
-var TRANSFORM = 'scale(' + SCALE + ', -' + SCALE + ') translate(0, -900)'
 
-function next_glyph() {
+function change_glyph(method) {
   var glyph = Session.get('glyph.data');
   var name = glyph ? glyph.name : undefined;
-  Meteor.call('get_next_glyph', name, function(error, data) {
+  Meteor.call(method, name, function(error, data) {
     Session.set('glyph.data', data);
   });
 }
-window.next_glyph = next_glyph;
+
+function to_line(pairs) {
+  return {x1: pairs[0][0], y1: pairs[0][1], x2: pairs[1][0], y2: pairs[1][1]};
+}
+
+function to_point(pair) {
+  return {x: pair[0], y: pair[1]};
+}
+
+Glyphs.get = function(name) {
+  Meteor.call('get_glyph', name, function(error, data) {
+    Session.set('glyph.data', data);
+  });
+}
 
 Template.glyph.helpers({
-  size: function() {
-    return SIZE;
-  },
-  transform: function() {
-    return TRANSFORM;
+  glyph: function() {
+    return !!Session.get('glyph.data');
   },
   d: function() {
-    var glyph = Session.get('glyph.data');
-    return glyph ? glyph.d : undefined;
+    return Session.get('glyph.data').d;
   },
   strokes: function() {
     var glyph = Session.get('glyph.data');
-    if (!glyph) {
-      return [];
-    }
     var result = [];
     var strokes = glyph.extractor.strokes;
     for (var i = 0; i < strokes.length; i++) {
@@ -38,8 +41,27 @@ Template.glyph.helpers({
     }
     return result;
   },
+  bridges: function() {
+    return Session.get('glyph.data').extractor.bridges.map(to_line);
+  },
+  corners: function() {
+    return Session.get('glyph.data').extractor.corners.map(to_point);
+  },
+  points: function() {
+    return Session.get('glyph.data').extractor.points.map(to_point);
+  },
 });
 
 Meteor.startup(function() {
-  next_glyph();
+  $('body').on('keypress', function(e) {
+    var key = String.fromCharCode(e.which);
+    if (key == 'a') {
+      change_glyph('get_previous_glyph');
+    } else if (key == 'd') {
+      change_glyph('get_next_glyph');
+    }
+  });
+  if (!Session.get('glyph.data')) {
+    change_glyph('get_next_glyph');
+  }
 });
