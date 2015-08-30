@@ -22,7 +22,7 @@ function get_glyph_data(characters, callback) {
       console.error(e);
       glyphs.length = 0;
     }
-    callback(glyphs, code);
+    callback(code === 0 ? null : 'child_process error: ' + code, glyphs);
   }));
 }
 
@@ -39,7 +39,7 @@ function iterate(start, end, index) {
   for (var i = index; i < max; i++) {
     characters.push(i.toString(16));
   }
-  get_glyph_data(characters, function(glyphs) {
+  get_glyph_data(characters, function(error, glyphs) {
     for (var i = 0; i < glyphs.length; i++) {
       var glyph = glyphs[i];
       Glyphs.upsert({name: glyph.name}, glyph);
@@ -57,6 +57,9 @@ Meteor.methods({
   },
   save_glyph: function(glyph) {
     Glyphs.upsert({name: glyph.name}, glyph);
+    var characters = [glyph.name.substr(1).toLowerCase()];
+    var result = Meteor.wrapAsync(get_glyph_data)(characters);
+    console.log(result);
     return glyph;
   },
 });

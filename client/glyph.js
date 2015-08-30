@@ -85,6 +85,32 @@ Template.controls.helpers({
   },
 });
 
+Template.glyph.events({
+  'click #glyph svg g line': function(e) {
+    var coordinates = $(e.target).data('coordinates');
+    var glyph = Session.get('glyph.data');
+    var found_manual_bridge = false;
+    for (var i = 0; i < glyph.manual.bridges_added.length; i++) {
+      var bridge = glyph.manual.bridges_added[i];
+      if (to_line(bridge).coordinates === coordinates) {
+        glyph.manual.bridges_added.splice(i, 1);
+        glyph.manual.verified = false;
+        change_glyph('save_glyph', glyph);
+        return;
+      }
+    }
+    var xs = coordinates.split(',').map(function(x) {
+      return parseInt(x, 10);
+    });
+    glyph.manual.bridges_removed.push([[xs[0], xs[1]], [xs[2], xs[3]]]);
+    glyph.manual.verified = false;
+    change_glyph('save_glyph', glyph);
+  },
+  'click #glyph svg g circle': function(e) {
+    console.log($(e.target).data('coordinates'));
+  },
+});
+
 Template.glyph.helpers({
   glyph: function() {
     return !!Session.get('glyph.data');
@@ -112,7 +138,19 @@ Template.glyph.helpers({
     return result;
   },
   bridges: function() {
-    return Session.get('glyph.data').extractor.bridges.map(to_line);
+    var glyph = Session.get('glyph.data');
+    var removed = {};
+    for (var i = 0; i < glyph.manual.bridges_removed.length; i++) {
+      removed[to_line(glyph.manual.bridges_removed[i]).coordinates] = true;
+    }
+    var result = [];
+    for (var i = 0; i < glyph.extractor.bridges.length; i++) {
+      var line = to_line(glyph.extractor.bridges[i]);
+      if (!removed[line.coordinates]) {
+        result.push(line);
+      }
+    }
+    return result;
   },
   corners: function() {
     return Session.get('glyph.data').extractor.corners.map(to_point);
