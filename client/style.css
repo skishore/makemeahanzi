@@ -9,7 +9,7 @@
 
 .btn {
   outline: 0 !important;
-  padding: 4px 12px !important;
+  padding: 6px 12px !important;
 }
 
 #reload-button {
@@ -24,7 +24,15 @@
   margin-bottom: 0;
 }
 
-.centered {
+#controls {
+  position: absolute;
+  top: 70px;
+  left: 10px;
+  z-index: 1;
+}
+
+#controls .btn {
+  width: 100px;
 }
 
 #glyph {
@@ -37,7 +45,13 @@
   text-align: center;
 }
 
-#glyph .svg {
+#glyph svg {
   height: 100%;
   margin: 0 auto;
+}
+
+#glyph svg g circle:hover, #glyph svg g line:hover {
+  cursor: pointer;
+  fill: blue;
+  stroke: blue;
 }

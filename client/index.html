@@ -4,6 +4,7 @@
 <body>
   {{> navbar}}
   {{> progress}}
+  {{> controls}}
   {{> glyph}}
 </body>
 
@@ -39,25 +40,37 @@
   </div>
 </template>
 
+<template name="controls">
+  <div id="controls" class="btn-group" role="group">
+    <button id="w-button" class="btn btn-info">W: Edit</button>
+    <button id="a-button" class="btn btn-success">A: Previous</button>
+    <button id="s-button" class="btn btn-warning">S: Verify</button>
+    <button id="d-button" class="btn btn-default">D: Next</button>
+  </div>
+</template>
+
 <template name="glyph">
   <div id="glyph">
-    <svg viewbox="0 0 1024 1024" class="svg">
+    <svg viewbox="0 0 1024 1024">
       <g transform="scale(1, -1) translate(0, -900)">
         {{#if glyph}}
-          <path d="{{d}}"></path>
-          {{#each strokes}}
-            <path fill="{{color}}" stroke="{{color}}" d="{{stroke}}"></path>
-          {{/each}}
-          {{#each bridges}}
-            <line x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
-                  style="stroke:red; stroke-width:4"></line>
-          {{/each}}
-          {{#each points}}
-            <circle cx={{x}} cy={{y}} r="4"></circle>
-          {{/each}}
-          {{#each corners}}
-            <circle fill="red" stroke="red" cx={{x}} cy={{y}} r="4"></circle>
-          {{/each}}
+          <path fill="{{base_color}}" stroke="{{base_color}}" d="{{d}}"></path>
+          {{#if show_strokes}}
+            {{#each strokes}}
+              <path fill="{{color}}" stroke="{{color}}" d="{{stroke}}"></path>
+            {{/each}}
+          {{else}}
+            {{#each bridges}}
+              <line x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
+                    stroke="red" stroke-width="8"></line>
+            {{/each}}
+            {{#each points}}
+              <circle cx={{x}} cy={{y}} r="8"></circle>
+            {{/each}}
+            {{#each corners}}
+              <circle fill="red" stroke="red" cx={{x}} cy={{y}} r="8"></circle>
+            {{/each}}
+          {{/if}}
         {{/if}}
       </g>
     </svg>

@@ -1,4 +1,5 @@
 Session.setDefault('glyph.data', undefined);
+Session.setDefault('glyph.show_strokes', true);
 
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
@@ -8,6 +9,7 @@ function change_glyph(method) {
   var name = glyph ? glyph.name : undefined;
   Meteor.call(method, name, function(error, data) {
     Session.set('glyph.data', data);
+    Session.set('glyph.show_strokes', true);
   });
 }
 
@@ -29,8 +31,14 @@ Template.glyph.helpers({
   glyph: function() {
     return !!Session.get('glyph.data');
   },
+  base_color: function() {
+    return Session.get('glyph.show_strokes') ? 'black' : 'gray';
+  },
   d: function() {
     return Session.get('glyph.data').d;
+  },
+  show_strokes: function() {
+    return !!Session.get('glyph.show_strokes');
   },
   strokes: function() {
     var glyph = Session.get('glyph.data');
@@ -59,6 +67,10 @@ Meteor.startup(function() {
       change_glyph('get_previous_glyph');
     } else if (key == 'd') {
       change_glyph('get_next_glyph');
+    } else if (key == 'w' && Session.get('glyph.show_strokes')) {
+      Session.set('glyph.show_strokes', false);
+    } else if (key == 's' && !Session.get('glyph.show_strokes')) {
+      Session.set('glyph.show_strokes', true);
     }
   });
   if (!Session.get('glyph.data')) {
