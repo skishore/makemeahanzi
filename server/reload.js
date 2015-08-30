@@ -6,13 +6,20 @@ var GLYPH_RANGE = [0x4e00, 0x9fff];
 
 var reloading = false;
 
-function get_glyph_data(characters, callback) {
+function get_glyph_data(characters, manual, callback) {
   var json = '';
   var font = path.join(process.env.PWD, 'derived', 'ukai.svg');
   var main = path.join(process.env.PWD, 'scripts', 'main.py');
-  var child = child_process.spawn(main, ['-f', font].concat(characters));
+  var args = ['-f', font].concat(characters);
+  if (manual) {
+    args = args.concat(['-m', JSON.stringify(manual)]);
+  }
+  var child = child_process.spawn(main, args);
   child.stdout.on('data', Meteor.bindEnvironment(function(data) {
     json += data;
+  }));
+  child.stderr.on('data', Meteor.bindEnvironment(function(data) {
+    console.error('' + data);
   }));
   child.on('close', Meteor.bindEnvironment(function(code) {
     var glyphs = [];
@@ -56,11 +63,12 @@ Meteor.methods({
     }
   },
   save_glyph: function(glyph) {
-    Glyphs.upsert({name: glyph.name}, glyph);
+    var manual = glyph.manual || {};
     var characters = [glyph.name.substr(1).toLowerCase()];
-    var result = Meteor.wrapAsync(get_glyph_data)(characters);
-    console.log(result);
-    return glyph;
+    var result = Meteor.wrapAsync(get_glyph_data)(characters, manual)[0];
+    result.manual = manual;
+    Glyphs.upsert({name: result.name}, result);
+    return result;
   },
 });
 

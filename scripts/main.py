@@ -30,7 +30,12 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('-f', '--font', dest='font',
                       help='SVG font to read characters from.', required=True)
+  parser.add_argument('-m', '--manual', dest='manual',
+                      help='Manual corrections to the algorithm.')
   (options, args) = parser.parse_known_args()
+  if options.manual is not None:
+    assert len(args) == 1, 'Manual corrections can only apply to one glyph!'
+    options.manual = json.loads(options.manual)
   # For each Unicode codepoint among the positional arguments, extract the glyph
   # that corresponds to that codepoint from the given SVG font.
   glyphs = []
@@ -53,7 +58,7 @@ if __name__ == '__main__':
     name = "U{0}".format(codepoint.upper())
     d = get_html_attribute(glyph, 'd')
     assert name and d, 'Missing glyph-name or d for glyph:\n{0}'.format(glyph)
-    extractor = stroke_extractor.StrokeExtractor(name, d)
+    extractor = stroke_extractor.StrokeExtractor(name, d, options.manual)
     data = {'name': name, 'd': d, 'extractor': extractor.get_data()}
     result.append(data)
   print json.dumps(result)

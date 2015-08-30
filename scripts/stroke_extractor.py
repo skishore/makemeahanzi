@@ -196,13 +196,41 @@ class Corner(object):
 
 
 class StrokeExtractor(object):
-  def __init__(self, name, d):
+  def __init__(self, name, d, manual=None):
     self.name = name
     self.messages = []
     self.paths = split_and_orient_path(svg.path.parse_path(d))
-    self.corners = self.get_corners()
-    self.bridges = self.get_bridges()
+    self.corners = self._default_corners = self.get_corners()
+    self.bridges = self._default_bridges = self.get_bridges()
+    if manual:
+      self.apply_manual_corrections(manual)
     (self.strokes, self.stroke_adjacency) = self.extract_strokes()
+
+  def apply_manual_corrections(self, manual):
+    indices = {}
+    for (i, path) in enumerate(self.paths):
+      for (j, element) in enumerate(path):
+        index = (i, j)
+        indices[element.start] = index
+        if index in self.corners:
+          assert element.start == self.corners[index].point
+
+    def get_index(pair):
+      result = indices[pair[0] + pair[1]*1j]
+      self.corners[result] = self.corners[result] or Corner(self.paths, result)
+      return result
+
+    for bridge in manual.get('bridges_added', []):
+      (index1, index2) = map(get_index, bridge)
+      self.bridges[index1].add(index2)
+      self.bridges[index2].add(index1)
+    for bridge in manual.get('bridges_removed', []):
+      (index1, index2) = map(get_index, bridge)
+      self.bridges[index1].remove(index2)
+      self.bridges[index2].remove(index1)
+    for (index, others) in self.bridges.items():
+      if not others:
+        del self.bridges[index]
 
   def extract_stroke(self, extracted, start):
     '''
@@ -317,9 +345,9 @@ class StrokeExtractor(object):
       bridges.add((index2, index1))
     # Convert the result to an adjacency list. Having more than two bridges at
     # any given corner results in a warning.
-    result = collections.defaultdict(list)
+    result = collections.defaultdict(set)
     for (index1, index2) in bridges:
-      result[index1].append(index2)
+      result[index1].add(index2)
       if len(result[index1]) == 3:
         self.log('More than two bridges at corner {0}'.format(
             self.corners[index1].point))
@@ -358,11 +386,14 @@ class StrokeExtractor(object):
     pair = lambda point: [int(point.real), int(point.imag)]
     return {
       'points': [pair(element.end) for path in self.paths for element in path],
-      'corners': [pair(corner.point) for corner in self.corners.itervalues()],
+      'corners': [
+        pair(corner.point)
+        for corner in self._default_corners.itervalues()
+      ],
       'bridges': [
         [pair(self.corners[index1].point), pair(self.corners[index2].point)]
-        for (index1, others) in self.bridges.iteritems() for index2 in others
-        if index1 < index2
+        for (index1, others) in self._default_bridges.iteritems()
+        for index2 in others if index1 < index2
       ],
       'strokes': [stroke.d() for stroke in self.strokes],
     }
