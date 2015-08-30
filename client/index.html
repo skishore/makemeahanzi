@@ -42,15 +42,15 @@
 
 <template name="controls">
   <div id="controls" class="btn-group" role="group">
-    <button id="w-button" class="btn btn-info">W: Edit</button>
-    <button id="a-button" class="btn btn-success">A: Previous</button>
-    <button id="s-button" class="btn btn-warning">S: Verify</button>
-    <button id="d-button" class="btn btn-default">D: Next</button>
+    <button id="w-button" class="btn btn-default">W: {{w_button_name}}</button>
+    <button id="a-button" class="btn btn-warning">A: Previous</button>
+    <button id="s-button" class="btn btn-success">S: {{s_button_name}}</button>
+    <button id="d-button" class="btn btn-info">D: Next</button>
   </div>
 </template>
 
 <template name="glyph">
-  <div id="glyph">
+  <div id="glyph" class="{{verified}}">
     <svg viewbox="0 0 1024 1024">
       <g transform="scale(1, -1) translate(0, -900)">
         {{#if glyph}}
@@ -62,13 +62,16 @@
           {{else}}
             {{#each bridges}}
               <line x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
-                    stroke="red" stroke-width="8"></line>
+                    stroke="red" stroke-width="8"
+                    data-coordinates="{{coordinates}}"></line>
             {{/each}}
             {{#each points}}
-              <circle cx={{x}} cy={{y}} r="8"></circle>
+              <circle cx={{x}} cy={{y}} r="8"
+                      data-coordinates="{{coordinates}}"></circle>
             {{/each}}
             {{#each corners}}
-              <circle fill="red" stroke="red" cx={{x}} cy={{y}} r="8"></circle>
+              <circle fill="red" stroke="red" cx={{x}} cy={{y}} r="8"
+                      data-coordinates="{{coordinates}}"></circle>
             {{/each}}
           {{/if}}
         {{/if}}

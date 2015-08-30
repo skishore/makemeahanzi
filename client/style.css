@@ -26,8 +26,8 @@
 
 #controls {
   position: absolute;
-  top: 70px;
-  left: 10px;
+  top: 72px;
+  left: 12px;
   z-index: 1;
 }
 
@@ -43,6 +43,10 @@
   right: 0;
   overflow: hidden;
   text-align: center;
+}
+
+#glyph.verified {
+  background-color: #dfc;
 }
 
 #glyph svg {

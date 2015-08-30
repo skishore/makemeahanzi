@@ -55,6 +55,10 @@ Meteor.methods({
       reloading = true;
     }
   },
+  save_glyph: function(glyph) {
+    Glyphs.upsert({name: glyph.name}, glyph);
+    return glyph;
+  },
 });
 
 Meteor.publish('progress', function() {
