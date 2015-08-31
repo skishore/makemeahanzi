@@ -87,7 +87,7 @@ Template.controls.helpers({
 
 Template.glyph.events({
   'click #glyph svg g line': function(e) {
-    var coordinates = $(e.target).data('coordinates');
+    var coordinates = $(e.target).attr('data-coordinates');
     var glyph = Session.get('glyph.data');
     var found_manual_bridge = false;
     for (var i = 0; i < glyph.manual.bridges_added.length; i++) {
@@ -107,7 +107,7 @@ Template.glyph.events({
     change_glyph('save_glyph', glyph);
   },
   'click #glyph svg g circle': function(e) {
-    console.log($(e.target).data('coordinates'));
+    var coordinates = $(e.target).attr('data-coordinates');
   },
 });
 
