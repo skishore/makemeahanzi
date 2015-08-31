@@ -62,15 +62,12 @@
           {{else}}
             {{#each bridges}}
               <line x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
-                    stroke="red" stroke-width="8"
+                    stroke="{{color}}" stroke-width="8"
                     data-coordinates="{{coordinates}}"></line>
             {{/each}}
             {{#each points}}
-              <circle cx={{x}} cy={{y}} r="8"
-                      data-coordinates="{{coordinates}}"></circle>
-            {{/each}}
-            {{#each corners}}
-              <circle fill="red" stroke="red" cx={{x}} cy={{y}} r="8"
+              <circle fill="{{color}}" stroke="{{color}}" cx={{x}} cy={{y}}
+                      r="8" style="z-index:{{z_index}}"
                       data-coordinates="{{coordinates}}"></circle>
             {{/each}}
           {{/if}}

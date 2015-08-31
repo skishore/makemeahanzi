@@ -25,6 +25,7 @@ At many points during this algorithm we may detect various anomalies. We log
 these anomalies so that they can be reviewed manually.
 '''
 import collections
+import copy
 import math
 import svg.path
 
@@ -200,10 +201,15 @@ class StrokeExtractor(object):
     self.name = name
     self.messages = []
     self.paths = split_and_orient_path(svg.path.parse_path(d))
-    self.corners = self._default_corners = self.get_corners()
-    self.bridges = self._default_bridges = self.get_bridges()
+    self.corners = self.get_corners()
+    self.bridges = self.get_bridges()
     if manual:
+      self._default_corners = copy.deepcopy(self.corners)
+      self._default_bridges = copy.deepcopy(self.bridges)
       self.apply_manual_corrections(manual)
+    else:
+      self._default_corners = self.corners
+      self._default_bridges = self.bridges
     (self.strokes, self.stroke_adjacency) = self.extract_strokes()
 
   def apply_manual_corrections(self, manual):
@@ -217,7 +223,8 @@ class StrokeExtractor(object):
 
     def get_index(pair):
       result = indices[pair[0] + pair[1]*1j]
-      self.corners[result] = self.corners[result] or Corner(self.paths, result)
+      if result not in self.corners:
+        self.corners[result] = Corner(self.paths, result)
       return result
 
     for bridge in manual.get('bridges_added', []):

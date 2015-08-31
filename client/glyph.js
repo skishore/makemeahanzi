@@ -1,4 +1,5 @@
 Session.setDefault('glyph.data', undefined);
+Session.setDefault('glyph.selected_point', undefined);
 Session.setDefault('glyph.show_strokes', true);
 
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
@@ -36,6 +37,11 @@ var bindings = {
   'w': function() {
     if (Session.get('glyph.show_strokes')) {
       Session.set('glyph.show_strokes', false);
+      Session.set('glyph.selected_point', undefined);
+      var glyph = Session.get('glyph.data');
+      glyph.manual.verified = false;
+      Session.set('glyph.data', glyph);
+      change_glyph('save_glyph', glyph);
     } else {
       var glyph = Session.get('glyph.data');
       delete glyph.manual;
@@ -55,6 +61,7 @@ var bindings = {
     }
     var glyph = Session.get('glyph.data');
     glyph.manual.verified = !glyph.manual.verified;
+    Session.set('glyph.data', glyph);
     change_glyph('save_glyph', glyph);
   },
   'd': function() {
@@ -108,6 +115,47 @@ Template.glyph.events({
   },
   'click #glyph svg g circle': function(e) {
     var coordinates = $(e.target).attr('data-coordinates');
+    var selected_point = Session.get('glyph.selected_point');
+    if (selected_point === coordinates) {
+      Session.set('glyph.selected_point', undefined);
+      return;
+    } else if (!selected_point) {
+      Session.set('glyph.selected_point', coordinates);
+      return;
+    }
+    Session.set('glyph.selected_point', undefined);
+    var option1 = selected_point + ',' + coordinates;
+    var option2 = coordinates + ',' + selected_point;
+    // If it's a removed bridge, add it back.
+    var glyph = Session.get('glyph.data');
+    for (var i = 0; i < glyph.manual.bridges_removed.length; i++) {
+      var removed_coordinates =
+          to_line(glyph.manual.bridges_removed[i]).coordinates;
+      if (removed_coordinates === option1 || removed_coordinates === option2) {
+        glyph.manual.bridges_removed.splice(i, 1);
+        glyph.manual.verified = false;
+        change_glyph('save_glyph', glyph);
+        return;
+      }
+    }
+    // We're adding a new bridge. Check that it doesn't exist.
+    var existing_bridges =
+        [].concat(glyph.extractor.bridges).concat(glyph.manual.bridges_added);
+    for (var i = 0; i < existing_bridges.length; i++) {
+      var existing_coordinates = to_line(existing_bridges[i]).coordinates;
+      if (existing_coordinates === option1 ||
+          existing_coordinates === option2) {
+        console.log('Skipping existing bridge.');
+        return;
+      }
+    }
+    // Add in the brand new bridge.
+    var xs = option1.split(',').map(function(x) {
+      return parseInt(x, 10);
+    });
+    glyph.manual.bridges_added.push([[xs[0], xs[1]], [xs[2], xs[3]]]);
+    glyph.manual.verified = false;
+    change_glyph('save_glyph', glyph);
   },
 });
 
@@ -147,16 +195,35 @@ Template.glyph.helpers({
     for (var i = 0; i < glyph.extractor.bridges.length; i++) {
       var line = to_line(glyph.extractor.bridges[i]);
       if (!removed[line.coordinates]) {
+        line.color = 'red';
         result.push(line);
       }
     }
+    for (var i = 0; i < glyph.manual.bridges_added.length; i++) {
+      var line = to_line(glyph.manual.bridges_added[i]);
+      line.color = 'purple';
+      result.push(line);
+    }
     return result;
   },
-  corners: function() {
-    return Session.get('glyph.data').extractor.corners.map(to_point);
-  },
   points: function() {
-    return Session.get('glyph.data').extractor.points.map(to_point);
+    var glyph = Session.get('glyph.data');
+    var corners = {};
+    for (var i = 0; i < glyph.extractor.corners.length; i++) {
+      corners[to_point(glyph.extractor.corners[i]).coordinates] = true;
+    }
+    var result = [];
+    for (var i = 0; i < glyph.extractor.points.length; i++) {
+      var point = to_point(glyph.extractor.points[i]);
+      point.color = corners[point.coordinates] ? 'red' : 'black';
+      point.z_index = corners[point.coordinates] ? 1 : 0;
+      if (point.coordinates === Session.get('glyph.selected_point')) {
+        point.color = 'purple';
+      }
+      result.push(point);
+    }
+    result.sort(function(p1, p2) { return p1.z_index - p2.z_index; });
+    return result;
   },
 });
 
