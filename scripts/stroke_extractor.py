@@ -35,6 +35,11 @@ MAX_CORNER_MERGE_DISTANCE = 16
 MIN_CORNER_ANGLE = 0.1*math.pi
 MIN_CORNER_TANGENT_DISTANCE = 4
 
+# Some glyphs in the font have strokes that incorrectly curve clockwise.
+# To handle these glyphs, we store a list of glyph names and stroke indices that
+# should be reversed during the call to split_and_orient_path.
+PATH_ORDER_MISTAKES = {'U9BFE': [4, 5, 6]}
+
 
 def area(path):
   '''
@@ -46,7 +51,7 @@ def area(path):
   return int(sum(map(area_under_curve, path))/2)
 
 
-def split_and_orient_path(path):
+def split_and_orient_path(name, path):
   '''
   Takes a non-empty svg.path.Path object that may contain multiple closed loops.
   Returns a list of svg.path.Path objects that are all minimal closed curve.
@@ -71,6 +76,8 @@ def split_and_orient_path(path):
   max_area = max((abs(area), area) for area in areas)[1]
   if max_area < 0:
     paths = map(reverse, paths)
+  for i in PATH_ORDER_MISTAKES.get(name, []):
+    paths[i] = reverse(paths[i])
   return [svg.path.Path(*path) for path in paths]
 
 
@@ -200,7 +207,7 @@ class StrokeExtractor(object):
   def __init__(self, name, d, manual=None):
     self.name = name
     self.messages = []
-    self.paths = split_and_orient_path(svg.path.parse_path(d))
+    self.paths = split_and_orient_path(name, svg.path.parse_path(d))
     self.corners = self.get_corners()
     self.bridges = self.get_bridges()
     if manual:
@@ -268,7 +275,7 @@ class StrokeExtractor(object):
     def angle(index, bridge):
       tangent = self.corners[index].tangent1
       ratio = (self.corners[bridge].point - self.corners[index].point)/tangent
-      return abs(math.atan2(ratio.imag, ratio.real))
+      return math.atan2(ratio.imag, ratio.real)
 
     while True:
       # Add the current stroke element to the path and advance along it.

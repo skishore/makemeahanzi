@@ -19,6 +19,10 @@ function change_glyph(method, glyph) {
   });
 }
 
+window.get_glyph = function(name) {
+  change_glyph('get_glyph', name);
+}
+
 function to_line(pairs) {
   return {
     x1: pairs[0][0],
