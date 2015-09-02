@@ -38,7 +38,10 @@ MIN_CORNER_TANGENT_DISTANCE = 4
 # Some glyphs in the font have strokes that incorrectly curve clockwise.
 # To handle these glyphs, we store a list of glyph names and stroke indices that
 # should be reversed during the call to split_and_orient_path.
-PATH_ORDER_MISTAKES = {'U9BFE': [4, 5, 6]}
+PATH_ORDER_MISTAKES = {
+  'U9BFE': [4, 5, 6], 'U9BD2': [0, 1, 2], 'U9BB7': [0, 1, 2],
+  'U9BA7': [0, 1, 2], 'U97CA': [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+  'U9793': [4, 5, 6], 'U9767': [4, 5, 6, 7, 8]}
 
 
 def area(path):
@@ -77,7 +80,7 @@ def split_and_orient_path(name, path):
   if max_area < 0:
     paths = map(reverse, paths)
   for i in PATH_ORDER_MISTAKES.get(name, []):
-    paths[i] = reverse(paths[i])
+    paths[i] = reverse(list(paths[i]))
   return [svg.path.Path(*path) for path in paths]
 
 
