@@ -36,29 +36,28 @@ if __name__ == '__main__':
   if options.manual is not None:
     assert len(args) == 1, 'Manual corrections can only apply to one glyph!'
     options.manual = json.loads(options.manual)
-  # For each Unicode codepoint among the positional arguments, extract the glyph
-  # that corresponds to that codepoint from the given SVG font.
+  # For each glyph name among the positional arguments, extract the glyph with
+  # that name from the SVG font.
   glyphs = []
   with open(options.font) as font:
     data = font.read()
-  for codepoint in args:
-    index = data.find('unicode="&#x{0};"'.format(codepoint))
+  for glyph_name in args:
+    index = data.find('glyph-name="{0}"'.format(glyph_name))
     if index < 0:
-      print >> sys.stderr, '{0}: missing {1}'.format(options.font, codepoint)
+      print >> sys.stderr, '{0}: missing {1}'.format(options.font, glyph_name)
       continue
     (left, right) = ('<glyph', '/>')
     (start, end) = (data.rfind(left, 0, index), data.find(right, index))
     if start < 0 or end < 0:
-      print >> sys.stderr, '{0}: malformed {1}'.format(options.font, codepoint)
+      print >> sys.stderr, '{0}: malformed {1}'.format(options.font, glyph_name)
       continue
-    glyphs.append((codepoint, data[start:end + len(right)]))
+    glyphs.append((glyph_name, data[start:end + len(right)]))
   # Print data for each of the extracted glyphs in JSON format.
   result = []
-  for (codepoint, glyph) in glyphs:
-    name = "U{0}".format(codepoint.upper())
+  for (glyph_name, glyph) in glyphs:
     d = get_html_attribute(glyph, 'd')
-    assert name and d, 'Missing glyph-name or d for glyph:\n{0}'.format(glyph)
-    extractor = stroke_extractor.StrokeExtractor(name, d, options.manual)
-    data = {'name': name, 'd': d, 'extractor': extractor.get_data()}
+    assert d, 'Missing glyph-name or d for glyph:\n{0}'.format(glyph)
+    extractor = stroke_extractor.StrokeExtractor(glyph_name, d, options.manual)
+    data = {'name': glyph_name, 'd': d, 'extractor': extractor.get_data()}
     result.append(data)
   print json.dumps(result)

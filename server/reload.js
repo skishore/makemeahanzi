@@ -45,7 +45,7 @@ function iterate(start, end, index) {
   var max = Math.min(index + BATCH_SIZE, end);
   var characters = [];
   for (var i = index; i < max; i++) {
-    characters.push(i.toString(16));
+    characters.push('uni' + i.toString(16).toUpperCase());
   }
   get_glyph_data(characters, undefined, function(error, glyphs) {
     for (var i = 0; i < glyphs.length; i++) {
@@ -65,7 +65,7 @@ Meteor.methods({
   },
   save_glyph: function(glyph) {
     var manual = glyph.manual || {};
-    var characters = [glyph.name.substr(1).toLowerCase()];
+    var characters = [glyph.name];
     var result = Meteor.wrapAsync(get_glyph_data)(characters, manual)[0];
     result.manual = manual;
     Glyphs.upsert({name: result.name}, result);
