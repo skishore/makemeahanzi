@@ -2,13 +2,14 @@ var child_process = Npm.require('child_process');
 var path = Npm.require('path');
 
 var BATCH_SIZE = 64;
+var FONT_NAME = 'gkai.svg';
 var GLYPH_RANGE = [0x4e00, 0x9fff];
 
 var reloading = false;
 
 function get_glyph_data(characters, manual, callback) {
   var json = '';
-  var font = path.join(process.env.PWD, 'derived', 'ukai.svg');
+  var font = path.join(process.env.PWD, 'derived', FONT_NAME);
   var main = path.join(process.env.PWD, 'scripts', 'main.py');
   var args = ['-f', font].concat(characters);
   if (manual) {
