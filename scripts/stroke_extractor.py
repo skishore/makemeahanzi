@@ -31,7 +31,7 @@ import svg.path
 
 
 MAX_BRIDGE_DISTANCE = 128
-MAX_CORNER_MERGE_DISTANCE = 16
+MAX_BRIDGE_SPLIT_DISTANCE = 16
 MIN_CORNER_ANGLE = 0.1*math.pi
 MIN_CORNER_TANGENT_DISTANCE = 4
 
@@ -141,36 +141,6 @@ class Corner(object):
     # TODO(skishore): Log this sample and use it to train the classifier.
     result = self._run_classifier(features)
     return result
-
-  def merge_into(self, other):
-    '''
-    Merges this corner into the other corner, updating the other's data.
-    The merged corner takes the position of the sharper corner of the two.
-    Because the path curves slightly in the positive direction on average, a
-    curve is sharper if its angle is more negative.
-    '''
-    if self.angle < other.angle:
-      other.index = self.index
-      other.point = self.point
-    other.tangent1 = self.tangent1
-    other.angle = other._get_angle(other.tangent1, other.tangent2)
-
-  def should_merge(self, other):
-    '''
-    Returns true if this corner point is close enough to the next one that
-    they should be combined into one corner point. Note that the next corner
-    should have an index that occurs soon after this corner's.
-    '''
-    assert other.index[0] == self.index[0], \
-           'merge called for corners on different curves!'
-    if abs(other.point - self.point) > MAX_CORNER_MERGE_DISTANCE:
-      return False
-    distance = 0
-    j = self.index[1]
-    while j != other.index[1]:
-      distance += abs(self.path[j].end - self.path[j].start)
-      j = (j + 1) % len(self.path)
-    return distance < MAX_CORNER_MERGE_DISTANCE
 
   def _get_angle(self, vector1, vector2):
     ratio = vector2/vector1 if vector1 else 0
@@ -379,14 +349,6 @@ class StrokeExtractor(object):
     result = {}
     for i, path in enumerate(self.paths):
       candidates = [Corner(self.paths, (i, j)) for j in xrange(len(path))]
-      j = 0
-      while j < len(candidates):
-        next_j = (j + 1) % len(candidates)
-        if candidates[j].should_merge(candidates[next_j]):
-          candidates[j].merge_into(candidates[next_j])
-          candidates.pop(j)
-        else:
-          j += 1
       for corner in filter(lambda x: x.angle < -MIN_CORNER_ANGLE, candidates):
         result[corner.index] = corner
     return result
@@ -433,6 +395,6 @@ class StrokeExtractor(object):
       t = ((corner.point.real - base.real)*diff.real +
            (corner.point.imag - base.imag)*diff.imag)/(abs(diff)**2)
       distance_to_line = abs(self.corners[index1].point + t*diff - corner.point)
-      if 0 < t < 1 and distance_to_line < MAX_CORNER_MERGE_DISTANCE:
+      if 0 < t < 1 and distance_to_line < MAX_BRIDGE_SPLIT_DISTANCE:
         return True
     return False
