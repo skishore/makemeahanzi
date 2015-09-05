@@ -47,7 +47,7 @@ function iterate(start, end, index) {
   for (var i = index; i < max; i++) {
     characters.push(i.toString(16));
   }
-  get_glyph_data(characters, function(error, glyphs) {
+  get_glyph_data(characters, undefined, function(error, glyphs) {
     for (var i = 0; i < glyphs.length; i++) {
       var glyph = glyphs[i];
       Glyphs.upsert({name: glyph.name}, glyph);
