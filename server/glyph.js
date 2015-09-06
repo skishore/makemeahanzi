@@ -26,6 +26,13 @@ Meteor.methods({
     return prev ? prev : Glyphs.findOne(
       {'manual.verified': {$ne: true}}, {sort: {name: -1}});
   },
+  save_glyphs: function(glyphs) {
+    for (var i = 0; i < glyphs.length; i++) {
+      var glyph = glyphs[i];
+      check(glyph.name, String);
+      Glyphs.upsert({name: glyph.name}, glyph);
+    }
+  },
 });
 
 Meteor.startup(function() {
