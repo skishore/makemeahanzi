@@ -8,10 +8,13 @@ var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
 function change_glyph(method, glyph) {
   glyph = glyph || Session.get('glyph.data');
   Meteor.call(method, glyph, function(error, data) {
+    data.d = Glyphs.get_svg_path(data);
+
     data.manual = data.manual || {};
     data.manual.bridges_added = data.manual.bridges_added || [];
     data.manual.bridges_removed = data.manual.bridges_removed || [];
     data.manual.verified = data.manual.verified || false;
+
     Session.set('glyph.data', data);
     if (method != 'save_glyph') {
       Session.set('glyph.show_strokes', true);
@@ -181,6 +184,7 @@ Template.glyph.helpers({
     return !!Session.get('glyph.show_strokes');
   },
   strokes: function() {
+    return [];
     var glyph = Session.get('glyph.data');
     var result = [];
     var strokes = glyph.extractor.strokes;

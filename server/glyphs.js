@@ -1,3 +1,9 @@
+function save_glyph(glyph) {
+  check(glyph.name, String);
+  Glyphs.upsert({name: glyph.name}, glyph);
+  return glyph;
+}
+
 Meteor.methods({
   get_glyph: function(name) {
     return Glyphs.findOne({name: name});
@@ -26,11 +32,10 @@ Meteor.methods({
     return prev ? prev : Glyphs.findOne(
       {'manual.verified': {$ne: true}}, {sort: {name: -1}});
   },
+  save_glyph: save_glyph,
   save_glyphs: function(glyphs) {
     for (var i = 0; i < glyphs.length; i++) {
-      var glyph = glyphs[i];
-      check(glyph.name, String);
-      Glyphs.upsert({name: glyph.name}, glyph);
+      save_glyph(glyphs[i]);
     }
   },
 });
