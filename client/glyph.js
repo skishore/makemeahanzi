@@ -194,8 +194,21 @@ Template.glyph.helpers({
     return result;
   },
   bridges: function() {
-    return [];
     var glyph = Session.get('glyph.data');
+    var result = [];
+    for (var i = 0; i < glyph.render.segments[0].length; i++) {
+      var j = glyph.render.matching[i];
+      var point1 = glyph.render.segments[0][i].point;
+      var point2 = glyph.render.segments[1][j].point;
+      if (point1[0] === point2[0] && point1[1] === point2[1]) {
+        continue;
+      }
+      var line = to_line([point1, point2]);
+      line.color = 'red'
+      result.push(line);
+    }
+    return result;
+
     var removed = {};
     for (var i = 0; i < glyph.manual.bridges_removed.length; i++) {
       removed[to_line(glyph.manual.bridges_removed[i]).coordinates] = true;
