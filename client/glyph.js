@@ -8,7 +8,7 @@ var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
 function change_glyph(method, glyph) {
   glyph = glyph || Session.get('glyph.data');
   Meteor.call(method, glyph, function(error, data) {
-    data.d = Glyphs.get_svg_path(data);
+    data.render = get_glyph_render_data(data);
 
     data.manual = data.manual || {};
     data.manual.bridges_added = data.manual.bridges_added || [];
@@ -178,7 +178,7 @@ Template.glyph.helpers({
     return Session.get('glyph.show_strokes') ? 'black' : 'gray';
   },
   d: function() {
-    return Session.get('glyph.data').d;
+    return Session.get('glyph.data').render.d;
   },
   show_strokes: function() {
     return !!Session.get('glyph.show_strokes');
@@ -194,6 +194,7 @@ Template.glyph.helpers({
     return result;
   },
   bridges: function() {
+    return [];
     var glyph = Session.get('glyph.data');
     var removed = {};
     for (var i = 0; i < glyph.manual.bridges_removed.length; i++) {
@@ -216,15 +217,12 @@ Template.glyph.helpers({
   },
   points: function() {
     var glyph = Session.get('glyph.data');
-    var corners = {};
-    for (var i = 0; i < glyph.extractor.corners.length; i++) {
-      corners[to_point(glyph.extractor.corners[i]).coordinates] = true;
-    }
     var result = [];
-    for (var i = 0; i < glyph.extractor.points.length; i++) {
-      var point = to_point(glyph.extractor.points[i]);
-      point.color = corners[point.coordinates] ? 'red' : 'black';
-      point.z_index = corners[point.coordinates] ? 1 : 0;
+    for (var i = 0; i < glyph.render.endpoints.length; i++) {
+      var endpoint = glyph.render.endpoints[i];
+      var point = to_point(endpoint.point);
+      point.color = endpoint.corner ? 'red' : 'black';
+      point.z_index = endpoint.corner ? 1 : 0;
       if (point.coordinates === Session.get('glyph.selected_point')) {
         point.color = 'purple';
       }
