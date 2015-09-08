@@ -184,12 +184,11 @@ Template.glyph.helpers({
     return !!Session.get('glyph.show_strokes');
   },
   strokes: function() {
-    return [];
     var glyph = Session.get('glyph.data');
     var result = [];
-    var strokes = glyph.extractor.strokes;
-    for (var i = 0; i < strokes.length; i++) {
-      result.push({stroke: strokes[i], color: COLORS[i % COLORS.length]});
+    for (var i = 0; i < glyph.render.strokes.length; i++) {
+      var stroke = glyph.render.strokes[i];
+      result.push({color: COLORS[i % COLORS.length], stroke: stroke});
     }
     return result;
   },
