@@ -16,8 +16,8 @@ function change_glyph(method, glyph) {
     data.manual.verified = data.manual.verified || false;
 
     Session.set('glyph.data', data);
-    if (method != 'save_glyph') {
-      Session.set('glyph.show_strokes', true);
+    if (method !== 'save_glyph') {
+      Session.set('glyph.show_strokes', data.manual.verified);
     }
   });
 }
@@ -147,7 +147,7 @@ Template.glyph.events({
     }
     // We're adding a new bridge. Check that it doesn't exist.
     var existing_bridges =
-        [].concat(glyph.extractor.bridges).concat(glyph.manual.bridges_added);
+        [].concat(glyph.render.bridges).concat(glyph.manual.bridges_added);
     for (var i = 0; i < existing_bridges.length; i++) {
       var existing_coordinates = to_line(existing_bridges[i]).coordinates;
       if (existing_coordinates === option1 ||
@@ -195,27 +195,13 @@ Template.glyph.helpers({
   },
   bridges: function() {
     var glyph = Session.get('glyph.data');
-    var result = [];
-    for (var i = 0; i < glyph.render.corners.length; i++) {
-      var j = glyph.render.matching[i];
-      var point1 = glyph.render.corners[i].point;
-      var point2 = glyph.render.corners[j].point;
-      if (point1[0] === point2[0] && point1[1] === point2[1]) {
-        continue;
-      }
-      var line = to_line([point1, point2]);
-      line.color = 'red'
-      result.push(line);
-    }
-    return result;
-
     var removed = {};
     for (var i = 0; i < glyph.manual.bridges_removed.length; i++) {
       removed[to_line(glyph.manual.bridges_removed[i]).coordinates] = true;
     }
     var result = [];
-    for (var i = 0; i < glyph.extractor.bridges.length; i++) {
-      var line = to_line(glyph.extractor.bridges[i]);
+    for (var i = 0; i < glyph.render.bridges.length; i++) {
+      var line = to_line(glyph.render.bridges[i]);
       if (!removed[line.coordinates]) {
         line.color = 'red';
         result.push(line);

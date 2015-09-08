@@ -60,15 +60,15 @@
               <path fill="{{color}}" stroke="black" d="{{stroke}}"></path>
             {{/each}}
           {{else}}
-            {{#each bridges}}
-              <line x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
-                    stroke="{{color}}" stroke-width="8"
-                    data-coordinates="{{coordinates}}"></line>
-            {{/each}}
             {{#each points}}
               <circle fill="{{color}}" stroke="{{color}}" cx={{x}} cy={{y}}
                       r="8" style="z-index:{{z_index}}"
                       data-coordinates="{{coordinates}}"></circle>
+            {{/each}}
+            {{#each bridges}}
+              <line x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
+                    stroke="{{color}}" stroke-width="8"
+                    data-coordinates="{{coordinates}}"></line>
             {{/each}}
           {{/if}}
         {{/if}}
