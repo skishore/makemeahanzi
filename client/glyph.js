@@ -196,10 +196,10 @@ Template.glyph.helpers({
   bridges: function() {
     var glyph = Session.get('glyph.data');
     var result = [];
-    for (var i = 0; i < glyph.render.segments[0].length; i++) {
+    for (var i = 0; i < glyph.render.corners.length; i++) {
       var j = glyph.render.matching[i];
-      var point1 = glyph.render.segments[0][i].point;
-      var point2 = glyph.render.segments[1][j].point;
+      var point1 = glyph.render.corners[i].point;
+      var point2 = glyph.render.corners[j].point;
       if (point1[0] === point2[0] && point1[1] === point2[1]) {
         continue;
       }
