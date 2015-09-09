@@ -8,13 +8,7 @@ var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
 function change_glyph(method, glyph) {
   glyph = glyph || Session.get('glyph.data');
   Meteor.call(method, glyph, function(error, data) {
-    data.render = get_glyph_render_data(data);
-
-    data.manual = data.manual || {};
-    data.manual.bridges_added = data.manual.bridges_added || [];
-    data.manual.bridges_removed = data.manual.bridges_removed || [];
-    data.manual.verified = data.manual.verified || false;
-
+    data = fill_glyph_fields(data);
     Session.set('glyph.data', data);
     if (method !== 'save_glyph') {
       Session.set('glyph.show_strokes', data.manual.verified);
@@ -22,14 +16,26 @@ function change_glyph(method, glyph) {
   });
 }
 
+function fill_glyph_fields(glyph) {
+  glyph.manual = glyph.manual || {};
+  glyph.manual.bridges_added = glyph.manual.bridges_added || [];
+  glyph.manual.bridges_removed = glyph.manual.bridges_removed || [];
+  glyph.manual.verified = glyph.manual.verified || false;
+  glyph.render = get_glyph_render_data(glyph, glyph.manual.bridges);
+  return glyph;
+}
+
 window.get_glyph = function(name) {
   change_glyph('get_glyph', name);
 }
 
-function push_new_bridge(bridges, bridge) {
-  if (remove_bridges(bridges, [bridge]).length === bridges.length) {
-    bridges.push(bridge);
-  }
+function contains(bridges, bridge) {
+  return remove_bridges(bridges, [bridge]).length < bridges.length;
+}
+
+function get_final_bridges(glyph) {
+  var add = glyph.render.bridges.concat(glyph.manual.bridges_added);
+  return remove_bridges(add, glyph.manual.bridges_removed);
 }
 
 function remove_bridges(add, remove) {
@@ -77,11 +83,12 @@ var bindings = {
     change_glyph('get_previous_glyph_skip_verified');
   },
   's': function() {
+    var glyph = Session.get('glyph.data');
     if (!Session.get('glyph.show_strokes')) {
+      Session.set('glyph.data', fill_glyph_fields(glyph));
       Session.set('glyph.show_strokes', true);
       return;
     }
-    var glyph = Session.get('glyph.data');
     glyph.manual.verified = !glyph.manual.verified;
     Session.set('glyph.data', glyph);
     change_glyph('save_glyph', glyph);
@@ -126,9 +133,10 @@ Template.glyph.events({
     var added = remove_bridges(glyph.manual.bridges_added, [bridge]);
     if (added.length < glyph.manual.bridges_added.length) {
       glyph.manual.bridges_added = added;
-    } else {
-      push_new_bridge(glyph.manual.bridges_removed, bridge);
+    } else if (!contains(glyph.manual.bridges_removed, bridge)) {
+      glyph.manual.bridges_removed.push(bridge);
     }
+    glyph.manual.bridges = get_final_bridges(glyph);
     Session.set('glyph.selected_point', undefined);
     Session.set('glyph.data', glyph);
   },
@@ -151,9 +159,11 @@ Template.glyph.events({
     var removed = remove_bridges(glyph.manual.bridges_removed, [bridge]);
     if (removed.length < glyph.manual.bridges_removed.length) {
       glyph.manual.bridges_removed = removed;
-    } else {
-      push_new_bridge(glyph.manual.bridges_added, bridge);
+    } else if (!contains(glyph.render.bridges, bridge) &&
+               !contains(glyph.manual.bridges_added, bridge)) {
+      glyph.manual.bridges_added.push(bridge);
     }
+    glyph.manual.bridges = get_final_bridges(glyph);
     Session.set('glyph.selected_point', undefined);
     Session.set('glyph.data', glyph);
   },
