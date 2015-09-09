@@ -26,6 +26,21 @@ window.get_glyph = function(name) {
   change_glyph('get_glyph', name);
 }
 
+function push_new_bridge(bridges, bridge) {
+  if (remove_bridges(bridges, [bridge]).length === bridges.length) {
+    bridges.push(bridge);
+  }
+}
+
+function remove_bridges(add, remove) {
+  var set = {};
+  for (var i = 0; i < remove.length; i++) {
+    set[to_line(remove[i]).coordinates] = true;
+    set[to_line([remove[i][1], remove[i][0]]).coordinates] = true;
+  }
+  return add.filter(function(x) { return !set[to_line(x).coordinates]; });
+}
+
 function to_line(pairs) {
   return {
     x1: pairs[0][0],
@@ -102,23 +117,20 @@ Template.controls.helpers({
 Template.glyph.events({
   'click #glyph svg g line': function(e) {
     var coordinates = $(e.target).attr('data-coordinates');
-    var glyph = Session.get('glyph.data');
-    var found_manual_bridge = false;
-    for (var i = 0; i < glyph.manual.bridges_added.length; i++) {
-      var bridge = glyph.manual.bridges_added[i];
-      if (to_line(bridge).coordinates === coordinates) {
-        glyph.manual.bridges_added.splice(i, 1);
-        glyph.manual.verified = false;
-        change_glyph('save_glyph', glyph);
-        return;
-      }
-    }
     var xs = coordinates.split(',').map(function(x) {
       return parseInt(x, 10);
     });
-    glyph.manual.bridges_removed.push([[xs[0], xs[1]], [xs[2], xs[3]]]);
-    glyph.manual.verified = false;
-    change_glyph('save_glyph', glyph);
+    var bridge = [[xs[0], xs[1]], [xs[2], xs[3]]];
+    // Remove the bridge from the list of bridges.
+    var glyph = Session.get('glyph.data');
+    var added = remove_bridges(glyph.manual.bridges_added, [bridge]);
+    if (added.length < glyph.manual.bridges_added.length) {
+      glyph.manual.bridges_added = added;
+    } else {
+      push_new_bridge(glyph.manual.bridges_removed, bridge);
+    }
+    Session.set('glyph.selected_point', undefined);
+    Session.set('glyph.data', glyph);
   },
   'click #glyph svg g circle': function(e) {
     var coordinates = $(e.target).attr('data-coordinates');
@@ -130,39 +142,20 @@ Template.glyph.events({
       Session.set('glyph.selected_point', coordinates);
       return;
     }
-    Session.set('glyph.selected_point', undefined);
-    var option1 = selected_point + ',' + coordinates;
-    var option2 = coordinates + ',' + selected_point;
-    // If it's a removed bridge, add it back.
-    var glyph = Session.get('glyph.data');
-    for (var i = 0; i < glyph.manual.bridges_removed.length; i++) {
-      var removed_coordinates =
-          to_line(glyph.manual.bridges_removed[i]).coordinates;
-      if (removed_coordinates === option1 || removed_coordinates === option2) {
-        glyph.manual.bridges_removed.splice(i, 1);
-        glyph.manual.verified = false;
-        change_glyph('save_glyph', glyph);
-        return;
-      }
-    }
-    // We're adding a new bridge. Check that it doesn't exist.
-    var existing_bridges =
-        [].concat(glyph.render.bridges).concat(glyph.manual.bridges_added);
-    for (var i = 0; i < existing_bridges.length; i++) {
-      var existing_coordinates = to_line(existing_bridges[i]).coordinates;
-      if (existing_coordinates === option1 ||
-          existing_coordinates === option2) {
-        console.log('Skipping existing bridge.');
-        return;
-      }
-    }
-    // Add in the brand new bridge.
-    var xs = option1.split(',').map(function(x) {
+    var xs = (coordinates + ',' + selected_point).split(',').map(function(x) {
       return parseInt(x, 10);
     });
-    glyph.manual.bridges_added.push([[xs[0], xs[1]], [xs[2], xs[3]]]);
-    glyph.manual.verified = false;
-    change_glyph('save_glyph', glyph);
+    var bridge = [[xs[0], xs[1]], [xs[2], xs[3]]];
+    // Add the new bridge to the list of bridges.
+    var glyph = Session.get('glyph.data');
+    var removed = remove_bridges(glyph.manual.bridges_removed, [bridge]);
+    if (removed.length < glyph.manual.bridges_removed.length) {
+      glyph.manual.bridges_removed = removed;
+    } else {
+      push_new_bridge(glyph.manual.bridges_added, bridge);
+    }
+    Session.set('glyph.selected_point', undefined);
+    Session.set('glyph.data', glyph);
   },
 });
 
