@@ -57,7 +57,8 @@
           <path fill="{{base_color}}" stroke="{{base_color}}" d="{{d}}"></path>
           {{#if show_strokes}}
             {{#each strokes}}
-              <path fill="{{color}}" stroke="black" d="{{stroke}}"></path>
+              <path class="stroke" fill="{{color}}"
+                    stroke="black" d="{{stroke}}"></path>
             {{/each}}
           {{else}}
             {{#each bridges}}

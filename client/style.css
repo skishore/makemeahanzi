@@ -54,6 +54,12 @@
   margin: 0 auto;
 }
 
+#glyph svg g path.stroke:hover {
+  cursor: pointer;
+  stroke: red;
+  stroke-width: 8;
+}
+
 #glyph svg g circle:hover, #glyph svg g line:hover {
   cursor: pointer;
   fill: blue;
