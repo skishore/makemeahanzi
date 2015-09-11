@@ -69,11 +69,10 @@ var bindings = {
       var glyph = Session.get('glyph.data');
       glyph.manual.verified = false;
       Session.set('glyph.data', glyph);
-      change_glyph('save_glyph', glyph);
     } else {
       var glyph = Session.get('glyph.data');
       delete glyph.manual;
-      change_glyph('save_glyph', glyph);
+      Session.set('glyph.data', glyph);
     }
   },
   'a': function() {

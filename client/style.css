@@ -12,27 +12,27 @@
   padding: 6px 12px !important;
 }
 
-#reload-button {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
 #progress .progress {
   height: 18px;
   margin-bottom: 0;
 }
 
-#controls {
+#controls, #right-controls {
   position: absolute;
   top: 72px;
-  left: 12px;
   z-index: 1;
 }
 
-#controls .btn {
+#controls .btn, #right-controls .btn {
   width: 100px;
+}
+
+#controls {
+  left: 12px;
+}
+
+#right-controls {
+  right: 12px;
 }
 
 #glyph {

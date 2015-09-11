@@ -2,7 +2,13 @@ var BATCH_SIZE = 64;
 var CODEPOINTS = [0x4e00, 0x9fff];
 var FONT_LOADED_PROGRESS = 0.1;
 
-Template.navbar.events({
+Template.controls.events({
+  'click #backup-button': function() {
+    Meteor.call('backup');
+  },
+  'click #restore-button': function() {
+    Meteor.call('restore');
+  },
   'click #reload-button': function() {
     Session.set('progress.value', 0);
     opentype.load('external/gkai00mp.ttf', function(err, font) {

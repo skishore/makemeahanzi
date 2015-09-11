@@ -14,9 +14,6 @@
       <div class="navbar-header">
         <div class="navbar-brand">zh-Hans character decomposition</div>
       </div>
-      <ul class="nav navbar navbar-nav navbar-right">
-        <button id="reload-button" class="btn btn-danger">Reload</button>
-      </ul>
     </div>
   </div>
 </template>
@@ -46,6 +43,11 @@
     <button id="a-button" class="btn btn-warning">A: Previous</button>
     <button id="s-button" class="btn btn-success">S: {{s_button_name}}</button>
     <button id="d-button" class="btn btn-info">D: Next</button>
+  </div>
+  <div id="right-controls" class="btn-group" role="group">
+    <button id="backup-button" class="btn btn-success">Backup</button>
+    <button id="restore-button" class="btn btn-info">Restore</button>
+    <button id="reload-button" class="btn btn-danger">Reload</button>
   </div>
 </template>
 
