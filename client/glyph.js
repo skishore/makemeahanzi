@@ -78,7 +78,7 @@ var bindings = {
       Session.set('glyph.selected_point', undefined);
       var glyph = Session.get('glyph.data');
       glyph.manual.verified = false;
-      Session.set('glyph.data', glyph);
+      change_glyph('save_glyph', glyph);
     } else {
       var glyph = Session.get('glyph.data');
       delete glyph.manual;
@@ -98,7 +98,6 @@ var bindings = {
       return;
     }
     glyph.manual.verified = !glyph.manual.verified;
-    Session.set('glyph.data', glyph);
     change_glyph('save_glyph', glyph);
   },
   'd': function() {

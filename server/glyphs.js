@@ -1,6 +1,9 @@
 function save_glyph(glyph) {
   check(glyph.name, String);
-  Glyphs.upsert({name: glyph.name}, glyph);
+  var saved_glyph = _.extend({}, glyph);
+  saved_glyph.strokes = saved_glyph.render.strokes;
+  delete saved_glyph.render;
+  Glyphs.upsert({name: glyph.name}, saved_glyph);
   return glyph;
 }
 
