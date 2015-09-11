@@ -1,7 +1,12 @@
 function save_glyph(glyph) {
   check(glyph.name, String);
   var saved_glyph = _.extend({}, glyph);
-  saved_glyph.strokes = saved_glyph.render.strokes;
+  saved_glyph.derived = {
+    errors: saved_glyph.render.log.filter(function(pair) {
+      return pair[0] !== 'success';
+    }),
+    strokes: saved_glyph.render.strokes,
+  };
   delete saved_glyph.render;
   Glyphs.upsert({name: glyph.name}, saved_glyph);
   return glyph;
