@@ -32,6 +32,9 @@ Meteor.methods({
     return prev ? prev : Glyphs.findOne(
       {'manual.verified': {$ne: true}}, {sort: {name: -1}});
   },
+  get_fraction_verified: function() {
+    return Glyphs.find({'manual.verified': true}).count()/Glyphs.find().count();
+  },
   save_glyph: save_glyph,
   save_glyphs: function(glyphs) {
     for (var i = 0; i < glyphs.length; i++) {
@@ -42,4 +45,5 @@ Meteor.methods({
 
 Meteor.startup(function() {
   Glyphs._ensureIndex({name: 1}, {unique: true});
+  Glyphs._ensureIndex({'manual.verified': 1});
 });

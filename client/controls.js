@@ -48,6 +48,14 @@ function save_glyphs(glyphs, index) {
   });
 }
 
+Template.navbar.helpers({
+  percent: function() {
+    var value = Session.get('glyph.fraction_verified');
+    return Math.round(100*(value === undefined ? 0 : value));
+  },
+});
+
+
 Template.progress.helpers({
   percent: function() {
     var value = Session.get('progress.value');

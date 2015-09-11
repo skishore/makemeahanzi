@@ -7,10 +7,12 @@ var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
 
 function change_glyph(method, glyph) {
   glyph = glyph || Session.get('glyph.data');
-  Meteor.call(method, glyph, function(error, data) {
+  Meteor.call(method, glyph, function(err, data) {
     data = fill_glyph_fields(data);
     Session.set('glyph.data', data);
-    if (method !== 'save_glyph') {
+    if (method === 'save_glyph') {
+      refresh_fraction_verified();
+    } else {
       Session.set('glyph.show_strokes', data.manual.verified);
     }
   });
@@ -23,6 +25,14 @@ function fill_glyph_fields(glyph) {
   glyph.manual.verified = glyph.manual.verified || false;
   glyph.render = get_glyph_render_data(glyph, glyph.manual.bridges);
   return glyph;
+}
+
+function refresh_fraction_verified() {
+  Meteor.call('get_fraction_verified', function(err, data) {
+    if (!err) {
+      Session.set('glyph.fraction_verified', data);
+    }
+  });
 }
 
 window.get_glyph = function(name) {
@@ -243,4 +253,5 @@ Meteor.startup(function() {
   if (!Session.get('glyph.data')) {
     change_glyph('get_next_glyph');
   }
+  refresh_fraction_verified();
 });

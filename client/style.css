@@ -7,12 +7,19 @@
   color: #ffffff !important;
 }
 
+.navbar .progress {
+  float: right;
+  margin-top: 21px;
+  margin-right: -3px;
+  width: 298px;
+}
+
 .btn {
   outline: 0 !important;
   padding: 6px 12px !important;
 }
 
-#progress .progress {
+.navbar .progress, #progress .progress {
   height: 18px;
   margin-bottom: 0;
 }
