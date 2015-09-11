@@ -82,7 +82,7 @@ var bindings = {
     } else {
       var glyph = Session.get('glyph.data');
       delete glyph.manual;
-      Session.set('glyph.data', glyph);
+      Session.set('glyph.data', fill_glyph_fields(glyph));
     }
   },
   'a': function() {
@@ -147,7 +147,7 @@ Template.glyph.events({
     }
     glyph.manual.bridges = get_final_bridges(glyph);
     Session.set('glyph.selected_point', undefined);
-    Session.set('glyph.data', glyph);
+    Session.set('glyph.data', fill_glyph_fields(glyph));
   },
   'click #glyph svg g circle': function(e) {
     var coordinates = $(e.target).attr('data-coordinates');
@@ -174,7 +174,7 @@ Template.glyph.events({
     }
     glyph.manual.bridges = get_final_bridges(glyph);
     Session.set('glyph.selected_point', undefined);
-    Session.set('glyph.data', glyph);
+    Session.set('glyph.data', fill_glyph_fields(glyph));
   },
 });
 
