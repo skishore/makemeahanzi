@@ -94,7 +94,6 @@ var bindings = {
   's': function() {
     var glyph = Session.get('glyph.data');
     if (!Session.get('glyph.show_strokes')) {
-      Session.set('glyph.data', fill_glyph_fields(glyph));
       Session.set('glyph.show_strokes', true);
       return;
     }
