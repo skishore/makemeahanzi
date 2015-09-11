@@ -59,6 +59,11 @@
 
 <template name="glyph">
   <div id="glyph" class="{{verified}}">
+    <div class="log">
+      {{#each log}}
+        <div class="log-line {{log_class}}">{{log_message}}</div>
+      {{/each}}
+    </div>
     <svg viewbox="0 0 1024 1024">
       <g transform="scale(1, -1) translate(0, -900)">
         {{#if glyph}}

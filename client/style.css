@@ -52,6 +52,26 @@
   text-align: center;
 }
 
+#glyph .log {
+  position: absolute;
+  text-align: left;
+  left: 40px;
+  top: 76px;
+}
+
+#glyph .log .log-line {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+#glyph .log .log-line.error {
+  color: red;
+}
+
+#glyph .log .log-line.success {
+  color: green;
+}
+
 #glyph.verified {
   background-color: #dfc;
 }

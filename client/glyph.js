@@ -186,6 +186,12 @@ Template.glyph.helpers({
     var glyph = Session.get('glyph.data');
     return glyph && glyph.manual.verified ? 'verified' : undefined;
   },
+  log: function() {
+    var glyph = Session.get('glyph.data');
+    return glyph ? glyph.render.log.map(function(pair) {
+      return {log_class: pair[0], log_message: pair[1]};
+    }) : [];
+  },
   base_color: function() {
     return Session.get('glyph.show_strokes') ? 'black' : 'gray';
   },
