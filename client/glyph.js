@@ -13,7 +13,7 @@ function change_glyph(method, glyph) {
     if (method === 'save_glyph') {
       refresh_fraction_verified();
     } else {
-      Session.set('glyph.show_strokes', data.manual.verified);
+      Session.set('glyph.show_strokes', true);
     }
   });
 }
