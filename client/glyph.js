@@ -20,10 +20,9 @@ function change_glyph(method, glyph) {
 
 function fill_glyph_fields(glyph) {
   glyph.manual = glyph.manual || {};
-  glyph.manual.bridges_added = glyph.manual.bridges_added || [];
-  glyph.manual.bridges_removed = glyph.manual.bridges_removed || [];
   glyph.manual.verified = glyph.manual.verified || false;
   glyph.render = get_glyph_render_data(glyph, glyph.manual.bridges);
+  glyph.manual.bridges = glyph.manual.bridges || glyph.render.bridges;
   return glyph;
 }
 
@@ -41,11 +40,6 @@ window.get_glyph = function(name) {
 
 function contains(bridges, bridge) {
   return remove_bridges(bridges, [bridge]).length < bridges.length;
-}
-
-function get_final_bridges(glyph) {
-  var add = glyph.render.bridges.concat(glyph.manual.bridges_added);
-  return remove_bridges(add, glyph.manual.bridges_removed);
 }
 
 function remove_bridges(add, remove) {
@@ -135,17 +129,10 @@ Template.glyph.events({
       return parseInt(x, 10);
     });
     var bridge = [[xs[0], xs[1]], [xs[2], xs[3]]];
-    // Remove the bridge from the list of bridges.
     var glyph = Session.get('glyph.data');
-    var added = remove_bridges(glyph.manual.bridges_added, [bridge]);
-    if (added.length < glyph.manual.bridges_added.length) {
-      glyph.manual.bridges_added = added;
-    } else if (!contains(glyph.manual.bridges_removed, bridge)) {
-      glyph.manual.bridges_removed.push(bridge);
-    }
-    glyph.manual.bridges = get_final_bridges(glyph);
-    Session.set('glyph.selected_point', undefined);
+    glyph.manual.bridges = remove_bridges(glyph.manual.bridges, [bridge]);
     Session.set('glyph.data', fill_glyph_fields(glyph));
+    Session.set('glyph.selected_point', undefined);
   },
   'click #glyph svg g circle': function(e) {
     var coordinates = $(e.target).attr('data-coordinates');
@@ -161,18 +148,12 @@ Template.glyph.events({
       return parseInt(x, 10);
     });
     var bridge = [[xs[0], xs[1]], [xs[2], xs[3]]];
-    // Add the new bridge to the list of bridges.
     var glyph = Session.get('glyph.data');
-    var removed = remove_bridges(glyph.manual.bridges_removed, [bridge]);
-    if (removed.length < glyph.manual.bridges_removed.length) {
-      glyph.manual.bridges_removed = removed;
-    } else if (!contains(glyph.render.bridges, bridge) &&
-               !contains(glyph.manual.bridges_added, bridge)) {
-      glyph.manual.bridges_added.push(bridge);
+    if (!contains(glyph.manual.bridges, bridge)) {
+      glyph.manual.bridges.push(bridge);
+      Session.set('glyph.data', fill_glyph_fields(glyph));
     }
-    glyph.manual.bridges = get_final_bridges(glyph);
     Session.set('glyph.selected_point', undefined);
-    Session.set('glyph.data', fill_glyph_fields(glyph));
   },
 });
 
@@ -210,21 +191,16 @@ Template.glyph.helpers({
   },
   bridges: function() {
     var glyph = Session.get('glyph.data');
-    var removed = {};
-    for (var i = 0; i < glyph.manual.bridges_removed.length; i++) {
-      removed[to_line(glyph.manual.bridges_removed[i]).coordinates] = true;
+    var original = {};
+    for (var i = 0; i < glyph.render.bridges.length; i++) {
+      var bridge = glyph.render.bridges[i];
+      original[to_line(bridge).coordinates] = true;
+      original[to_line([bridge[1], bridge[0]]).coordinates] = true;
     }
     var result = [];
-    for (var i = 0; i < glyph.render.bridges.length; i++) {
-      var line = to_line(glyph.render.bridges[i]);
-      if (!removed[line.coordinates]) {
-        line.color = 'red';
-        result.push(line);
-      }
-    }
-    for (var i = 0; i < glyph.manual.bridges_added.length; i++) {
-      var line = to_line(glyph.manual.bridges_added[i]);
-      line.color = 'purple';
+    for (var i = 0; i < glyph.manual.bridges.length; i++) {
+      var line = to_line(glyph.manual.bridges[i]);
+      line.color = original[line.coordinates] ? 'red' : 'purple';
       result.push(line);
     }
     return result;
