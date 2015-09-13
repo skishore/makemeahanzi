@@ -1,10 +1,3 @@
-function assert(condition, message) {
-  if (!condition) {
-    console.log(message);
-    throw new Error;
-  }
-}
-
 function get_final_bridges(glyph, original_bridges) {
   var set = {};
   var result = original_bridges.concat(glyph.manual.bridges_added);
