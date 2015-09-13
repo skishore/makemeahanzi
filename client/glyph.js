@@ -26,6 +26,11 @@ function fill_glyph_fields(glyph) {
   return glyph;
 }
 
+function has_errors(glyph) {
+  var error = function(pair) { return pair[0] != 'success'; };
+  return glyph && glyph.render.log.filter(error).length > 0;
+}
+
 function refresh_fraction_verified() {
   Meteor.call('get_fraction_verified', function(err, data) {
     if (!err) {
@@ -91,8 +96,10 @@ var bindings = {
       Session.set('glyph.show_strokes', true);
       return;
     }
-    glyph.manual.verified = !glyph.manual.verified;
-    change_glyph('save_glyph', glyph);
+    if (glyph.manual.verified || !has_errors(glyph)) {
+      glyph.manual.verified = !glyph.manual.verified;
+      change_glyph('save_glyph', glyph);
+    }
   },
   'd': function() {
     change_glyph('get_next_glyph');
@@ -163,6 +170,9 @@ Template.glyph.helpers({
   },
   verified: function() {
     var glyph = Session.get('glyph.data');
+    if (has_errors(glyph)) {
+      return 'error';
+    }
     return glyph && glyph.manual.verified ? 'verified' : undefined;
   },
   log: function() {
