@@ -8,7 +8,7 @@ function evaluate(glyphs, classifier) {
   return num_correct/glyphs.length;
 }
 
-Meteor.startup(function() {
+function train_neural_net() {
   var glyphs = Glyphs.find({'manual.verified': true}).fetch();
   var sample = _.sample(glyphs, 400);
   console.log('Hand-tuned accuracy:', evaluate(sample, hand_tuned_classifier));
@@ -52,7 +52,7 @@ Meteor.startup(function() {
     }
     console.log('Iteration', iteration, 'mean loss:', loss/round_data.length);
   }
-  console.log('Trained neural network.');
+  console.log('Trained neural network:', JSON.stringify(net.toJSON()));
 
   function net_classifier(features) {
     assert(input.w.length === features.length);
@@ -73,4 +73,4 @@ Meteor.startup(function() {
     console.log('Weight',  weights[i], 'combined accuracy:',
                 evaluate(sample, combined_classifier(weights[i])));
   }
-});
+}
