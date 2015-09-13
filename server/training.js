@@ -28,7 +28,7 @@ Meteor.startup(function() {
     {type: 'input', out_sx: 1, out_sy: 1, out_depth: 8},
     {type: 'fc', num_neurons: 8, activation: 'tanh'},
     {type: 'fc', num_neurons: 8, activation: 'tanh'},
-    {type: 'regression', num_neurons: 1},
+    {type: 'softmax', num_classes: 2},
   ]);
   var trainer = new convnetjs.Trainer(
       net, {method: 'adadelta', l2_decay: 0.001, batch_size: 10});
@@ -38,7 +38,7 @@ Meteor.startup(function() {
     for (var i = 0; i < training_data.length; i++) {
       assert(input.w.length === training_data[i][0].length);
       input.w = training_data[i][0];
-      var stats = trainer.train(input, [training_data[i][1]]);
+      var stats = trainer.train(input, training_data[i][1]);
       assert(!isNaN(stats.loss))
       loss += stats.loss;
     }
@@ -49,7 +49,9 @@ Meteor.startup(function() {
   function net_classifier(features) {
     assert(input.w.length === features.length);
     input.w = features;
-    return net.forward(input).w[0] || 0;
+    var softmax = net.forward(input).w;
+    assert(softmax.length === 2);
+    return -1/Math.max(softmax[1], 0.01);
   }
   console.log('Neural-net accuracy:', evaluate(glyphs, net_classifier));
 });
