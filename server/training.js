@@ -10,13 +10,20 @@ function evaluate(glyphs, classifier) {
 
 Meteor.startup(function() {
   var glyphs = Glyphs.find({'manual.verified': true}).fetch();
-  var glyphs = glyphs.slice(0, 100);
-  console.log('Hand-tuned accuracy:', evaluate(glyphs, hand_tuned_classifier));
+  var sample = _.sample(glyphs, 100);
+  console.log('Hand-tuned accuracy:', evaluate(sample, hand_tuned_classifier));
 
   var training_data = [];
-  var training_labels = [];
   for (var i = 0; i < glyphs.length; i++) {
     var glyph_data = get_glyph_training_data(glyphs[i]);
+    var positive_data = glyph_data.filter(function(x) { return x[1] > 0; });
+    var negative_data = glyph_data.filter(function(x) { return x[1] === 0; });
+    if (positive_data.length > negative_data.length) {
+      positive_data = _.sample(positive_data, negative_data.length);
+    } else {
+      negative_data = _.sample(negative_data, positive_data.length);
+    }
+    glyph_data = negative_data.concat(positive_data);
     for (var j = 0; j < glyph_data.length; j++) {
       training_data.push(glyph_data[j]);
     }
@@ -35,14 +42,15 @@ Meteor.startup(function() {
   var input = new convnetjs.Vol(1, 1, 8);
   for (var iteration = 0; iteration < 10; iteration++) {
     var loss = 0;
-    for (var i = 0; i < training_data.length; i++) {
-      assert(input.w.length === training_data[i][0].length);
-      input.w = training_data[i][0];
-      var stats = trainer.train(input, training_data[i][1]);
+    var round_data = _.sample(training_data, 1000);
+    for (var i = 0; i < round_data.length; i++) {
+      assert(input.w.length === round_data[i][0].length);
+      input.w = round_data[i][0];
+      var stats = trainer.train(input, round_data[i][1]);
       assert(!isNaN(stats.loss))
       loss += stats.loss;
     }
-    console.log('Iteration', iteration, 'loss:', loss/training_data.length);
+    console.log('Iteration', iteration, 'mean loss:', loss/round_data.length);
   }
   console.log('Trained neural network.');
 
@@ -51,7 +59,7 @@ Meteor.startup(function() {
     input.w = features;
     var softmax = net.forward(input).w;
     assert(softmax.length === 2);
-    return -1/Math.max(softmax[1], 0.01);
+    return softmax[1] - softmax[0];
   }
-  console.log('Neural-net accuracy:', evaluate(glyphs, net_classifier));
+  console.log('Neural-net accuracy:', evaluate(sample, net_classifier));
 });
