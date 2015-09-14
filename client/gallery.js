@@ -1,5 +1,3 @@
-Session.setDefault('gallery.radical', undefined);
-
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
 
@@ -12,7 +10,7 @@ function comparison(glyph1, glyph2) {
 
 Template.gallery.events({
   'click svg.radical': function(e) {
-    Session.set('gallery.radical', this.radical);
+    window.location.hash = this.radical;
   },
 });
 
@@ -55,6 +53,18 @@ Template.navbar.helpers({
   },
 });
 
-Tracker.autorun(function() {
-  Meteor.subscribe('index', Session.get('gallery.radical'));
+window.onhashchange = function() {
+  var hash = parseInt(window.location.hash.substr(1), 10);
+  if (isNaN(hash)) {
+    Session.set('gallery.radical', undefined);
+  } else {
+    Session.set('gallery.radical', hash);
+  }
+}
+
+Meteor.startup(function() {
+  window.onhashchange();
+  Tracker.autorun(function() {
+    Meteor.subscribe('index', Session.get('gallery.radical'));
+  });
 });
