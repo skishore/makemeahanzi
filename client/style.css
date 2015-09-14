@@ -42,13 +42,11 @@
   right: 12px;
 }
 
-#glyph {
+#gallery, #glyph {
   position: absolute;
   top: 60px;
-  bottom: 0;
   left: 0;
   right: 0;
-  overflow: hidden;
   text-align: center;
 }
 
@@ -85,7 +83,20 @@
   margin: 0 auto;
 }
 
-#glyph svg g path.stroke:hover {
+#gallery svg {
+  height: 200px;
+  width: 200px;
+}
+
+#gallery svg.radical {
+  cursor: pointer;
+}
+
+#gallery svg.radical:hover {
+  background-color: #8cf;
+}
+
+#gallery svg g path.stroke:hover, #glyph svg g path.stroke:hover {
   cursor: pointer;
   stroke: red;
   stroke-width: 8;

@@ -3,18 +3,21 @@
 </head>
 <body>
   {{> navbar}}
+  {{> gallery}}
+  <!--
   {{> progress}}
   {{> controls}}
   {{> glyph}}
+  -->
 </body>
 
 <template name="navbar">
   <div id="navbar" class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
       <div class="navbar-header">
-        <div class="navbar-brand">zh-Hans character decomposition</div>
+        <div class="navbar-brand">Hanzi decomposition - {{gallery}}</div>
       </div>
-      <div class="navbar-progress progress">
+      <div class="navbar-progress progress" style="visibility: hidden;">
         <div class="progress-bar progress-bar-warning active"
              role="progressbar" style="width: {{percent}}%"
              aria-valuenow="{{percent}}"
@@ -88,5 +91,21 @@
         {{/if}}
       </g>
     </svg>
+  </div>
+</template>
+
+<template name="gallery">
+  <div id="gallery">
+    {{#each glyphs}}
+      <svg viewbox="0 0 1024 1024" class="{{class}}">
+        <g transform="scale(1, -1) translate(0, -900)">
+          <path d="{{d}}"></path>
+          {{#each strokes}}
+            <path class="stroke" fill="{{color}}"
+                  stroke="black" d="{{stroke}}"></path>
+          {{/each}}
+        </g>
+      </svg>
+    {{/each}}
   </div>
 </template>
