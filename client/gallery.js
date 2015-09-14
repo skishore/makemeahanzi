@@ -4,10 +4,12 @@ var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
 var subscription = undefined;
 
 function comparison(glyph1, glyph2) {
-  if (glyph1.index.strokes === glyph2.index.strokes) {
+  if (glyph1.index.strokes !== glyph2.index.strokes) {
+    return glyph1.index.strokes - glyph2.index.strokes;
+  } else if (glyph1.index.radical !== glyph2.index.radical) {
     return glyph1.index.radical - glyph2.index.radical;
   }
-  return glyph1.index.strokes - glyph2.index.strokes;
+  return glyph1.name < glyph2.name ? -1 : 1;
 }
 
 Template.gallery.events({
@@ -40,11 +42,15 @@ Template.gallery.helpers({
       result.push({
         class: (on_radicals_page ? 'radical' : 'character'),
         d: Glyphs.get_svg_path(glyph),
+        name: glyph.name,
         radical: glyph.index.radical,
         strokes: strokes
       });
     }
     return result;
+  },
+  loading: function() {
+    return !Session.get('gallery.ready');
   },
 });
 

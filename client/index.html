@@ -97,7 +97,7 @@
 <template name="gallery">
   <div id="gallery">
     {{#each glyphs}}
-      <svg viewbox="0 0 1024 1024" class="{{class}}">
+      <svg viewbox="0 0 1024 1024" class="{{class}}" data-name="{{name}}">
         <g transform="scale(1, -1) translate(0, -900)">
           <path d="{{d}}"></path>
           {{#each strokes}}
@@ -108,4 +108,9 @@
       </svg>
     {{/each}}
   </div>
+  {{#if loading}}
+    <div id="gallery-loader">
+      <div class="whirly-loader"></div>
+    </div>
+  {{/if}}
 </template>

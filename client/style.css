@@ -42,12 +42,28 @@
   right: 12px;
 }
 
-#gallery, #glyph {
+#gallery, #gallery-loader, #glyph {
   position: absolute;
   top: 60px;
   left: 0;
   right: 0;
   text-align: center;
+}
+
+#gallery-loader, #glyph {
+  bottom: 0;
+}
+
+#gallery-loader {
+  position: fixed !important;
+  top: 0;
+  transform: scale(2, 2);
+}
+
+#gallery-loader .whirly-loader {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 #glyph .log {
