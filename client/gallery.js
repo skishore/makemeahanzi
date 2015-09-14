@@ -1,6 +1,8 @@
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
 
+var subscription = undefined;
+
 function comparison(glyph1, glyph2) {
   if (glyph1.index.strokes === glyph2.index.strokes) {
     return glyph1.index.radical - glyph2.index.radical;
@@ -16,6 +18,9 @@ Template.gallery.events({
 
 Template.gallery.helpers({
   glyphs: function() {
+    if (!Session.get('gallery.ready')) {
+      return [];
+    }
     var glyphs = Glyphs.find().fetch().sort(comparison);
     var on_radicals_page = Session.get('gallery.radical') === undefined;
     var result = [];
@@ -60,11 +65,18 @@ window.onhashchange = function() {
   } else {
     Session.set('gallery.radical', hash);
   }
+  Session.set('gallery.ready', false);
+  if (subscription) {
+    subscription.stop();
+  }
 }
 
 Meteor.startup(function() {
   window.onhashchange();
   Tracker.autorun(function() {
-    Meteor.subscribe('index', Session.get('gallery.radical'));
+    var radical = Session.get('gallery.radical')
+    subscription = Meteor.subscribe('index', radical, function() {
+      Session.set('gallery.ready', true);
+    });
   });
 });
