@@ -97,6 +97,9 @@
 <template name="gallery">
   <div id="gallery">
     {{#each blocks}}
+      {{#if show_divider}}
+        <div class="gallery-divider"></div>
+      {{/if}}
       <div class="gallery-block">
         <div class="block-header">{{count}}</div>
         <div class="block-values">

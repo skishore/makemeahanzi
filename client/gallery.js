@@ -55,7 +55,11 @@ Template.gallery.helpers({
       var num_strokes =
           on_radicals_page ? glyph.derived.strokes.length : glyph.index.strokes;
       if (num_strokes != last_num_strokes) {
-        result.push({glyphs: [], count: num_strokes});
+        result.push({
+          glyphs: [],
+          count: num_strokes,
+          show_divider: result.length > 0,
+        });
         last_num_strokes = num_strokes;
       }
       result[result.length - 1].glyphs.push(data);
