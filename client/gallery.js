@@ -1,5 +1,6 @@
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
+var DICTIONARY = 'http://www.archchinese.com/chinese_english_dictionary.html';
 
 var subscription = undefined;
 
@@ -15,6 +16,10 @@ function comparison(glyph1, glyph2) {
 Template.gallery.events({
   'click svg.radical': function(e) {
     window.location.hash = this.radical;
+  },
+  'click svg.character': function(e) {
+    var character = String.fromCodePoint(parseInt(this.name.substr(3), 16));
+    window.open(DICTIONARY + '?find=' + character, '_blank').focus();
   },
 });
 

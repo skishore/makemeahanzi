@@ -106,7 +106,7 @@
 
 #gallery .gallery-block {
   display: inline-block;
-  margin: 60px auto;
+  margin: 40px auto;
   text-align: left;
 }
 
@@ -124,12 +124,12 @@
   width: 1020px;
 }
 
-#gallery svg.radical {
+#gallery svg {
   cursor: pointer;
 }
 
-#gallery svg.radical:hover {
-  background-color: #8cf;
+#gallery svg:hover {
+  background-color: #adf;
 }
 
 #gallery svg g path.stroke:hover, #glyph svg g path.stroke:hover {
