@@ -96,16 +96,24 @@
 
 <template name="gallery">
   <div id="gallery">
-    {{#each glyphs}}
-      <svg viewbox="0 0 1024 1024" class="{{class}}" data-name="{{name}}">
-        <g transform="scale(1, -1) translate(0, -900)">
-          <path d="{{d}}"></path>
-          {{#each strokes}}
-            <path class="stroke" fill="{{color}}"
-                  stroke="black" d="{{stroke}}"></path>
+    {{#each blocks}}
+      <div class="gallery-block">
+        <div class="block-header">{{count}}</div>
+        <div class="block-values">
+          {{#each glyphs}}
+            <svg viewbox="0 0 1024 1024"
+                 class="{{class}}" data-name="{{name}}">
+              <g transform="scale(1, -1) translate(0, -900)">
+                <path d="{{d}}"></path>
+                {{#each strokes}}
+                  <path class="stroke" fill="{{color}}"
+                        stroke="black" d="{{stroke}}"></path>
+                {{/each}}
+              </g>
+            </svg>
           {{/each}}
-        </g>
-      </svg>
+        </div>
+      </div>
     {{/each}}
   </div>
   {{#if loading}}

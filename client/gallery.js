@@ -4,8 +4,8 @@ var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
 var subscription = undefined;
 
 function comparison(glyph1, glyph2) {
-  if (glyph1.index.strokes !== glyph2.index.strokes) {
-    return glyph1.index.strokes - glyph2.index.strokes;
+  if (glyph1.derived.strokes.length !== glyph2.derived.strokes.length) {
+    return glyph1.derived.strokes.length - glyph2.derived.strokes.length;
   } else if (glyph1.index.radical !== glyph2.index.radical) {
     return glyph1.index.radical - glyph2.index.radical;
   }
@@ -19,12 +19,13 @@ Template.gallery.events({
 });
 
 Template.gallery.helpers({
-  glyphs: function() {
+  blocks: function() {
     if (!Session.get('gallery.ready')) {
       return [];
     }
     var glyphs = Glyphs.find().fetch().sort(comparison);
     var on_radicals_page = Session.get('gallery.radical') === undefined;
+    var last_num_strokes = -1;
     var result = [];
     for (var i = 0; i < glyphs.length; i++) {
       var glyph = glyphs[i];
@@ -39,13 +40,20 @@ Template.gallery.helpers({
           strokes.push({color: COLORS[j % COLORS.length], stroke: stroke});
         }
       }
-      result.push({
+      var data = {
         class: (on_radicals_page ? 'radical' : 'character'),
         d: Glyphs.get_svg_path(glyph),
         name: glyph.name,
         radical: glyph.index.radical,
         strokes: strokes
-      });
+      };
+      var num_strokes =
+          on_radicals_page ? glyph.derived.strokes.length : glyph.index.strokes;
+      if (num_strokes != last_num_strokes) {
+        result.push({glyphs: [], count: num_strokes});
+        last_num_strokes = num_strokes;
+      }
+      result[result.length - 1].glyphs.push(data);
     }
     return result;
   },

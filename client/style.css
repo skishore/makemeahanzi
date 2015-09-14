@@ -104,6 +104,26 @@
   width: 200px;
 }
 
+#gallery .gallery-block {
+  display: inline-block;
+  margin: 60px auto;
+  text-align: left;
+}
+
+#gallery .gallery-block .block-header {
+  float: left;
+  font-size: 60px;
+  line-height: 200px;
+  margin-right: 80px;
+  text-align: right;
+  width: 80px;
+}
+
+#gallery .gallery-block .block-values {
+  float: left;
+  width: 1020px;
+}
+
 #gallery svg.radical {
   cursor: pointer;
 }
