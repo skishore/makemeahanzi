@@ -71,16 +71,6 @@ Template.gallery.helpers({
   },
 });
 
-Template.navbar.helpers({
-  gallery: function() {
-    var radical = Session.get('gallery.radical');
-    if (radical === undefined) {
-      return 'all radicals';
-    }
-    return 'radical ' + radical;
-  },
-});
-
 window.onhashchange = function() {
   var hash = parseInt(window.location.hash.substr(1), 10);
   if (isNaN(hash)) {

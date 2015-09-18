@@ -3,19 +3,14 @@
 </head>
 <body>
   {{> navbar}}
-  {{> gallery}}
-  <!--
-  {{> progress}}
-  {{> controls}}
-  {{> glyph}}
-  -->
+  {{> content}}
 </body>
 
 <template name="navbar">
   <div id="navbar" class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
       <div class="navbar-header">
-        <div class="navbar-brand">Hanzi decomposition - {{gallery}}</div>
+        <div class="navbar-brand">Hanzi decomposition - {{mode}}</div>
       </div>
       <div class="navbar-progress progress" style="visibility: hidden;">
         <div class="progress-bar progress-bar-warning active"
@@ -46,6 +41,15 @@
   </div>
 </template>
 
+<template name="content">
+  {{#if show_editor}}
+    {{> controls}}
+    {{> glyph}}
+  {{else}}
+    {{> gallery}}
+  {{/if}}
+</template>
+
 <template name="controls">
   <div id="controls" class="btn-group" role="group">
     <button id="w-button" class="btn btn-default">W: {{w_button_name}}</button>
@@ -56,7 +60,7 @@
   <div id="right-controls" class="btn-group" role="group">
     <button id="backup-button" class="btn btn-success">Backup</button>
     <button id="restore-button" class="btn btn-info">Restore</button>
-    <button id="reload-button" class="btn btn-danger">Reload</button>
+    <button id="reload-button" class="btn btn-warning">Reload</button>
   </div>
 </template>
 

@@ -2,6 +2,14 @@ var BATCH_SIZE = 64;
 var CODEPOINTS = [0x4e00, 0x9fff];
 var FONT_LOADED_PROGRESS = 0.1;
 
+Session.setDefault('controls.show_editor', false);
+
+Template.content.helpers({
+  show_editor: function() {
+    return Session.get('controls.show_editor');
+  }
+});
+
 Template.controls.events({
   'click #backup-button': function() {
     Meteor.call('backup');
@@ -49,6 +57,16 @@ function save_glyphs(glyphs, index) {
 }
 
 Template.navbar.helpers({
+  mode: function() {
+    if (Session.get('controls.show_editor')) {
+      return 'editor';
+    }
+    var radical = Session.get('gallery.radical');
+    if (radical === undefined) {
+      return 'all radicals';
+    }
+    return 'radical ' + radical;
+  },
   percent: function() {
     var value = Session.get('glyph.fraction_verified');
     return Math.round(100*(value === undefined ? 0 : value));
