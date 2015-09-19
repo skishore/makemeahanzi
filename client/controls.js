@@ -1,4 +1,4 @@
-Session.setDefault('controls.show_editor', false);
+Session.setDefault('controls.show_editor', true);
 
 Template.content.helpers({
   show_editor: function() {

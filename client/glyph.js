@@ -4,6 +4,8 @@ Session.setDefault('glyph.show_strokes', true);
 
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
+var DICTIONARY = 'http://www.archchinese.com/chinese_english_dictionary.html';
+var EDIT_STROKES = false;
 
 function change_glyph(method, glyph) {
   glyph = glyph || Session.get('glyph.data');
@@ -21,7 +23,11 @@ function change_glyph(method, glyph) {
 function fill_glyph_fields(glyph) {
   glyph.manual = glyph.manual || {};
   glyph.manual.verified = glyph.manual.verified || false;
-  glyph.render = get_glyph_render_data(glyph, glyph.manual.bridges);
+  if (EDIT_STROKES) {
+    glyph.render = get_glyph_render_data(glyph, glyph.manual.bridges);
+  } else {
+    glyph.render = {d: '', log: [], strokes: glyph.derived.strokes};
+  }
   glyph.manual.bridges = glyph.manual.bridges || glyph.render.bridges;
   return glyph;
 }
@@ -72,6 +78,12 @@ function to_point(pair) {
 
 var bindings = {
   'w': function() {
+    if (!EDIT_STROKES) {
+      var glyph = Session.get('glyph.data');
+      var character = String.fromCodePoint(parseInt(glyph.name.substr(3), 16));
+      window.open(DICTIONARY + '?find=' + character, '_blank').focus();
+      return;
+    }
     if (Session.get('glyph.show_strokes')) {
       Session.set('glyph.show_strokes', false);
       Session.set('glyph.selected_point', undefined);
@@ -91,6 +103,9 @@ var bindings = {
     change_glyph('get_previous_glyph_skip_verified');
   },
   's': function() {
+    if (!EDIT_STROKES) {
+      return;
+    }
     var glyph = Session.get('glyph.data');
     if (!Session.get('glyph.show_strokes')) {
       Session.set('glyph.show_strokes', true);
@@ -118,6 +133,9 @@ Template.controls.events({
 
 Template.controls.helpers({
   w_button_name: function() {
+    if (!EDIT_STROKES) {
+      return 'Check';
+    }
     return Session.get('glyph.show_strokes') ? 'Edit' : 'Reset';
   },
   s_button_name: function() {
@@ -169,6 +187,9 @@ Template.glyph.helpers({
     return !!Session.get('glyph.data');
   },
   verified: function() {
+    if (!EDIT_STROKES) {
+      return undefined;
+    }
     var glyph = Session.get('glyph.data');
     if (has_errors(glyph)) {
       return 'error';
