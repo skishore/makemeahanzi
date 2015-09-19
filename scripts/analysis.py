@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 def MutableNamedTuple(name, fields):
   def tostr(value):
     if type(value) == unicode:
@@ -15,19 +16,30 @@ def MutableNamedTuple(name, fields):
           tostr(self.__dict__[key]) for key in fields))
   return TemporaryClass
 
+RADICAL_VARIANTS_TO_SKIP = (u'𠆢', u'𠘨')
+SIMPLIFIED_RADICALS_TO_SKIP = (27,)
+
+def in_cjk_block(character):
+  if not (len(character) == 1 and 0x4e00 <= ord(character) <= 0x9fff):
+    print '%s is U+%s' % (character, hex(ord(character))[2:].upper())
+    return False
+  return True
+
 with open('scripts/glyphs') as f:
   glyphs = f.readlines()[0].strip().decode('utf8')
+  assert(all(in_cjk_block(glyph) for glyph in glyphs))
   glyph_set = set(glyphs)
 assert(len(glyphs) == len(glyph_set) == 6763)
 
-Radical = MutableNamedTuple(
+ArchRadical = MutableNamedTuple(
     'Radical', ['number', 'character', 'definition', 'pinyin', 'strokes'])
 
-with open('scripts/radicals') as f:
+with open('scripts/arch_radicals') as f:
   rows = [line.strip().decode('utf8').split('  ') for line in f.readlines()]
-  radicals = [Radical(*row) for row in rows]
-  radical_map = dict((radical.character, radical) for radical in radicals)
-assert(len(radicals) == len(radical_map) == 214)
+  arch_radicals = [ArchRadical(*row) for row in rows]
+  arch_radical_map = dict((radical.character, radical)
+                          for radical in arch_radicals)
+assert(len(arch_radicals) == len(arch_radical_map) == 214)
 
 WikiRadical = MutableNamedTuple(
     'WikiRadical', ['number', 'character', 'strokes', 'pinyin',
@@ -41,8 +53,8 @@ with open('scripts/wiki_radicals') as f:
                           for radical in wiki_radicals)
 assert(len(wiki_radicals) == len(wiki_radical_map) == 214)
 
-for radical in radicals:
-  radical.number = int(radical.number)
+print 'Homogenizing Arch radicals:'
+for radical in arch_radicals:
   radical.number = int(radical.number)
   radical.variants = ''
   if ' ' in radical.strokes:
@@ -56,23 +68,64 @@ for radical in radicals:
     radical.variants = ''
   else:
     radical.traditional = None
-  radical.variants = radical.variants.split() if radical.variants else []
-  assert(len(radical.character) == 1)
-  assert(radical.traditional is None or len(radical.traditional) == 1)
-  assert(all(len(variant) == 1 for variant in radical.variants))
+  if radical.variants:
+    radical.variants = tuple(sorted(radical.variants.split()))
+  else:
+    radical.variants = ()
+  in_cjk_block(radical.character)
+  if radical.traditional is not None:
+    in_cjk_block(radical.traditional)
+  [in_cjk_block(variant) for variant in radical.variants]
   assert(radical.definition)
   assert(radical.pinyin)
 
-for (radical, wiki_radical) in zip(radicals, wiki_radicals):
-  print radical
-  print wiki_radical
-  assert(radical.number == wiki_radical.number)
-  if radical.character != wiki_radical.character:
+print 'Homogenizing Wiki radicals:'
+for radical in wiki_radicals:
+  radical.number = int(radical.number)
+  radical.strokes = int(radical.strokes)
+  radical.variants = ()
+  if ' ' in radical.character:
+    index = radical.character.find(' ')
+    assert(radical.character[index + 1] == '(')
+    assert(radical.character[-1] == ')')
+    radical.variants = radical.character[index + 2:-1].split(',')
+    radical.variants = [variant.strip() for variant in radical.variants
+                        if variant.strip() not in RADICAL_VARIANTS_TO_SKIP]
+    radical.variants = tuple(sorted(radical.variants))
+    radical.character = radical.character[:index]
+  radical.traditional = None
+  if radical.simplified and radical.number not in SIMPLIFIED_RADICALS_TO_SKIP:
+    if radical.simplified.startswith('(pr. '):
+      radical.pinyin = radical.simplified[5:-1]
+    else:
+      radical.traditional = radical.character
+      radical.character = radical.simplified
+  in_cjk_block(radical.character)
+  if radical.traditional is not None:
+    in_cjk_block(radical.traditional)
+  [in_cjk_block(variant) for variant in radical.variants]
+  assert(radical.definition)
+  assert(radical.pinyin)
+
+for (arch_radical, wiki_radical) in zip(arch_radicals, wiki_radicals):
+  assert(arch_radical.number == wiki_radical.number)
+  if arch_radical.character != wiki_radical.character:
     print 'Different characters for radical %s: %s vs. %s' % (
-        radical.number, radical.character, wiki_radical.character)
-  if radical.definition != wiki_radical.definition:
+        arch_radical.number, arch_radical.character, wiki_radical.character)
+  if arch_radical.definition != wiki_radical.definition:
     print 'Different definitions for radical %s: "%s" vs. "%s"' % (
-        radical.number, radical.definition, wiki_radical.definition)
+        arch_radical.number, arch_radical.definition, wiki_radical.definition)
+  if arch_radical.pinyin != wiki_radical.pinyin:
+    print 'Different pronunciation for radical %s: "%s" vs. "%s"' % (
+        arch_radical.number, arch_radical.pinyin, wiki_radical.pinyin)
+  if arch_radical.traditional != wiki_radical.traditional:
+    print 'Different variants for radical %s: "%s" vs. "%s"' % (
+        arch_radical.number, arch_radical.traditional, wiki_radical.traditional)
+  if arch_radical.variants != wiki_radical.variants:
+    print 'Different variants for radical %s: (%s) vs. (%s)' % (
+        arch_radical.number,
+        ', '.join(variant.encode('utf8') for variant in arch_radical.variants),
+        ', '.join(variant.encode('utf8') for variant in wiki_radical.variants))
 
 Decomposition = MutableNamedTuple(
   'Decomposition', ['character', 'strokes', 'type', 'part1', 'strokes1',
@@ -87,10 +140,12 @@ with open('data/decomposition/data') as f:
                             for decomposition in decompositions)
 assert(len(decomposition_map) == 21166)
 
+#print 'Checking decompositions:'
 for glyph in glyphs:
   assert(glyph in decomposition_map), 'Missing glyph: %s' % (glyph,)
   decomposition = decomposition_map[glyph]
   for part in decomposition.part1 + decomposition.part2:
     if part != '*' and part not in glyph_set:
       #print 'Extra glyph needed for %s: %s' % (glyph, part)
+      #in_cjk_block(part)
       continue
