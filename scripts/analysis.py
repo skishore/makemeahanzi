@@ -47,7 +47,11 @@ Radical = MutableNamedTuple(
 
 with open('scripts/radicals') as f:
   rows = [line[:-1].decode('utf8').split('\t') for line in f.readlines()[1:]]
-  radicals = [Radical(*row) for row in rows]
+  all_radicals = [Radical(*row) for row in rows]
+  radicals = []
+  for radical in all_radicals:
+    if not radicals or radical.number != radicals[-1].number:
+      radicals.append(radical)
   radical_map = dict((radical.character, radical)
                           for radical in radicals)
 assert(len(radicals) == len(radical_map) == 214)
