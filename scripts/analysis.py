@@ -41,17 +41,16 @@ with open('scripts/arch_radicals') as f:
                           for radical in arch_radicals)
 assert(len(arch_radicals) == len(arch_radical_map) == 214)
 
-WikiRadical = MutableNamedTuple(
-    'WikiRadical', ['number', 'character', 'strokes', 'pinyin',
-                    'unused1', 'unused2', 'unused3', 'definition',
-                    'frequency', 'simplified', 'examples'])
+Radical = MutableNamedTuple(
+  'Radical', ['number', 'character', 'definition', 'pinyin',
+              'strokes', 'traditional', 'variants'])
 
-with open('scripts/wiki_radicals') as f:
-  rows = [line.strip().decode('utf8').split('\t') for line in f.readlines()[2:]]
-  wiki_radicals = [WikiRadical(*row) for row in rows]
-  wiki_radical_map = dict((radical.character, radical)
-                          for radical in wiki_radicals)
-assert(len(wiki_radicals) == len(wiki_radical_map) == 214)
+with open('scripts/radicals') as f:
+  rows = [line[:-1].decode('utf8').split('\t') for line in f.readlines()[1:]]
+  radicals = [Radical(*row) for row in rows]
+  radical_map = dict((radical.character, radical)
+                          for radical in radicals)
+assert(len(radicals) == len(radical_map) == 214)
 
 print 'Homogenizing Arch radicals:'
 for radical in arch_radicals:
@@ -79,27 +78,13 @@ for radical in arch_radicals:
   assert(radical.definition)
   assert(radical.pinyin)
 
-print 'Homogenizing Wiki radicals:'
-for radical in wiki_radicals:
+print 'Homogenizing derived radicals:'
+for radical in radicals:
   radical.number = int(radical.number)
   radical.strokes = int(radical.strokes)
-  radical.variants = ()
-  if ' ' in radical.character:
-    index = radical.character.find(' ')
-    assert(radical.character[index + 1] == '(')
-    assert(radical.character[-1] == ')')
-    radical.variants = radical.character[index + 2:-1].split(',')
-    radical.variants = [variant.strip() for variant in radical.variants
-                        if variant.strip() not in RADICAL_VARIANTS_TO_SKIP]
-    radical.variants = tuple(sorted(radical.variants))
-    radical.character = radical.character[:index]
-  radical.traditional = None
-  if radical.simplified and radical.number not in SIMPLIFIED_RADICALS_TO_SKIP:
-    if radical.simplified.startswith('(pr. '):
-      radical.pinyin = radical.simplified[5:-1]
-    else:
-      radical.traditional = radical.character
-      radical.character = radical.simplified
+  radical.traditional = radical.traditional or None
+  radical.variants = \
+    tuple(radical.variants.split(',')) if radical.variants else ()
   in_cjk_block(radical.character)
   if radical.traditional is not None:
     in_cjk_block(radical.traditional)
@@ -107,39 +92,25 @@ for radical in wiki_radicals:
   assert(radical.definition)
   assert(radical.pinyin)
 
-for (arch_radical, wiki_radical) in zip(arch_radicals, wiki_radicals):
-  assert(arch_radical.number == wiki_radical.number)
-  if arch_radical.character != wiki_radical.character:
+for (arch_radical, radical) in zip(arch_radicals, radicals):
+  assert(arch_radical.number == radical.number)
+  if arch_radical.character != radical.character:
     print 'Different characters for radical %s: %s vs. %s' % (
-        arch_radical.number, arch_radical.character, wiki_radical.character)
-  if arch_radical.definition != wiki_radical.definition:
+        arch_radical.number, arch_radical.character, radical.character)
+  if arch_radical.definition != radical.definition:
     print 'Different definitions for radical %s: "%s" vs. "%s"' % (
-        arch_radical.number, arch_radical.definition, wiki_radical.definition)
-  if arch_radical.pinyin != wiki_radical.pinyin:
+        arch_radical.number, arch_radical.definition, radical.definition)
+  if arch_radical.pinyin != radical.pinyin:
     print 'Different pronunciation for radical %s: "%s" vs. "%s"' % (
-        arch_radical.number, arch_radical.pinyin, wiki_radical.pinyin)
-  if arch_radical.traditional != wiki_radical.traditional:
+        arch_radical.number, arch_radical.pinyin, radical.pinyin)
+  if arch_radical.traditional != radical.traditional:
     print 'Different variants for radical %s: "%s" vs. "%s"' % (
-        arch_radical.number, arch_radical.traditional, wiki_radical.traditional)
-  if arch_radical.variants != wiki_radical.variants:
+        arch_radical.number, arch_radical.traditional, radical.traditional)
+  if arch_radical.variants != radical.variants:
     print 'Different variants for radical %s: (%s) vs. (%s)' % (
         arch_radical.number,
         ', '.join(variant.encode('utf8') for variant in arch_radical.variants),
-        ', '.join(variant.encode('utf8') for variant in wiki_radical.variants))
-
-RADICAL_FIELDS = ['number', 'character', 'definition', 'pinyin', 'strokes',
-                  'traditional', 'variants']
-Radical = MutableNamedTuple('Radical', RADICAL_FIELDS)
-
-with open('scripts/radicals', 'w') as f:
-  f.write('\t'.join(RADICAL_FIELDS))
-  f.write('\n')
-  for radical in wiki_radicals:
-    f.write((u'\t'.join([str(radical.number), radical.character,
-                         radical.definition, radical.pinyin,
-                         str(radical.strokes), radical.traditional or '',
-                         u','.join(radical.variants)])).encode('utf8'))
-    f.write('\n')
+        ', '.join(variant.encode('utf8') for variant in radical.variants))
 
 Decomposition = MutableNamedTuple(
   'Decomposition', ['character', 'strokes', 'type', 'part1', 'strokes1',
