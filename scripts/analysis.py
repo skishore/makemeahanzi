@@ -34,8 +34,7 @@ Radical = MutableNamedTuple('Radical', ['number', 'character', 'definition',
 with open('scripts/radicals') as f:
   rows = [line[:-1].decode('utf8').split('\t') for line in f.readlines()[1:]]
   radicals = [Radical(*row) for row in rows]
-  radical_map = dict((radical.character, radical) for radical in radicals)
-assert(len(radicals) == len(radical_map) == 216)
+assert(len(radicals) == 216)
 
 print 'Homogenizing derived radicals:'
 for radical in radicals:
@@ -49,6 +48,18 @@ for radical in radicals:
   [in_cjk_block(variant) for variant in radical.variants]
   assert(radical.definition)
   assert(radical.pinyin)
+
+radical_map = dict((radical.character, radical) for radical in radicals)
+assert(len(radical_map) == len(radicals))
+for radical in radicals:
+  if radical.traditional:
+    assert(radical.traditional not in radical_map)
+    radical_map[radical.traditional] = radical
+  for variant in radical.variants:
+    assert(variant not in radical_map), variant.encode('utf8')
+    radical_map[variant] = radical
+print 'Got %s radicals, including variants.' % (len(radical_map),)
+radicals_used = set()
 
 Decomposition = MutableNamedTuple(
   'Decomposition', ['character', 'strokes', 'type', 'part1', 'strokes1',
@@ -69,7 +80,9 @@ for glyph in glyphs:
   assert(glyph in decomposition_map), 'Missing glyph: %s' % (glyph,)
   decomposition = decomposition_map[glyph]
   for part in decomposition.part1 + decomposition.part2:
-    if part != '*' and part not in glyph_set:
+    if part in radical_map:
+      radicals_used.add(part)
+    elif part != '*' and part not in glyph_set:
       if ord(part) > 0xd000:
         assert part not in decomposition_map
         #print 'Got out-of-bounds character for %s: U+%s' % (
@@ -87,7 +100,28 @@ for glyph in glyphs:
       extra_glyphs.add(part)
       subdecomposition = decomposition_map[part]
       for subpart in subdecomposition.part1 + subdecomposition.part2:
-        if subpart != '*' and subpart not in glyph_set:
+        if subpart in radical_map:
+          radicals_used.add(subpart)
+        elif subpart != '*' and subpart not in glyph_set:
           #print 'Failed to decompose %s further: %s' % (part, subpart)
           continue
 print '%s extra glyphs required for decompositions.' % (len(extra_glyphs),)
+print '%s radicals required for decomposition.' % (len(radicals_used),)
+
+for radical in radical_map:
+  if radical not in glyphs:
+    extra_glyphs.add(radical)
+print 'Final list of extra glyphs:'
+print ''.join(sorted(extra_glyphs))
+
+print '\nUsed radicals:'
+print ''.join(sorted(radical for radical in radical_map
+                     if radical not in glyphs and
+                     (radical in radicals_used or
+                      radical == radical_map[radical].character)))
+
+print '\nUnused radicals:'
+print ''.join(sorted(radical for radical in radical_map
+                     if radical not in glyphs and
+                     (radical not in radicals_used and
+                      radical != radical_map[radical].character)))
