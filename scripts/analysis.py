@@ -140,12 +140,31 @@ with open('data/decomposition/data') as f:
                             for decomposition in decompositions)
 assert(len(decomposition_map) == 21166)
 
-#print 'Checking decompositions:'
+print 'Checking decompositions:'
+extra_glyphs = set()
 for glyph in glyphs:
   assert(glyph in decomposition_map), 'Missing glyph: %s' % (glyph,)
   decomposition = decomposition_map[glyph]
   for part in decomposition.part1 + decomposition.part2:
     if part != '*' and part not in glyph_set:
+      if ord(part) > 0xd000:
+        assert part not in decomposition_map
+        #print 'Got out-of-bounds character for %s: U+%s' % (
+        #    glyph, hex(ord(part))[2:].upper())
+        continue
+      elif ord(part) < 0xff:
+        #print 'Got ASCII character in decomposition for %s: %s' % (glyph, part)
+        continue
       #print 'Extra glyph needed for %s: %s' % (glyph, part)
-      #in_cjk_block(part)
-      continue
+      if part not in decomposition_map:
+        #print 'Indivisible part for %s: %s' % (glyph, part)
+        continue
+      if part in extra_glyphs:
+        continue
+      extra_glyphs.add(part)
+      subdecomposition = decomposition_map[part]
+      for subpart in subdecomposition.part1 + subdecomposition.part2:
+        if subpart != '*' and subpart not in glyph_set:
+          #print 'Failed to decompose %s further: %s' % (part, subpart)
+          continue
+print '%s extra glyphs required for decompositions.' % (len(extra_glyphs),)
