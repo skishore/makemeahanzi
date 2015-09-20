@@ -127,6 +127,20 @@ for (arch_radical, wiki_radical) in zip(arch_radicals, wiki_radicals):
         ', '.join(variant.encode('utf8') for variant in arch_radical.variants),
         ', '.join(variant.encode('utf8') for variant in wiki_radical.variants))
 
+RADICAL_FIELDS = ['number', 'character', 'definition', 'pinyin', 'strokes',
+                  'traditional', 'variants']
+Radical = MutableNamedTuple('Radical', RADICAL_FIELDS)
+
+with open('scripts/radicals', 'w') as f:
+  f.write('\t'.join(RADICAL_FIELDS))
+  f.write('\n')
+  for radical in wiki_radicals:
+    f.write((u'\t'.join([str(radical.number), radical.character,
+                         radical.definition, radical.pinyin,
+                         str(radical.strokes), radical.traditional or '',
+                         u','.join(radical.variants)])).encode('utf8'))
+    f.write('\n')
+
 Decomposition = MutableNamedTuple(
   'Decomposition', ['character', 'strokes', 'type', 'part1', 'strokes1',
                     'warning1', 'part2', 'strokes2', 'warning2',
