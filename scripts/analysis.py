@@ -1,5 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import cjklib.characterlookup
+import cjklib.exception
+import collections
+
+cjk = cjklib.characterlookup.CharacterLookup('C')
+
 def MutableNamedTuple(name, fields):
   def tostr(value):
     if type(value) == unicode:
@@ -61,50 +67,64 @@ for radical in radicals:
 print 'Got %s radicals, including variants.' % (len(radical_map),)
 radicals_used = set()
 
-Decomposition = MutableNamedTuple(
-  'Decomposition', ['character', 'strokes', 'type', 'part1', 'strokes1',
-                    'warning1', 'part2', 'strokes2', 'warning2',
-                    'cangjie', 'radical'])
-
-with open('data/decomposition/data') as f:
-  lines = [line for line in f.readlines() if line.startswith('\t')]
-  rows = [line.strip().decode('utf8').split('\t') for line in lines]
-  decompositions = [Decomposition(*row)  for row in rows if len(row) == 11]
-  decomposition_map = dict((decomposition.character, decomposition)
-                            for decomposition in decompositions)
-assert(len(decomposition_map) == 21166)
+def decomposition_to_str(decomposition):
+  result = ''
+  for element in decomposition:
+    if type(element) == unicode:
+      result += element.encode('utf8')
+    else:
+      result += element[0].encode('utf8')
+      if element[1] != 0:
+        result += '[%s]' % (element[1],)
+  return result
 
 print 'Checking decompositions:'
 extra_glyphs = set()
+counts = collections.defaultdict(int)
+decompositions = cjk.getDecompositionEntriesDict()
 for glyph in glyphs:
-  assert(glyph in decomposition_map), 'Missing glyph: %s' % (glyph,)
-  decomposition = decomposition_map[glyph]
-  for part in decomposition.part1 + decomposition.part2:
+  index = cjk.getDefaultGlyph(glyph)
+  if glyph in radical_map or (glyph, index) not in decompositions:
+    counts['indecomposable'] += 1
+    if glyph in radical_map:
+      radicals_used.add(glyph)
+    continue
+  decomposition = decompositions[(glyph, index)][0]
+  for element in decomposition:
+    if type(element) == unicode:
+      continue
+    (part, index) = element
+    # If the index is non-zero here, the decomposition includes a variant of
+    # the given part instead of the part itself. However, by inspection, the
+    # few hundred or so times this occurs in the 6763 characters in GB2312 seem
+    # largely benign; most of the time, the character is simply stretched
+    # horizontally or vertically.
+    #if index != 0:
+    #  print 'In %s, got index %s for part %s' % (glyph, index, part)
     if part in radical_map:
       radicals_used.add(part)
-    elif part != '*' and part not in glyph_set:
-      if ord(part) > 0xd000:
-        assert part not in decomposition_map
-        #print 'Got out-of-bounds character for %s: U+%s' % (
-        #    glyph, hex(ord(part))[2:].upper())
-        continue
-      elif ord(part) < 0xff:
-        #print 'Got ASCII character in decomposition for %s: %s' % (glyph, part)
-        continue
-      #print 'Extra glyph needed for %s: %s' % (glyph, part)
-      if part not in decomposition_map:
-        #print 'Indivisible part for %s: %s' % (glyph, part)
-        continue
-      if part in extra_glyphs:
-        continue
-      extra_glyphs.add(part)
-      subdecomposition = decomposition_map[part]
-      for subpart in subdecomposition.part1 + subdecomposition.part2:
-        if subpart in radical_map:
-          radicals_used.add(subpart)
-        elif subpart != '*' and subpart not in glyph_set:
-          #print 'Failed to decompose %s further: %s' % (part, subpart)
+      continue
+    if part == u'？':
+      counts['unknown'] += 1
+      continue
+    if part not in glyphs and part not in extra_glyphs:
+      assert part != u'㣺'
+      if cjk.isRadicalChar(part):
+        try:
+          equivalent_character = cjk.getRadicalFormEquivalentCharacter(part)
+        except cjklib.exception.UnsupportedError:
+          equivalent_character = None
+        if equivalent_character in radical_map:
+          if equivalent_character not in radicals_used:
+            radicals_used.add(equivalent_character)
+            print '(Found in %s. Equivalent character for %s: %s)' % (
+                glyph, part, equivalent_character)
           continue
+      if not in_cjk_block(part):
+        print '(Found in %s.)' % (glyph,)
+      extra_glyphs.add(part)
+
+print counts
 print '%s extra glyphs required for decompositions.' % (len(extra_glyphs),)
 print '%s radicals required for decomposition.' % (len(radicals_used),)
 
@@ -117,11 +137,10 @@ print ''.join(sorted(extra_glyphs))
 print '\nUsed radicals:'
 print ''.join(sorted(radical for radical in radical_map
                      if radical not in glyphs and
-                     (radical in radicals_used or
-                      radical == radical_map[radical].character)))
+                        (radical in radicals_used or
+                         radical == radical_map[radical].character)))
 
 print '\nUnused radicals:'
 print ''.join(sorted(radical for radical in radical_map
-                     if radical not in glyphs and
-                     (radical not in radicals_used and
-                      radical != radical_map[radical].character)))
+                     if not (radical in radicals_used or
+                             radical == radical_map[radical].character)))
