@@ -5,7 +5,7 @@ Session.setDefault('glyph.show_strokes', true);
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
 var DICTIONARY = 'http://www.archchinese.com/chinese_english_dictionary.html';
-var EDIT_STROKES = false;
+var EDIT_STROKES = true;
 
 function change_glyph(method, glyph) {
   glyph = glyph || Session.get('glyph.data');

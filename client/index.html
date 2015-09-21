@@ -4,6 +4,7 @@
 <body>
   {{> navbar}}
   {{> content}}
+  {{> progress}}
 </body>
 
 <template name="navbar">
@@ -60,6 +61,7 @@
   <div id="right-controls" class="btn-group" role="group">
     <button id="backup-button" class="btn btn-success">Backup</button>
     <button id="restore-button" class="btn btn-info">Restore</button>
+    <button id="reload-button" class="btn btn-danger">Reload</button>
   </div>
 </template>
 
