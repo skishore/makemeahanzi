@@ -1,13 +1,13 @@
 "use strict";
 
 var BATCH_SIZE = 64;
-var CODEPOINTS = [0x4e00, 0x9fff];
+var CODEPOINTS = [0x2e80, 0x2fdf];
 var FONT_LOADED_PROGRESS = 0.1;
 
 Template.controls.events({
   'click #reload-button': function() {
     Session.set('progress.value', 0);
-    opentype.load('external/UKaiCN.ttf', function(err, font) {
+    opentype.load('arphic/UKaiCN.ttf', function(err, font) {
       if (err) {
         console.log('Error loading font: ' + err);
         return;
@@ -15,35 +15,11 @@ Template.controls.events({
       Session.set('progress.value', FONT_LOADED_PROGRESS);
       var glyphs_to_save = [];
 
-      var should_save = {};
-      var will_save = {};
-      for (var i = 0; i < EXTRA_GLYPHS.length; i++) {
-        should_save[EXTRA_GLYPHS.codePointAt(i)] = true;
-      }
-
       for (var i = 0; i < font.glyphs.length; i++) {
         var glyph = font.glyphs.glyphs[i];
-        if (should_save[glyph.unicode]) {
+        if (CODEPOINTS[0] <= glyph.unicode && glyph.unicode <= CODEPOINTS[1]) {
           var name = 'uni' + glyph.unicode.toString(16).toUpperCase();
           glyphs_to_save.push({name: name, path: glyph.path.commands});
-          will_save[glyph.unicode] = true;
-        }
-      }
-
-      for (var i = 0; i < EXTRA_GLYPHS.length; i++) {
-        var codepoint = EXTRA_GLYPHS.codePointAt(i);
-        if (!will_save[codepoint]) {
-          console.log('Missing glyph U+' +
-                      codepoint.toString(16).toUpperCase() +
-                      ': ' + String.fromCodePoint(codepoint));
-        }
-      }
-      for (var i = 0; i < EXTRA_RADICALS_USED.length; i++) {
-        var codepoint = EXTRA_RADICALS_USED.codePointAt(i);
-        if (!will_save[codepoint]) {
-          console.log('Missing radical U+' +
-                      codepoint.toString(16).toUpperCase() +
-                      ': ' + String.fromCodePoint(codepoint));
         }
       }
 
