@@ -34,36 +34,11 @@ with open('scripts/glyphs') as f:
   glyph_set = set(glyphs)
 assert(len(glyphs) == len(glyph_set) == 6763)
 
-Radical = MutableNamedTuple('Radical', ['number', 'character', 'definition',
-                                        'pinyin', 'traditional', 'variants'])
-
-with open('scripts/radicals') as f:
-  rows = [line[:-1].decode('utf8').split('\t') for line in f.readlines()[1:]]
-  radicals = [Radical(*row) for row in rows]
-assert(len(radicals) == 216)
-
-print 'Homogenizing derived radicals:'
-for radical in radicals:
-  radical.number = int(radical.number)
-  radical.traditional = radical.traditional or None
-  radical.variants = \
-    tuple(sorted(radical.variants.split(','))) if radical.variants else ()
-  in_cjk_block(radical.character)
-  if radical.traditional is not None:
-    in_cjk_block(radical.traditional)
-  [in_cjk_block(variant) for variant in radical.variants]
-  assert(radical.definition)
-  assert(radical.pinyin)
-
-radical_map = dict((radical.character, radical) for radical in radicals)
-assert(len(radical_map) == len(radicals))
-for radical in radicals:
-  if radical.traditional:
-    assert(radical.traditional not in radical_map)
-    radical_map[radical.traditional] = radical
-  for variant in radical.variants:
-    assert(variant not in radical_map), variant.encode('utf8')
-    radical_map[variant] = radical
+radical_map = {}
+for i in range(214):
+  variants = cjk.getKangxiRadicalRepresentativeCharacters(i + 1)
+  for variant in variants:
+    radical_map[variant] = i + 1
 print 'Got %s radicals, including variants.' % (len(radical_map),)
 radicals_used = set()
 
@@ -108,18 +83,6 @@ for glyph in glyphs:
       counts['unknown'] += 1
       continue
     if part not in glyphs and part not in extra_glyphs:
-      assert part != u'㣺'
-      if cjk.isRadicalChar(part):
-        try:
-          equivalent_character = cjk.getRadicalFormEquivalentCharacter(part)
-        except cjklib.exception.UnsupportedError:
-          equivalent_character = None
-        if equivalent_character in radical_map:
-          if equivalent_character not in radicals_used:
-            radicals_used.add(equivalent_character)
-            print '(Found in %s. Equivalent character for %s: %s)' % (
-                glyph, part, equivalent_character)
-          continue
       if not in_cjk_block(part):
         print '(Found in %s.)' % (glyph,)
       extra_glyphs.add(part)
@@ -128,19 +91,28 @@ print counts
 print '%s extra glyphs required for decompositions.' % (len(extra_glyphs),)
 print '%s radicals required for decomposition.' % (len(radicals_used),)
 
+def equivalent_form(radical):
+  try:
+    return cjk.getRadicalFormEquivalentCharacter(radical)
+  except:
+    return radical
+def collapse(radicals):
+  return set(map(equivalent_form, radicals))
+
+extra_glyphs = collapse(extra_glyphs)
+radical_map = collapse(radical_map)
+radicals_used = collapse(radicals_used)
+
 for radical in radical_map:
   if radical not in glyphs:
     extra_glyphs.add(radical)
 print 'Final list of extra glyphs:'
 print ''.join(sorted(extra_glyphs))
 
-print '\nUsed radicals:'
+print '\nUsed radicals without glyphs:'
 print ''.join(sorted(radical for radical in radical_map
-                     if radical not in glyphs and
-                        (radical in radicals_used or
-                         radical == radical_map[radical].character)))
+                     if radical not in glyphs and radical in radicals_used))
 
 print '\nUnused radicals:'
 print ''.join(sorted(radical for radical in radical_map
-                     if not (radical in radicals_used or
-                             radical == radical_map[radical].character)))
+                     if radical not in glyphs and radical not in radicals_used))
