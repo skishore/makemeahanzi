@@ -1,0 +1,498 @@
+# This file is part of cjklib.
+#
+# cjklib is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# cjklib is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with cjklib.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Syllables of Mandarin Chinese for Pinyin.
+#
+# Relation to other sources:
+#
+#   * ISO 7098:1991: Information and documentation - Romanization of Chinese,
+#     1991.
+#     All syllables from Annex A (普通话声韵拼和总表, Table of syllabic forms)
+#     included. These syllables ISO Table are marked with an 'I' in the Source
+#     column.
+#
+#   * Library of Congress Pinyin Conversion Project - New Chinese Romanization
+#     Guidelines: http://www.loc.gov/catdir/pinyin/romcover.html, 28.05.1999
+#     This list contains syllables taken from Dìmíng Hànzì Yìyīnbiǎo
+#     (地名漢字譯音表, 1971) and ALA-LC romanization tables (1997) for the
+#     Wade-Giles parts and furthermore Xiàndài Hànyǔ Cídiǎn (现代汉语词典, 1983)
+#     for the Pinyin parts.
+#     The projection of the Wade-Giles to Pinyin mapping table is completly
+#     included in this list.
+#
+#   * Unicode - Unihan Database: http://www.unicode.org/charts/unihan.html,
+#     12.07.2006.
+#     The database includes a mapping from characters to Pinyin through the
+#     field 'kMandarin'.
+#     All Pinyin syllables found in this mapping are included here. For
+#     reference the syllables can be obtained by the following SQL command:
+#     SELECT DISTINCT SUBSTR(Reading, 1, LENGTH(Reading)-1) FROM
+#     CharacterPinyin;
+#     Or for MySQL:
+#     SELECT DISTINCT SUBSTR(Reading, 1, CHAR_LENGTH(Reading)-1) FROM
+#     CharacterPinyin;
+#
+#   * Xiàndài Hànyǔ Pínlǜ Cídiǎn (現代漢語頻率詞典). First edition 1986/6, 2nd
+#     printing 1990/4, ISBN 7-5619-0094-5/H.67.
+#     Available from the Unihan Database in field 'kHanyuPinlu'.
+#     All Pinyin syllables found in this mapping are included here. For
+#     reference the syllables can be optained by the following SQL command:
+#     SELECT DISTINCT SUBSTR(Reading, 1, LENGTH(Reading)-1) FROM
+#     CharacterXHPCPinyin;
+#     Or for MySQL:
+#     SELECT DISTINCT SUBSTR(Reading, 1, CHAR_LENGTH(Reading)-1) FROM
+#     CharacterXHPCPinyin;
+#
+#   * Xiàndài Hànyǔ Cídiǎn (现代汉语词典). Shāngwù Yìnshūguǎn (商务印书馆), Beijing,
+#     1983, ISBN 7-100-04385-9.
+#     Available from the Unihan Database in field 'kXHC1983'.
+#     All Pinyin syllables found in this mapping are included here. For
+#     reference the syllables can be optained by the following SQL command:
+#     SELECT DISTINCT SUBSTR(Reading, 1, LENGTH(Reading)-1) FROM
+#     CharacterXHCPinyin;
+#     Or for MySQL:
+#     SELECT DISTINCT SUBSTR(Reading, 1, CHAR_LENGTH(Reading)-1) FROM
+#     CharacterXHCPinyin;
+#
+#   * Xiàndài Hànyǔ Cídiǎn (5th Edition) (现代汉语词典（第5版）). Shāngwù Yìnshūguǎn
+#     (商务印书馆), Beijing, 2005, ISBN 7-100-04385-9.
+#     Reference for single syllables 'cei' (p.138), 'ê' (p. 358), 'hm', 'hng'
+#     (both p. 562), 'kei' (p. 776), 'n' (p. 974), 'ng' (p. 990/991), 'm'
+#     (p. 905) listed in this dictionary are included here.
+#
+# Pinyin, Source
+a,I
+ai,I
+an,I
+ang,I
+ao,I
+zha,I
+cha,I
+zhai,I
+chai,I
+zhan,I
+chan,I
+zhang,I
+chang,I
+zhao,I
+chao,I
+zhe,I
+che,I
+zhen,I
+chen,I
+zheng,I
+cheng,I
+ji,I
+qi,I
+jia,I
+qia,I
+jiang,I
+qiang,I
+jiao,I
+qiao,I
+jie,I
+qie,I
+jian,I
+qian,I
+zhi,I
+chi,I
+jin,I
+qin,I
+jing,I
+qing,I
+jiu,I
+qiu,I
+jiong,I
+qiong,I
+zhuo,I
+chuo,I
+zhou,I
+chou,I
+zhu,I
+chu,I
+ju,I
+qu,I
+zhua,I
+zhuai,I
+chuai,I
+zhuan,I
+chuan,I
+juan,I
+quan,I
+zhuang,I
+chuang,I
+jue,I
+que,I
+zhui,I
+chui,I
+zhun,I
+chun,I
+jun,I
+qun,I
+zhong,I
+chong,I
+en,I
+er,I
+fa,I
+fan,I
+fang,I
+fei,I
+fen,I
+feng,I
+fo,I
+fou,I
+fu,I
+ha,I
+hai,I
+han,I
+hang,I
+hao,I
+hei,I
+hen,I
+heng,I
+he,I
+hou,I
+xi,I
+xia,I
+xiang,I
+xiao,I
+xie,I
+xian,I
+xin,I
+xing,I
+xiu,I
+xiong,I
+xu,I
+xuan,I
+xue,I
+xun,I
+hu,I
+hua,I
+huai,I
+huan,I
+huang,I
+hui,I
+hun,I
+hong,I
+huo,I
+yi,I
+ran,I
+rang,I
+rao,I
+re,I
+ren,I
+reng,I
+ri,I
+ruo,I
+rou,I
+ru,I
+rua,I
+ruan,I
+rui,I
+run,I
+rong,I
+ga,I
+ka,I
+gai,I
+kai,I
+kei,I
+gan,I
+kan,I
+gang,I
+kang,I
+gao,I
+kao,I
+gen,I
+ken,I
+geng,I
+keng,I
+ge,I
+ke,I
+gou,I
+kou,I
+gu,I
+ku,I
+gua,I
+kua,I
+guai,I
+kuai,I
+guan,I
+kuan,I
+guang,I
+kuang,I
+gui,I
+kui,I
+gun,I
+kun,I
+gong,I
+kong,I
+guo,I
+kuo,I
+la,I
+lai,I
+lan,I
+lang,I
+lao,I
+le,I
+lei,I
+leng,I
+li,I
+liang,I
+liao,I
+lie,I
+lian,I
+lin,I
+ling,I
+liu,I
+luo,I
+lou,I
+lu,I
+lü,I
+luan,I
+lüe,I
+lun,I
+long,I
+ma,I
+mai,I
+man,I
+mang,I
+mao,I
+mei,I
+men,I
+meng,I
+mi,I
+miao,I
+mie,I
+mian,I
+min,I
+ming,I
+miu,I
+mo,I
+mou,I
+mu,I
+na,I
+nai,I
+nan,I
+nang,I
+nao,I
+nei,I
+nen,I
+neng,I
+ni,I
+niang,I
+niao,I
+nie,I
+nian,I
+nin,I
+ning,I
+niu,I
+nuo,I
+nou,I
+nu,I
+nü,I
+nuan,I
+nüe,I
+nong,I
+e,I
+ou,I
+ba,I
+pa,I
+bai,I
+pai,I
+ban,I
+pan,I
+bang,I
+pang,I
+bao,I
+pao,I
+bei,I
+pei,I
+ben,I
+pen,I
+beng,I
+peng,I
+bi,I
+pi,I
+biao,I
+piao,I
+bie,I
+pie,I
+bian,I
+pian,I
+bin,I
+pin,I
+bing,I
+ping,I
+bo,I
+po,I
+pou,I
+bu,I
+pu,I
+sa,I
+sai,I
+san,I
+sang,I
+sao,I
+se,I
+sen,I
+seng,I
+sha,I
+shai,I
+shan,I
+shang,I
+shao,I
+she,I
+shen,I
+sheng,I
+shi,I
+shou,I
+shu,I
+shua,I
+shuai,I
+shuan,I
+shuang,I
+shui,I
+shun,I
+shuo,I
+suo,I
+sou,I
+si,I
+su,I
+suan,I
+sui,I
+sun,I
+song,I
+da,I
+ta,I
+dai,I
+tai,I
+dan,I
+tan,I
+dang,I
+tang,I
+dao,I
+tao,I
+de,I
+te,I
+deng,I
+teng,I
+di,I
+ti,I
+diao,I
+tiao,I
+die,I
+tie,I
+dian,I
+tian,I
+ding,I
+ting,I
+diu,I
+duo,I
+tuo,I
+dou,I
+tou,I
+du,I
+tu,I
+duan,I
+tuan,I
+dui,I
+tui,I
+dun,I
+tun,I
+dong,I
+tong,I
+za,I
+ca,I
+zai,I
+cai,I
+zan,I
+can,I
+zang,I
+cang,I
+zao,I
+cao,I
+ze,I
+ce,I
+zei,I
+zen,I
+cen,I
+zeng,I
+ceng,I
+zuo,I
+cuo,I
+zou,I
+cou,I
+zu,I
+cu,I
+zuan,I
+cuan,I
+zui,I
+cui,I
+zun,I
+cun,I
+zong,I
+cong,I
+zi,I
+ci,I
+wa,I
+wai,I
+wan,I
+wang,I
+wei,I
+wen,I
+weng,I
+wo,I
+wu,I
+ya,I
+yai,
+yang,I
+yao,I
+ye,I
+yan,I
+yin,I
+ying,I
+yo,I
+you,I
+yu,I
+yuan,I
+yue,I
+yun,I
+yong,I
+n,
+ng,
+m,
+ê,
+cei,
+hm,
+hng,
+ne,I
+chua,I
+fe,
+dei,I
+me,I
+lia,I
+den,I
+lo,
+o,I
+dia,
+nun,
+ei,I
+gei,I
+shei,I
+zhei,I
+eng,I
+fiao,
+tei,

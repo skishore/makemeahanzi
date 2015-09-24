@@ -1,0 +1,499 @@
+# This file is part of cjklib.
+#
+# cjklib is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# cjklib is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with cjklib.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Mapping of Mandarin Chinese syllables from the Wade-Giles romanisation to
+# Pinyin.
+#
+# Source:
+#   *  Ireneus László Legeza: Guide to transliterated Chinese in the modern
+#      Peking dialect. Conversion tables of the currently used international and
+#      European systems with comparative tables of initials and finals. E. J.
+#      Brill, Leiden, 1968.
+#      This uses "A Chinese-English dictionary" (H. A. Giles, London, 1892) as
+#      bibliographic source.
+#
+#      Some Wade-Giles forms are wrong and have been corrected here:
+#      'pie' to 'pieh' and Pinyin forms 'lue' and 'nue' to 'lüe' and 'nüe'.
+#      Missing in this source are Wade-Giles forms ei, êng, o, yo and yai.
+#      Some forms don't occur in the bibliographic source and have been deduced
+#      by the author: ts’ei, jua, sei, shei, t’ei.
+#      Forms ei and êng have been added as they are clearly deducible in the
+#      initial/final system.
+#
+# Some forms listed are old, dialect forms and not used today. Pinyin forms
+# should not map to those and thus an index is used to separate them from normal
+# ones.
+#
+# Missing mappings for syllables in Pinyin:
+#   SELECT DISTINCT Pinyin FROM PinyinSyllables WHERE Pinyin NOT IN (SELECT
+#   Pinyin FROM WadeGilesPinyinMapping);
+#   * dia
+#   * e
+#   * fe
+#   * fiao
+#   * hm
+#   * hng
+#   * lo
+#   * m
+#   * me
+#   * n
+#   * ne
+#   * ng
+#   * o
+#   * yai
+#   * yo
+#   * zhei
+#
+# Missing mappings for syllables not in Pinyin (and thus not included in list):
+#   * "lüan","lüan",0
+#   * "lün","lün",0
+#   * "sei","sei",0
+#
+# The mapping from Wade-Giles to Pinyin isn't injective, even for preferred
+# forms:
+#   SELECT a1.WadeGiles, a2.WadeGiles, a1.Pinyin FROM WadeGilesPinyinMapping a1,
+#   WadeGilesPinyinMapping a2 WHERE a1.Pinyin = a2.Pinyin
+#   AND a1.WadeGiles < a2.WadeGiles AND a1.PinyinIdx = 0 AND a2.PinyinIdx = 0;
+#   * o, ê for ê
+#   * ko, kê for ge
+#   * ho, hê for he
+#   * k’o, k’ê for ke
+#   * i, yi for yi
+#
+# WadeGiles, Pinyin, PinyinIdx
+"a","a",0
+"ai","ai",0
+"an","an",0
+"ang","ang",0
+"ao","ao",0
+"pa","ba",0
+"pai","bai",0
+"pan","ban",0
+"pang","bang",0
+"pao","bao",0
+"pei","bei",0
+"pên","ben",0
+"pêng","beng",0
+"pi","bi",0
+"pien","bian",0
+"piao","biao",0
+"pieh","bie",0
+"pin","bin",0
+"ping","bing",0
+"po","bo",0
+"pu","bu",0
+"ts’a","ca",0
+"ts’ai","cai",0
+"ts’an","can",0
+"ts’ang","cang",0
+"ts’ao","cao",0
+"ts’ê","ce",0
+"ts’ei","cei",0
+"ts’ên","cen",0
+"ts’êng","ceng",0
+"ch’a","cha",0
+"ch’ai","chai",0
+"ch’an","chan",0
+"ch’ang","chang",0
+"ch’ao","chao",0
+"ch’ê","che",0
+"ch’ên","chen",0
+"ch’êng","cheng",0
+"ch’ih","chi",0
+"ch’ung","chong",0
+"ch’ou","chou",0
+"ch’u","chu",0
+"ch’ua","chua",0
+"ch’uai","chuai",0
+"ch’uan","chuan",0
+"ch’uang","chuang",0
+"ch’ui","chui",0
+"ch’un","chun",0
+"ch’o","chuo",0
+"tz’ŭ","ci",0
+"ts’ung","cong",0
+"ts’ou","cou",0
+"ts’u","cu",0
+"ts’uan","cuan",0
+"ts’ui","cui",0
+"ts’un","cun",0
+"ts’o","cuo",0
+"ta","da",0
+"tai","dai",0
+"tan","dan",0
+"tang","dang",0
+"tao","dao",0
+"tê","de",0
+"tei","dei",0
+"tên","den",0
+"têng","deng",0
+"ti","di",0
+"tien","dian",0
+"tiao","diao",0
+"tieh","die",0
+"ting","ding",0
+"tiu","diu",0
+"tung","dong",0
+"tou","dou",0
+"tu","du",0
+"tuan","duan",0
+"tui","dui",0
+"tun","dun",0
+"to","duo",0
+"ê","ê",0
+"o","ê",0
+"ei","ei",0
+"ên","en",0
+"êng","eng",0
+"êrh","er",0
+"fa","fa",0
+"fan","fan",0
+"fang","fang",0
+"fei","fei",0
+"fên","fen",0
+"fêng","feng",0
+"fo","fo",0
+"fou","fou",0
+"fu","fu",0
+"ka","ga",0
+"kai","gai",0
+"kan","gan",0
+"kang","gang",0
+"kao","gao",0
+"kê","ge",0
+"ko","ge",0
+"kei","gei",0
+"kên","gen",0
+"kêng","geng",0
+"kung","gong",0
+"kou","gou",0
+"ku","gu",0
+"kua","gua",0
+"kuai","guai",0
+"kuan","guan",0
+"kuang","guang",0
+"kuei","gui",0
+"kun","gun",0
+"kuo","guo",0
+"ha","ha",0
+"hai","hai",0
+"han","han",0
+"hang","hang",0
+"hao","hao",0
+"hê","he",0
+"ho","he",0
+"hei","hei",0
+"hên","hen",0
+"hêng","heng",0
+"hung","hong",0
+"hou","hou",0
+"hu","hu",0
+"hua","hua",0
+"huai","huai",0
+"huan","huan",0
+"huang","huang",0
+"hui","hui",0
+"hun","hun",0
+"huo","huo",0
+"chi","ji",0
+"chia","jia",0
+"chien","jian",0
+"chiang","jiang",0
+"chiao","jiao",0
+"chieh","jie",0
+"chiai","jie",1
+"chin","jin",0
+"ching","jing",0
+"chiung","jiong",0
+"chiu","jiu",0
+"chü","ju",0
+"chüan","juan",0
+"chüeh","jue",0
+"chio","jue",1
+"chüo","jue",1
+"chün","jun",0
+"k’a","ka",0
+"k’ai","kai",0
+"k’an","kan",0
+"k’ang","kang",0
+"k’ao","kao",0
+"k’ê","ke",0
+"k’o","ke",0
+"k’ei","kei",0
+"k’ên","ken",0
+"k’êng","keng",0
+"k’ung","kong",0
+"k’ou","kou",0
+"k’u","ku",0
+"k’ua","kua",0
+"k’uai","kuai",0
+"k’uan","kuan",0
+"k’uang","kuang",0
+"k’uei","kui",0
+"k’un","kun",0
+"k’uo","kuo",0
+"la","la",0
+"lai","lai",0
+"lan","lan",0
+"lang","lang",0
+"lao","lao",0
+"lê","le",0
+"lei","lei",0
+"lêng","leng",0
+"li","li",0
+"lia","lia",0
+"lien","lian",0
+"liang","liang",0
+"liao","liao",0
+"lieh","lie",0
+"lin","lin",0
+"ling","ling",0
+"liu","liu",0
+"lung","long",0
+"lou","lou",0
+"lu","lu",0
+"luan","luan",0
+"lun","lun",0
+"lo","luo",0
+"lü","lü",0
+"lüeh","lüe",0
+"lio","lüe",1
+"lüo","lüe",1
+"ma","ma",0
+"mai","mai",0
+"man","man",0
+"mang","mang",0
+"mao","mao",0
+"mei","mei",0
+"mên","men",0
+"mêng","meng",0
+"mi","mi",0
+"mien","mian",0
+"miao","miao",0
+"mieh","mie",0
+"min","min",0
+"ming","ming",0
+"miu","miu",0
+"mo","mo",0
+"mou","mou",0
+"mu","mu",0
+"na","na",0
+"nai","nai",0
+"nan","nan",0
+"nang","nang",0
+"nao","nao",0
+"nei","nei",0
+"nên","nen",0
+"nêng","neng",0
+"ni","ni",0
+"nien","nian",0
+"niang","niang",0
+"niao","niao",0
+"nieh","nie",0
+"nin","nin",0
+"ning","ning",0
+"niu","niu",0
+"nung","nong",0
+"nou","nou",0
+"nu","nu",0
+"nuan","nuan",0
+"nun","nun",0
+"no","nuo",0
+"nü","nü",0
+"nüeh","nüe",0
+"nüo","nüe",1
+"ou","ou",0
+"p’a","pa",0
+"p’ai","pai",0
+"p’an","pan",0
+"p’ang","pang",0
+"p’ao","pao",0
+"p’ei","pei",0
+"p’ên","pen",0
+"p’êng","peng",0
+"p’i","pi",0
+"p’ien","pian",0
+"p’iao","piao",0
+"p’ieh","pie",0
+"p’in","pin",0
+"p’ing","ping",0
+"p’o","po",0
+"p’ou","pou",0
+"p’u","pu",0
+"ch’i","qi",0
+"ch’ia","qia",0
+"ch’ien","qian",0
+"ch’iang","qiang",0
+"ch’iao","qiao",0
+"ch’ieh","qie",0
+"ch’iai","qie",1
+"ch’in","qin",0
+"ch’ing","qing",0
+"ch’iung","qiong",0
+"ch’iu","qiu",0
+"ch’ü","qu",0
+"ch’üan","quan",0
+"ch’üeh","que",0
+"ch’io","que",1
+"ch’üo","que",1
+"ch’ün","qun",0
+"jan","ran",0
+"jang","rang",0
+"jao","rao",0
+"jê","re",0
+"jên","ren",0
+"jêng","reng",0
+"jih","ri",0
+"jung","rong",0
+"jou","rou",0
+"ju","ru",0
+"jua","rua",0
+"juan","ruan",0
+"jui","rui",0
+"jun","run",0
+"jo","ruo",0
+"sa","sa",0
+"sai","sai",0
+"san","san",0
+"sang","sang",0
+"sao","sao",0
+"sê","se",0
+"sên","sen",0
+"sêng","seng",0
+"sha","sha",0
+"shai","shai",0
+"shan","shan",0
+"shang","shang",0
+"shao","shao",0
+"shê","she",0
+"shei","shei",0
+"shên","shen",0
+"shêng","sheng",0
+"shih","shi",0
+"shou","shou",0
+"shu","shu",0
+"shua","shua",0
+"shuai","shuai",0
+"shuan","shuan",0
+"shuang","shuang",0
+"shui","shui",0
+"shun","shun",0
+"shuo","shuo",0
+"ssŭ","si",0
+"sung","song",0
+"sou","sou",0
+"su","su",0
+"suan","suan",0
+"sui","sui",0
+"sun","sun",0
+"so","suo",0
+"t’a","ta",0
+"t’ai","tai",0
+"t’an","tan",0
+"t’ang","tang",0
+"t’ao","tao",0
+"t’ê","te",0
+"t’ei","tei",0
+"t’êng","teng",0
+"t’i","ti",0
+"t’ien","tian",0
+"t’iao","tiao",0
+"t’ieh","tie",0
+"t’ing","ting",0
+"t’ung","tong",0
+"t’ou","tou",0
+"t’u","tu",0
+"t’uan","tuan",0
+"t’ui","tui",0
+"t’un","tun",0
+"t’o","tuo",0
+"wa","wa",0
+"wai","wai",0
+"wan","wan",0
+"wang","wang",0
+"wei","wei",0
+"wên","wen",0
+"wêng","weng",0
+"wo","wo",0
+"wu","wu",0
+"hsi","xi",0
+"hsia","xia",0
+"hsien","xian",0
+"hsiang","xiang",0
+"hsiao","xiao",0
+"hsieh","xie",0
+"hsin","xin",0
+"hsing","xing",0
+"hsiung","xiong",0
+"hsiu","xiu",0
+"hsü","xu",0
+"hsüan","xuan",0
+"hsüeh","xue",0
+"hsio","xue",1
+"hsüo","xue",1
+"hsün","xun",0
+"ya","ya",0
+"yen","yan",0
+"yang","yang",0
+"yao","yao",0
+"yeh","ye",0
+"i","yi",0
+"yi","yi",0
+"yin","yin",0
+"ying","ying",0
+"yung","yong",0
+"yu","you",0
+"yü","yu",0
+"yüan","yuan",0
+"yüeh","yue",0
+"yo","yue",1
+"yün","yun",0
+"tsa","za",0
+"tsai","zai",0
+"tsan","zan",0
+"tsang","zang",0
+"tsao","zao",0
+"tsê","ze",0
+"tsei","zei",0
+"tsên","zen",0
+"tsêng","zeng",0
+"cha","zha",0
+"chai","zhai",0
+"chan","zhan",0
+"chang","zhang",0
+"chao","zhao",0
+"chê","zhe",0
+"chên","zhen",0
+"chêng","zheng",0
+"chih","zhi",0
+"chung","zhong",0
+"chou","zhou",0
+"chu","zhu",0
+"chua","zhua",0
+"chuai","zhuai",0
+"chuan","zhuan",0
+"chuang","zhuang",0
+"chui","zhui",0
+"chun","zhun",0
+"cho","zhuo",0
+"tzŭ","zi",0
+"tsung","zong",0
+"tsou","zou",0
+"tsu","zu",0
+"tsuan","zuan",0
+"tsui","zui",0
+"tsun","zun",0
+"tso","zuo",0

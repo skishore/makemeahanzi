@@ -1,0 +1,98 @@
+# This file is part of cjklib.
+#
+# cjklib is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# cjklib is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with cjklib.  If not, see <http://www.gnu.org/licenses/>.
+#
+#
+# Abbreviated spellings for romanisation Gwoyeu Romatzyh.
+#
+# All forms carry tonal information, multi-entity entries are separated by
+# spaces.
+#
+# Source:
+#   * Yuen Ren Chao: A Grammar of Spoken Chinese. University of California
+#     Press, Berkeley, 1968, ISBN 0-520-00219-9, pp. xxx, xxxi.
+#     * a for .a (啊)
+#     * ba for .ba (吧 and 罢)
+#     * bu for bu, bwu, buh (不)
+#     * de for .de (的)
+#     * g for ˳geh (个)
+#     * i for i, yi, yih (一)
+#     * ia for .ia (呀)
+#     * j for -.jy, -.je (着)
+#     * le for .le (了)
+#     * ma for .ma (嗎)
+#     * me for -.me (么) and .me (嚜)
+#     * men for -.men (们)
+#     * ne for .ne (呐)
+#     * sh for ˳shyh (是)
+#     * tz for -.tzy (子)
+#   * Yuen Ren Chao: Mandarin Primer: an intensive course in spoken Chinese.
+#     Harvard University Press, Cambridge, 1948.
+#     * -tz for .tzy (子)
+#     * -j for -.jy and .je (著)
+#     * g for -.geh (個)
+#     * de for .de (的)
+#     * sherm(.me) for shern.me (甚麼) (p. 123)
+#     * tzeem(.me) (怎麼) (p. 123)
+#     * tzemm(.me) (p. 123)
+#     * nemm(.me), also .ne.me (那麼) (p. 123, 138)
+#     * jemm.me (simmilar to tzemm.me) (這麼) (p. 137)
+#     * -m (-.men as in 我們 and 你們 etc. turns to -m before labials) (p. 123)
+# TODO:
+#   * Yuen Ren Chao: A Grammar of Spoken Chinese. University of California
+#     Press, Berkeley, 1968, ISBN 0-520-00219-9.
+#     * V bu V for V .bu ˳V ( pp. xxxi)
+#   * Yuen Ren Chao: Mandarin Primer: an intensive course in spoken Chinese.
+#     Harvard University Press, Cambridge, 1948.
+#     * .èh (p. 22, 124), .oh (p. 22, 130), è (p. 153) interjections
+#     * j-h-eh (jeh), tz-h-uoh (tzuoh) meng, (p. 162) marking laughter
+#     * ss (p. 190)
+#
+# Field "Specialised" carries flags indicating:
+#   * T, tonal abbreviation, while itself being a valid syllable
+#   * S, tone sandhi variation
+#   * I, non-standard pronunciation or other ignorable mapping
+#
+#TraditionalChinese,GR,GRAbbreviation,Specialised
+啊,.a,a,T
+吧,.ba,ba,T
+罢,.ba,ba,T
+不,buw,bu,TSI
+不,buh,bu,TS
+一,i,yi,TS
+一,i,yih,TS
+呀,.ia,ia,T
+了,.le,le,T
+嗎,.ma,ma,T
+麼,.me,me,T
+嚜,.me,me,T
+們,.men,men,T
+們,.men,m,
+呐,.ne,ne,T
+是,˳shyh,sh,
+子,.tzy,tz,
+著,.jy,j,I
+著,.je,j,
+個,˳geh,g,
+的,.de,de,T
+甚麼,shern .me,sherm .me,
+甚麼,shern .me,sherm,
+怎麼,tzeen .me,tzeem .me,
+怎麼,tzeen .me,tzeem,
+這麼,tzenn .me,tzemm .me,
+這麼,tzenn .me,tzemm,
+這麼,jenn .me,jemm .me,
+這麼,jenn .me,jemm,
+那麼,ne .me,nemm .me,
+那麼,ne .me,nemm,
