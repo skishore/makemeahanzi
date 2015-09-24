@@ -1,3 +1,5 @@
+"use strict";
+
 function initialize_radicals(verbose) {
   var num_radicals = 214;
   var radicals = [];

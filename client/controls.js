@@ -1,3 +1,5 @@
+"use strict";
+
 Session.setDefault('controls.show_editor', true);
 
 Template.content.helpers({

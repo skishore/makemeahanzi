@@ -1,3 +1,5 @@
+"use strict";
+
 var child_process = Npm.require('child_process');
 var path = Npm.require('path');
 

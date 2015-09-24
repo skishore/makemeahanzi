@@ -1,3 +1,5 @@
+"use strict";
+
 Session.setDefault('glyph.data', undefined);
 Session.setDefault('glyph.selected_point', undefined);
 Session.setDefault('glyph.show_strokes', true);

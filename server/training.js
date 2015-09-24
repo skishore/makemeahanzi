@@ -1,3 +1,5 @@
+"use strict";
+
 function evaluate(glyphs, classifier) {
   var num_correct = 0;
   for (var i = 0; i < glyphs.length; i++) {

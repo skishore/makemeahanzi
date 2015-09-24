@@ -1,3 +1,5 @@
+"use strict";
+
 var BATCH_SIZE = 64;
 var CODEPOINTS = [0x4e00, 0x9fff];
 var FONT_LOADED_PROGRESS = 0.1;

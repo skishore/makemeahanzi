@@ -1,3 +1,5 @@
+"use strict";
+
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
 var DICTIONARY = 'http://www.archchinese.com/chinese_english_dictionary.html';

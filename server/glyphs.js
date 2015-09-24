@@ -1,3 +1,5 @@
+"use strict";
+
 function save_glyph(glyph) {
   check(glyph.name, String);
   var saved_glyph = _.extend({}, glyph);
