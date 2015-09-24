@@ -1,7 +1,5 @@
-if (Meteor.isServer) {
-  const fs = Npm.require('fs');
-  const path = Npm.require('path');
-}
+const fs = maybeRequire('fs');
+const path = maybeRequire('path');
 
 this.cjklib = {};
 
