@@ -13,6 +13,13 @@ this.cjklib = {
   },
 };
 
+this.cjklib_radicals = {
+  primary_radical: {},
+  index_to_radical_map: {},
+  radical_to_index_map: {},
+  radical_to_character_map: {},
+};
+
 CHARACTER_FIELDS.map((field) => cjklib[field] = {});
 
 // Input: String contents of a cjklib data file.
@@ -20,7 +27,8 @@ CHARACTER_FIELDS.map((field) => cjklib[field] = {});
 getCJKLibRows = (data) => {
   const lines = data.split('\n');
   return lines.filter((line) => line.length > 0 && line[0] !== '#')
-              .map((line) => line.split(',').map((x) => x.replace(/"/g, '')));
+              .map((line) => line.split(',').map(
+                  (entry) => entry.replace(/["']/g, '')));
 }
 
 // Input: String contents of a Unihan data file.
@@ -98,6 +106,35 @@ fillStrokeCounts = (dictionary_like_data, result) => {
   });
 }
 
+// Output: Promise that fills multiple dictionaries in the result:
+//   - index_to_radical_map: Map from index -> list of radicals at that index
+//   - radical_to_index_map: Map from radical -> index of that radical
+//   - primary_radical: Map from index -> primary radical at that index
+fillRadicalData = (locale, radicals, result) => {
+  return radicals.then((rows) => {
+    rows.filter((row) => row[3].indexOf(locale) >= 0).map((row) => {
+      if (!result.index_to_radical_map.hasOwnProperty(row[0])) {
+        result.index_to_radical_map[row[0]] = [];
+      }
+      result.index_to_radical_map[row[0]].push(row[1]);
+      result.radical_to_index_map[row[1]] = row[0];
+      if (row[2] === 'R') {
+        result.primary_radical[row[0]] = row[1];
+      }
+    });
+  });
+}
+
+// Output: Promise that fills result with a map from Unicode radical-codeblock
+// character -> equivalent Unicode CJK-codeblock (hopefully, GB2312) character.
+// There may be Unicode radical characters without a CJK equivalent.
+fillRadicalToCharacterMap = (locale, radical_equivalent_characters, result) => {
+  radical_equivalent_characters.then((rows) => {
+    rows.filter((row) => row[2].indexOf(locale) >= 0)
+        .map((row) => result[row[0]] = row[1]);
+  });
+}
+
 // Given the rows of the locale-character map from the cjklib data, returns a
 // mapping from characters to the appropriate glyph in that locale.
 parseLocaleGlyphMap = (locale, rows) => {
@@ -109,11 +146,17 @@ parseLocaleGlyphMap = (locale, rows) => {
 
 Meteor.startup(() => {
   // cjklib database data.
+  const locale = 'C';
   const decomposition =
       readFile('cjklib/characterdecomposition.csv').then(getCJKLibRows);
   const glyphs = readFile('cjklib/localecharacterglyph.csv')
                      .then(getCJKLibRows)
-                     .then(parseLocaleGlyphMap.bind(null, 'C'));
+                     .then(parseLocaleGlyphMap.bind(null, locale));
+  const radicals = readFile('cjklib/kangxiradical.csv').then(getCJKLibRows);
+  const radical_equivalent_characters =
+      readFile('cjklib/radicalequivalentcharacter.csv').then(getCJKLibRows);
+  const radical_isolated_characters =
+      readFile('cjklib/kangxiradicalisolatedcharacter.csv').then(getCJKLibRows);
 
   // Unihan database data.
   const dictionary_like_data =
@@ -123,10 +166,16 @@ Meteor.startup(() => {
   const readings = readFile('unihan/Unihan_Readings.txt').then(getUnihanRows);
 
   Promise.all([
+      // Per-character data.
       fillDecompositions(decomposition, glyphs, cjklib.decomposition),
       fillDefinitions(readings, cjklib.definition),
       fillKangxiIndex(radical_stroke_counts, cjklib.kangxi_index),
       fillPinyin(readings, cjklib.pinyin),
       fillStrokeCounts(dictionary_like_data, cjklib.strokes),
+      // Per-radical data.
+      fillRadicalData(locale, radicals, cjklib_radicals),
+      fillRadicalData(locale, radical_isolated_characters, cjklib_radicals),
+      fillRadicalToCharacterMap(locale, radical_equivalent_characters,
+                                cjklib_radicals.radical_to_character_map),
   ]).catch(console.error.bind(console));
 });
