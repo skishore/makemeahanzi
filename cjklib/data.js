@@ -1,17 +1,27 @@
 const fs = maybeRequire('fs');
 const path = maybeRequire('path');
 
-const CHARACTER_FIELDS = ['definition', 'kangxi_index', 'pinyin', 'strokes'];
+const CHARACTER_FIELDS = ['character', 'decomposition', 'definition',
+                          'kangxi_index', 'pinyin', 'strokes'];
 
 this.cjklib = {
   getCharacterData(character) {
     const result = {};
     CHARACTER_FIELDS.map((field) => result[field] = cjklib[field][character]);
+    result.character = character;
     return result;
   },
 };
 
 CHARACTER_FIELDS.map((field) => cjklib[field] = {});
+
+// Input: String contents of a cjklib data file.
+// Output: a list of rows, each of which is a list of String columns.
+getCJKLibRows = (data) => {
+  const lines = data.split('\n');
+  return lines.filter((line) => line.length > 0 && line[0] !== '#')
+              .map((line) => line.split(',').map((x) => x.replace(/"/g, '')));
+}
 
 // Input: String contents of a Unihan data file.
 // Output: a list of rows, each of which is a list of String columns.
@@ -43,6 +53,16 @@ readFile = (filename) => new Promise((resolve, reject) => {
 });
 
 // Promises that return specific data tables.
+
+// Output: Promise that fills result with a mapping character -> decomposition.
+// The decompositions are formatted using Ideographic Description Sequence
+// symbols - see the Unicode standard for more details.
+fillDecompositions = (decompositions, glyphs, result) => {
+  return Promise.all([decompositions, glyphs]).then(([rows, glyphs]) => {
+    rows.filter((row) => parseInt(row[2], 10) === (glyphs[row[0]] || 0))
+        .map((row) => result[row[0]] = row[1]);
+  });
+}
 
 // Output: Promise that fills result with a mapping character -> Pinyin.
 fillDefinitions = (readings, result) => {
@@ -78,13 +98,32 @@ fillStrokeCounts = (dictionary_like_data, result) => {
   });
 }
 
+// Given the rows of the locale-character map from the cjklib data, returns a
+// mapping from characters to the appropriate glyph in that locale.
+parseLocaleGlyphMap = (locale, rows) => {
+  const result = {};
+  rows.filter((row) => row[2].indexOf(locale) >= 0)
+      .map((row) => result[row[0]] = parseInt(row[1], 10));
+  return result;
+}
+
 Meteor.startup(() => {
+  // cjklib database data.
+  const decomposition =
+      readFile('cjklib/characterdecomposition.csv').then(getCJKLibRows);
+  const glyphs = readFile('cjklib/localecharacterglyph.csv')
+                     .then(getCJKLibRows)
+                     .then(parseLocaleGlyphMap.bind(null, 'C'));
+
+  // Unihan database data.
   const dictionary_like_data =
       readFile('unihan/Unihan_DictionaryLikeData.txt').then(getUnihanRows);
   const radical_stroke_counts =
       readFile('unihan/Unihan_RadicalStrokeCounts.txt').then(getUnihanRows);
   const readings = readFile('unihan/Unihan_Readings.txt').then(getUnihanRows);
+
   Promise.all([
+      fillDecompositions(decomposition, glyphs, cjklib.decomposition),
       fillDefinitions(readings, cjklib.definition),
       fillKangxiIndex(radical_stroke_counts, cjklib.kangxi_index),
       fillPinyin(readings, cjklib.pinyin),
