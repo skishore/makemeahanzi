@@ -6,6 +6,11 @@ var FONT_LOADED_PROGRESS = 0.1;
 
 Template.controls.events({
   'click #reload-button': function() {
+    const characters_to_save =
+        new Set(Object.keys(cjklib.radicals.radical_to_index_map)
+                      .filter((radical) => !cjklib.gb2312[radical]));
+    const characters_found = new Set;
+
     Session.set('progress.value', 0);
     opentype.load('arphic/UKaiCN.ttf', function(err, font) {
       if (err) {
@@ -17,12 +22,16 @@ Template.controls.events({
 
       for (var i = 0; i < font.glyphs.length; i++) {
         var glyph = font.glyphs.glyphs[i];
-        if (CODEPOINTS[0] <= glyph.unicode && glyph.unicode <= CODEPOINTS[1]) {
+        const unicode = String.fromCodePoint(glyph.unicode || 0);
+        if (characters_to_save.has(unicode)) {
           var name = 'uni' + glyph.unicode.toString(16).toUpperCase();
           glyphs_to_save.push({name: name, path: glyph.path.commands});
+          characters_found.add(unicode);
         }
       }
 
+      console.log('Missing radicals:', Array.from(characters_to_save).filter(
+                                           (x) => !characters_found.has(x)));
       save_glyphs(glyphs_to_save);
     });
   },
