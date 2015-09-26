@@ -5,22 +5,24 @@ const CHARACTER_FIELDS = ['character', 'decomposition', 'definition',
                           'kangxi_index', 'pinyin', 'strokes'];
 
 this.cjklib = {
+  characters: {},
+  gb2312: {},
+  radicals: {
+    primary_radical: {},
+    index_to_radical_map: {},
+    radical_to_index_map: {},
+    radical_to_character_map: {},
+  },
   getCharacterData(character) {
     const result = {};
-    CHARACTER_FIELDS.map((field) => result[field] = cjklib[field][character]);
+    CHARACTER_FIELDS.map((field) =>
+        result[field] = cjklib.characters[field][character]);
     result.character = character;
     return result;
   },
 };
 
-this.cjklib_radicals = {
-  primary_radical: {},
-  index_to_radical_map: {},
-  radical_to_index_map: {},
-  radical_to_character_map: {},
-};
-
-CHARACTER_FIELDS.map((field) => cjklib[field] = {});
+CHARACTER_FIELDS.map((field) => cjklib.characters[field] = {});
 
 // Input: String contents of a cjklib data file.
 // Output: a list of rows, each of which is a list of String columns.
@@ -135,6 +137,18 @@ fillRadicalToCharacterMap = (locale, radical_equivalent_characters, result) => {
   });
 }
 
+// Given the data from the GB2312 data file, fills the GB2312 result map.
+fillGB2312 = (data, result) => {
+  Array.from(data).map((character) => {
+    if (character === '\n') return;
+    assert(character.length === 1);
+    const codepoint = character.codePointAt(0);
+    assert(0x4e00 <= codepoint && codepoint <= 0x9fff);
+    result[character] = true;
+  });
+  assert(Object.keys(result).length === 6763);
+}
+
 // Given the rows of the locale-character map from the cjklib data, returns a
 // mapping from characters to the appropriate glyph in that locale.
 parseLocaleGlyphMap = (locale, rows) => {
@@ -147,8 +161,8 @@ parseLocaleGlyphMap = (locale, rows) => {
 // Methods used for final post-processing of the loaded datasets.
 
 cleanupCJKLibData = () => {
-  const characters = cjklib;
-  const radicals = cjklib_radicals;
+  const characters = cjklib.characters;
+  const radicals = cjklib.radicals;
   const convert_astral_characters = (x) => x.length === 1 ? x : '？'
   const radical_to_character = (x) => radicals.radical_to_character_map[x] || x;
   Object.keys(characters.decomposition).map((character) => {
@@ -202,15 +216,18 @@ Meteor.startup(() => {
 
   Promise.all([
       // Per-character data.
-      fillDecompositions(decomposition, glyphs, cjklib.decomposition),
-      fillDefinitions(readings, cjklib.definition),
-      fillKangxiIndex(radical_stroke_counts, cjklib.kangxi_index),
-      fillPinyin(readings, cjklib.pinyin),
-      fillStrokeCounts(dictionary_like_data, cjklib.strokes),
+      fillDecompositions(decomposition, glyphs,
+                         cjklib.characters.decomposition),
+      fillDefinitions(readings, cjklib.characters.definition),
+      fillKangxiIndex(radical_stroke_counts, cjklib.characters.kangxi_index),
+      fillPinyin(readings, cjklib.characters.pinyin),
+      fillStrokeCounts(dictionary_like_data, cjklib.characters.strokes),
       // Per-radical data.
-      fillRadicalData(locale, radicals, cjklib_radicals),
-      fillRadicalData(locale, radical_isolated_characters, cjklib_radicals),
+      fillRadicalData(locale, radicals, cjklib.radicals),
+      fillRadicalData(locale, radical_isolated_characters, cjklib.radicals),
       fillRadicalToCharacterMap(locale, radical_equivalent_characters,
-                                cjklib_radicals.radical_to_character_map),
+                                cjklib.radicals.radical_to_character_map),
+      // Extract the list of characters in the GB2312 character set.
+      readFile('gb2312').then((data) => fillGB2312(data, cjklib.gb2312)),
   ]).then(cleanupCJKLibData).catch(console.error.bind(console));
 });
