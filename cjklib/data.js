@@ -60,7 +60,7 @@ readFile = (filename) => new Promise((resolve, reject) => {
   }
 });
 
-// Promises that return specific data tables.
+// Promises that fill data from specific tables.
 
 // Output: Promise that fills result with a mapping character -> decomposition.
 // The decompositions are formatted using Ideographic Description Sequence
@@ -129,7 +129,7 @@ fillRadicalData = (locale, radicals, result) => {
 // character -> equivalent Unicode CJK-codeblock (hopefully, GB2312) character.
 // There may be Unicode radical characters without a CJK equivalent.
 fillRadicalToCharacterMap = (locale, radical_equivalent_characters, result) => {
-  radical_equivalent_characters.then((rows) => {
+  return radical_equivalent_characters.then((rows) => {
     rows.filter((row) => row[2].indexOf(locale) >= 0)
         .map((row) => result[row[0]] = row[1]);
   });
@@ -142,6 +142,41 @@ parseLocaleGlyphMap = (locale, rows) => {
   rows.filter((row) => row[2].indexOf(locale) >= 0)
       .map((row) => result[row[0]] = parseInt(row[1], 10));
   return result;
+}
+
+// Methods used for final post-processing of the loaded datasets.
+
+cleanupCJKLibData = () => {
+  const characters = cjklib;
+  const radicals = cjklib_radicals;
+  const convert_astral_characters = (x) => x.length === 1 ? x : '？'
+  const radical_to_character = (x) => radicals.radical_to_character_map[x] || x;
+  Object.keys(characters.decomposition).map((character) => {
+    // Convert any 'astral characters' - that is, characters outside the Basic
+    // Multilingual Plane - to wide question marks and replace radicals with an
+    // equivalent character with that character.
+    const decomposition = characters.decomposition[character];
+    characters.decomposition[character] =
+        Array.from(decomposition).map(convert_astral_characters)
+                                 .map(radical_to_character).join('');
+  });
+  for (let i = 1; i <= 214; i++) {
+    // All primary radicals should have an equivalent character form.
+    const primary = radicals.primary_radical[i];
+    assert(radicals.radical_to_character_map.hasOwnProperty(primary));
+    radicals.primary_radical[i] = radicals.radical_to_character_map[primary];
+    radicals.index_to_radical_map[i] =
+        radicals.index_to_radical_map[i].map(radical_to_character).unique();
+  }
+  Object.keys(radicals.radical_to_index_map).map((radical) => {
+    const character = radical_to_character(radical);
+    if (character !== radical) {
+      radicals.radical_to_index_map[character] =
+          radicals.radical_to_index_map[radical];
+      delete radicals.radical_to_index_map[radical];
+    }
+  });
+  delete radicals.radical_to_character_map;
 }
 
 Meteor.startup(() => {
@@ -177,5 +212,5 @@ Meteor.startup(() => {
       fillRadicalData(locale, radical_isolated_characters, cjklib_radicals),
       fillRadicalToCharacterMap(locale, radical_equivalent_characters,
                                 cjklib_radicals.radical_to_character_map),
-  ]).catch(console.error.bind(console));
+  ]).then(cleanupCJKLibData).catch(console.error.bind(console));
 });
