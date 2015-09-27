@@ -7,6 +7,7 @@ const CHARACTER_FIELDS = ['character', 'decomposition', 'definition',
 this.cjklib = {
   characters: {},
   gb2312: {},
+  promise: undefined,
   radicals: {
     primary_radical: {},
     index_to_radical_map: {},
@@ -214,7 +215,7 @@ Meteor.startup(() => {
       readFile('unihan/Unihan_RadicalStrokeCounts.txt').then(getUnihanRows);
   const readings = readFile('unihan/Unihan_Readings.txt').then(getUnihanRows);
 
-  Promise.all([
+  cjklib.promise = Promise.all([
       // Per-character data.
       fillDecompositions(decomposition, glyphs,
                          cjklib.characters.decomposition),
@@ -229,5 +230,6 @@ Meteor.startup(() => {
                                 cjklib.radicals.radical_to_character_map),
       // Extract the list of characters in the GB2312 character set.
       readFile('gb2312').then((data) => fillGB2312(data, cjklib.gb2312)),
-  ]).then(cleanupCJKLibData).catch(console.error.bind(console));
+  ]).then(cleanupCJKLibData);
+  cjklib.promise.catch(console.error.bind(console));
 });

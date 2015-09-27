@@ -54,8 +54,3 @@ Meteor.methods({
     }
   },
 });
-
-Meteor.startup(function() {
-  Glyphs._ensureIndex({name: 1}, {unique: true});
-  Glyphs._ensureIndex({'manual.verified': 1});
-});
