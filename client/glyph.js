@@ -12,6 +12,7 @@ var EDIT_STROKES = true;
 function change_glyph(method, glyph) {
   glyph = glyph || Session.get('glyph.data');
   Meteor.call(method, glyph, function(err, data) {
+    Session.set('glyph.test', data);
     data = fill_glyph_fields(data);
     Session.set('glyph.data', data);
     if (method === 'save_glyph') {
