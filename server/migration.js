@@ -2,7 +2,23 @@
 
 const completionCallback = undefined;
 
-const perGlyphCallback = undefined; 
+const perGlyphCallback = (glyph) => {
+  assert(glyph.stages.strokes !== undefined);
+  let changed = 0;
+  for (var i = 0; i < glyph.stages.strokes.length; i++) {
+    const stroke = glyph.stages.strokes[i];
+    const paths = svg.convertSVGPathToPaths(stroke);
+    assert(paths.length === 1);
+    const path = svg.convertPathsToSVGPath(paths);
+    if (path !== stroke) {
+      glyph.stages.strokes[i] = path;
+      changed += 1;
+    }
+  }
+  if (changed) {
+    console.log(`Flipped ${changed} path(s) in glyph: ${glyph.character}`);
+  }
+}
 
 // Runs the given per-glyph callback for each glyph in the database.
 // When all the glyphs are migrated, runs the completion callback.
