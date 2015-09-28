@@ -56,13 +56,11 @@
         {{/each}}
         {{#each lines}}
           <line class="{{cls}}" stroke="{{stroke}}" stroke-width="8"
-                x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
-                data-coordinates="{{coordinates}}"></line>
+                x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}></line>
         {{/each}}
         {{#each points}}
           <circle class="{{cls}}" fill="{{fill}}" stroke="{{stroke}}"
-                  cx={{cx}} cy={{cy}} r="8"
-                  data-coordinates="{{coordinates}}"></circle>
+                  cx={{cx}} cy={{cy}} r="8"></circle>
         {{/each}}
       </g>
     </svg>
@@ -88,6 +86,7 @@
     <div class="panel-heading">
       <h3 class="panel-title">Edit {{stage}}</h3>
     </div>
+    <div class="instructions">{{instructions}}</div>
     <ul class="log">
       {{#each lines}}
         <li class="line {{cls}}">{{message}}</li>
