@@ -1,0 +1,86 @@
+// Bootstrap style overrides.
+.panel-title {
+  font-size: 16px;
+}
+
+.progress {
+  height: 18px;
+  margin-bottom: 0;
+}
+
+// Styling for the 'navbar' template.
+#navbar {
+  cursor: default !important;
+  -webkit-user-select: none !important;
+
+  .navbar-brand:hover {
+    color: white !important;
+  }
+
+  .progress {
+    float: right;
+    margin-top: 21px;
+    margin-right: -3px;
+    width: 298px;
+  }
+}
+
+// Styling for the 'editor' template.
+#editor {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 60px;
+  bottom: 0;
+
+  .left-pane {
+    float: left;
+    width: 680px;
+
+    .metadata, .status {
+      margin: 16px 16px 0 16px;
+    }
+
+    .metadata {
+      .field {
+        margin: 12px 0 4px;
+
+        .control-label {
+          margin-right: 4px;
+          text-align: right;
+          width: 96px;
+        }
+      }
+    }
+
+    .status {
+      .log {
+        margin-bottom: 0;
+
+        .line {
+          margin: 6px 0;
+          &.error { color: red; }
+          &.success { color: green; }
+        }
+      }
+    }
+  }
+
+  svg {
+    float: left;
+    height: 100%;
+    margin: 0 auto;
+
+    path.selectable:hover {
+      cursor: pointer;
+      stroke: blue;
+      stroke-width: 8;
+    }
+
+    circle.selectable:hover {
+      cursor: pointer;
+      fill: blue;
+      stroke: blue;
+    }
+  }
+}

@@ -3,17 +3,17 @@
 </head>
 <body>
   {{> navbar}}
-  {{> content}}
-  {{> progress}}
+  {{> modal}}
+  {{> editor}}
 </body>
 
 <template name="navbar">
   <div id="navbar" class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
       <div class="navbar-header">
-        <div class="navbar-brand">Hanzi decomposition - {{mode}}</div>
+        <div class="navbar-brand">Hanzi decomposition</div>
       </div>
-      <div class="navbar-progress progress" style="visibility: hidden;">
+      <div class="progress">
         <div class="progress-bar progress-bar-warning active"
              role="progressbar" style="width: {{percent}}%"
              aria-valuenow="{{percent}}"
@@ -23,12 +23,12 @@
   </div>
 </template>
 
-<template name="progress">
-  <div id="progress" class="modal fade" tabIndex="2"
+<template name="modal">
+  <div id="modal" class="modal fade" tabIndex="2"
        data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-body">Reloading glyph data...</div>
+        <div class="modal-body">{{content}}</div>
         <div class="modal-footer">
           <div class="progress">
             <div class="progress-bar progress-bar-striped active"
@@ -42,91 +42,56 @@
   </div>
 </template>
 
-<template name="content">
-  {{#if show_editor}}
-    {{> controls}}
-    {{> glyph}}
-  {{else}}
-    {{> gallery}}
-  {{/if}}
-</template>
-
-<template name="controls">
-  <div id="controls" class="btn-group" role="group">
-    <button id="w-button" class="btn btn-default">W: {{w_button_name}}</button>
-    <button id="a-button" class="btn btn-warning">A: Previous</button>
-    <button id="s-button" class="btn btn-success">S: {{s_button_name}}</button>
-    <button id="d-button" class="btn btn-info">D: Next</button>
-  </div>
-  <div id="right-controls" class="btn-group" role="group">
-    <button id="backup-button" class="btn btn-success">Backup</button>
-    <button id="restore-button" class="btn btn-info">Restore</button>
-    <button id="reload-button" class="btn btn-danger">Reload</button>
-  </div>
-</template>
-
-<template name="glyph">
-  <div id="glyph" class="{{verified}}">
-    <div class="log">
-      {{#each log}}
-        <div class="log-line {{log_class}}">{{log_message}}</div>
-      {{/each}}
+<template name="editor">
+  <div id="editor" class="{{stage}}">
+    <div class="left-pane">
+      {{> metadata}}
+      {{> status}}
     </div>
     <svg viewbox="0 0 1024 1024">
       <g transform="scale(1, -1) translate(0, -900)">
-        {{#if glyph}}
-          <path fill="{{base_color}}" stroke="{{base_color}}" d="{{d}}"></path>
-          {{#if show_strokes}}
-            {{#each strokes}}
-              <path class="stroke" fill="{{color}}"
-                    stroke="black" d="{{stroke}}"></path>
-            {{/each}}
-          {{else}}
-            {{#each bridges}}
-              <line x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
-                    stroke="{{color}}" stroke-width="8"
-                    data-coordinates="{{coordinates}}"></line>
-            {{/each}}
-            {{#each points}}
-              <circle fill="{{color}}" stroke="{{color}}" cx={{x}} cy={{y}}
-                      r="8" style="z-index:{{z_index}}"
-                      data-coordinates="{{coordinates}}"></circle>
-            {{/each}}
-          {{/if}}
-        {{/if}}
+        {{#each paths}}
+          <path class="{{cls}}" fill="{{fill}}"
+                stroke="{{stroke}}" d="{{d}}"></path>
+        {{/each}}
+        {{#each lines}}
+          <line class="{{cls}}" stroke="{{stroke}}" stroke-width="8"
+                x1={{x1}} y1={{y1}} x2={{x2}} y2={{y2}}
+                data-coordinates="{{coordinates}}"></line>
+        {{/each}}
+        {{#each points}}
+          <circle class="{{cls}}" fill="{{fill}}" stroke="{{stroke}}"
+                  cx={{cx}} cy={{cy}} r="8"
+                  data-coordinates="{{coordinates}}"></circle>
+        {{/each}}
       </g>
     </svg>
   </div>
 </template>
 
-<template name="gallery">
-  <div id="gallery">
-    {{#each blocks}}
-      {{#if show_divider}}
-        <div class="gallery-divider"></div>
-      {{/if}}
-      <div class="gallery-block">
-        <div class="block-header">{{count}}</div>
-        <div class="block-values">
-          {{#each glyphs}}
-            <svg viewbox="0 0 1024 1024"
-                 class="{{class}}" data-name="{{name}}">
-              <g transform="scale(1, -1) translate(0, -900)">
-                <path d="{{d}}"></path>
-                {{#each strokes}}
-                  <path class="stroke" fill="{{color}}"
-                        stroke="black" d="{{stroke}}"></path>
-                {{/each}}
-              </g>
-            </svg>
-          {{/each}}
-        </div>
+<template name="metadata">
+  <div class="panel panel-primary metadata">
+    <div class="panel-heading">
+      <h3 class="panel-title">Metadata for {{character}}</h3>
+    </div>
+    {{#each items}}
+      <div class="field">
+        <label class="control-label">{{field}}</label>
+        <span contenteditable="true">{{value}}</span>
       </div>
     {{/each}}
   </div>
-  {{#if loading}}
-    <div id="gallery-loader">
-      <div class="whirly-loader"></div>
+</template>
+
+<template name="status">
+  <div class="panel panel-primary status">
+    <div class="panel-heading">
+      <h3 class="panel-title">Edit {{stage}}</h3>
     </div>
-  {{/if}}
+    <ul class="log">
+      {{#each lines}}
+        <li class="line {{cls}}">{{message}}</li>
+      {{/each}}
+    </ul>
+  </div>
 </template>

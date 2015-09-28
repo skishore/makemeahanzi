@@ -1,44 +1,16 @@
 "use strict";
 
-Session.setDefault('glyph.data', undefined);
+Session.setDefault('editor.glyph', undefined);
 Session.setDefault('glyph.selected_point', undefined);
-Session.setDefault('glyph.show_strokes', true);
 
 var COLORS = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
               '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
 var DICTIONARY = 'http://www.archchinese.com/chinese_english_dictionary.html';
-var EDIT_STROKES = true;
 
-function change_glyph(method, glyph) {
-  glyph = glyph || Session.get('glyph.data');
-  Meteor.call(method, glyph, function(err, data) {
-    Session.set('glyph.data', data);
-    Session.set('glyph.show_strokes', true);
-  });
-}
-
-function fill_glyph_fields(glyph) {
-  glyph.manual = glyph.manual || {};
-  glyph.manual.verified = glyph.manual.verified || false;
-  if (EDIT_STROKES) {
-    glyph.render = get_glyph_render_data(glyph, glyph.manual.bridges);
-  } else {
-    glyph.render = {d: '', log: [], strokes: glyph.derived.strokes};
-  }
-  glyph.manual.bridges = glyph.manual.bridges || glyph.render.bridges;
-  return glyph;
-}
-
-function has_errors(glyph) {
-  var error = function(pair) { return pair[0] != 'success'; };
-  return glyph && glyph.render.log.filter(error).length > 0;
-}
-
-function refresh_fraction_verified() {
-  Meteor.call('get_fraction_verified', function(err, data) {
-    if (!err) {
-      Session.set('glyph.fraction_verified', data);
-    }
+function change_glyph(method, argument) {
+  argument = argument || Session.get('editor.glyph');
+  Meteor.call(method, argument, function(err, data) {
+    Session.set('editor.glyph', data);
   });
 }
 
@@ -76,7 +48,7 @@ function to_point(pair) {
 var bindings = {
   'w': function() {
     if (!EDIT_STROKES) {
-      var glyph = Session.get('glyph.data');
+      var glyph = Session.get('editor.glyph');
       var character = String.fromCodePoint(parseInt(glyph.name.substr(3), 16));
       window.open(DICTIONARY + '?find=' + character, '_blank').focus();
       return;
@@ -84,13 +56,13 @@ var bindings = {
     if (Session.get('glyph.show_strokes')) {
       Session.set('glyph.show_strokes', false);
       Session.set('glyph.selected_point', undefined);
-      var glyph = Session.get('glyph.data');
+      var glyph = Session.get('editor.glyph');
       glyph.manual.verified = false;
       change_glyph('save_glyph', glyph);
     } else {
-      var glyph = Session.get('glyph.data');
+      var glyph = Session.get('editor.glyph');
       delete glyph.manual;
-      Session.set('glyph.data', fill_glyph_fields(glyph));
+      Session.set('editor.glyph', fill_glyph_fields(glyph));
     }
   },
   'a': function() {
@@ -103,7 +75,7 @@ var bindings = {
     if (!EDIT_STROKES) {
       return;
     }
-    var glyph = Session.get('glyph.data');
+    var glyph = Session.get('editor.glyph');
     if (!Session.get('glyph.show_strokes')) {
       Session.set('glyph.show_strokes', true);
       return;
@@ -121,13 +93,7 @@ var bindings = {
   },
 };
 
-Template.controls.events({
-  'click #w-button': bindings.w,
-  'click #a-button': bindings.a,
-  'click #s-button': bindings.s,
-  'click #d-button': bindings.d,
-});
-
+/*
 Template.controls.helpers({
   w_button_name: function() {
     if (!EDIT_STROKES) {
@@ -179,50 +145,30 @@ Template.glyph.events({
     Session.set('glyph.selected_point', undefined);
   },
 });
+*/
 
-Template.glyph.helpers({
-  glyph() {
-    return !!Session.get('glyph.data');
+Template.editor.helpers({
+  class() {
+    return undefined;
   },
-  verified: function() {
-    return false;
-    if (!EDIT_STROKES) {
-      return undefined;
-    }
-    var glyph = Session.get('glyph.data');
-    if (has_errors(glyph)) {
-      return 'error';
-    }
-    return glyph && glyph.manual.verified ? 'verified' : undefined;
-  },
-  log: function() {
-    return;
-    var glyph = Session.get('glyph.data');
-    return glyph ? glyph.render.log.map(function(pair) {
-      return {log_class: pair[0], log_message: pair[1]};
-    }) : [];
-  },
-  base_color() {
-    return Session.get('glyph.show_strokes') ? 'black' : 'gray';
-  },
-  d() {
-    return Session.get('glyph.data').stages.path;
-  },
-  show_strokes() {
-    return !!Session.get('glyph.show_strokes');
-  },
-  strokes() {
-    const glyph = Session.get('glyph.data');
+  paths() {
+    const glyph = Session.get('editor.glyph');
+    if (!glyph) return;
     const result = [];
     for (let i = 0; i < glyph.stages.strokes.length; i++) {
-      const stroke = glyph.stages.strokes[i];
-      result.push({color: COLORS[i % COLORS.length], stroke: stroke});
+      result.push({
+        cls: 'selectable',
+        d: glyph.stages.strokes[i],
+        fill: COLORS[i % COLORS.length],
+        stroke: 'black',
+      });
     }
     return result;
   },
-  bridges: function() {
+  lines() {
     return;
-    var glyph = Session.get('glyph.data');
+    const glyph = Session.get('editor.glyph');
+    if (!glyph) return;
     var original = {};
     for (var i = 0; i < glyph.render.bridges.length; i++) {
       var bridge = glyph.render.bridges[i];
@@ -237,9 +183,10 @@ Template.glyph.helpers({
     }
     return result;
   },
-  points: function() {
+  points() {
     return;
-    var glyph = Session.get('glyph.data');
+    const glyph = Session.get('editor.glyph');
+    if (!glyph) return;
     var result = [];
     for (var i = 0; i < glyph.render.endpoints.length; i++) {
       var endpoint = glyph.render.endpoints[i];
@@ -256,6 +203,37 @@ Template.glyph.helpers({
   },
 });
 
+Template.metadata.helpers({
+  character() {
+    const glyph = Session.get('editor.glyph');
+    if (!glyph) return;
+    return glyph.character;
+  },
+  items() {
+    const glyph = Session.get('editor.glyph');
+    if (!glyph) return;
+    const defaults = cjklib.getCharacterData(glyph.character);
+    const fields = ['definition', 'pinyin', 'strokes']
+    return fields.map((x) => ({
+      field: `${x[0].toUpperCase()}${x.substr(1)}:`,
+      value: glyph.metadata[x] || defaults[x] || '(unknown)',
+    }));
+  },
+});
+
+Template.status.helpers({
+  stage() {
+    return 'strokes';
+  },
+  lines() {
+    return [
+      {cls: 'success', message: 'asdf'},
+      {cls: 'error', message: 'asdf asdf'},
+      {message: 'asdf asdf asdf asdf asdf asdf asdf asdf asdf asd fasd fasd fasd fas dfa sdfa sdf'},
+    ];
+  },
+});
+
 Meteor.startup(function() {
   $('body').on('keypress', function(e) {
     var key = String.fromCharCode(e.which);
@@ -263,8 +241,6 @@ Meteor.startup(function() {
       bindings[key]();
     }
   });
-  if (!Session.get('glyph.data')) {
-    change_glyph('get_next_glyph');
-  }
-  refresh_fraction_verified();
+  cjklib.promise.then(() => change_glyph('get_next_glyph'))
+                .catch(console.error.bind(console));
 });
