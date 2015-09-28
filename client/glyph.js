@@ -12,14 +12,8 @@ var EDIT_STROKES = true;
 function change_glyph(method, glyph) {
   glyph = glyph || Session.get('glyph.data');
   Meteor.call(method, glyph, function(err, data) {
-    Session.set('glyph.test', data);
-    data = fill_glyph_fields(data);
     Session.set('glyph.data', data);
-    if (method === 'save_glyph') {
-      refresh_fraction_verified();
-    } else {
-      Session.set('glyph.show_strokes', true);
-    }
+    Session.set('glyph.show_strokes', true);
   });
 }
 
@@ -142,6 +136,7 @@ Template.controls.helpers({
     return Session.get('glyph.show_strokes') ? 'Edit' : 'Reset';
   },
   s_button_name: function() {
+    return '(Error)';
     if (!Session.get('glyph.show_strokes')) {
       return 'View';
     }
@@ -186,10 +181,11 @@ Template.glyph.events({
 });
 
 Template.glyph.helpers({
-  glyph: function() {
+  glyph() {
     return !!Session.get('glyph.data');
   },
   verified: function() {
+    return false;
     if (!EDIT_STROKES) {
       return undefined;
     }
@@ -200,30 +196,32 @@ Template.glyph.helpers({
     return glyph && glyph.manual.verified ? 'verified' : undefined;
   },
   log: function() {
+    return;
     var glyph = Session.get('glyph.data');
     return glyph ? glyph.render.log.map(function(pair) {
       return {log_class: pair[0], log_message: pair[1]};
     }) : [];
   },
-  base_color: function() {
+  base_color() {
     return Session.get('glyph.show_strokes') ? 'black' : 'gray';
   },
-  d: function() {
-    return Session.get('glyph.data').render.d;
+  d() {
+    return Session.get('glyph.data').stages.path;
   },
-  show_strokes: function() {
+  show_strokes() {
     return !!Session.get('glyph.show_strokes');
   },
-  strokes: function() {
-    var glyph = Session.get('glyph.data');
-    var result = [];
-    for (var i = 0; i < glyph.render.strokes.length; i++) {
-      var stroke = glyph.render.strokes[i];
+  strokes() {
+    const glyph = Session.get('glyph.data');
+    const result = [];
+    for (let i = 0; i < glyph.stages.strokes.length; i++) {
+      const stroke = glyph.stages.strokes[i];
       result.push({color: COLORS[i % COLORS.length], stroke: stroke});
     }
     return result;
   },
   bridges: function() {
+    return;
     var glyph = Session.get('glyph.data');
     var original = {};
     for (var i = 0; i < glyph.render.bridges.length; i++) {
@@ -240,6 +238,7 @@ Template.glyph.helpers({
     return result;
   },
   points: function() {
+    return;
     var glyph = Session.get('glyph.data');
     var result = [];
     for (var i = 0; i < glyph.render.endpoints.length; i++) {

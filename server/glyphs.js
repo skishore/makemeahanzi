@@ -17,8 +17,8 @@ function save_glyph(glyph) {
 }
 
 Meteor.methods({
-  get_glyph: function(name) {
-    return Glyphs.findOne({name: name});
+  get_glyph: function(character) {
+    return Glyphs.findOne({character: character});
   },
   get_next_glyph: function(glyph) {
     var name = glyph ? glyph.name : undefined;
