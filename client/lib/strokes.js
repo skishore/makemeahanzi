@@ -2,7 +2,7 @@
 
 const getStatusLine = (actual, expected) => {
   const actual_text = `Extracted ${actual} stroke${actual === 1 ? '' : 's'}`;
-  if (expected === undefined || expected === null) {
+  if (expected === undefined) {
     return {cls: 'error', message: `${actual_text}. True number unknown.`};
   } else if (actual !== expected) {
     return {cls: 'error', message: `${actual_text}, but expected ${expected}.`};

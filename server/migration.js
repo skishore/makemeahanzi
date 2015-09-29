@@ -1,5 +1,12 @@
 "use strict";
 
+const checkStrokeExtractorStability = (glyph) => {
+  const strokes = stroke_extractor.getStrokes(glyph);
+  if (!_.isEqual(strokes.strokes.sort(), glyph.stages.strokes.sort())) {
+    console.log(`Different strokes for ${glyph.character}`);
+  }
+}
+
 const completionCallback = undefined;
 
 const perGlyphCallback = undefined;
