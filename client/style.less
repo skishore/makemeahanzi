@@ -62,9 +62,20 @@
         margin-bottom: 0;
 
         .line {
+          list-style: none;
           margin: 6px 0;
+          position: relative;
           &.error { color: red; }
           &.success { color: green; }
+
+          &:before {
+            content: "•";
+            font-size: 1.5em;
+            position: absolute;
+            transform: translate(-50%, -50%) translateY(-1px);
+            left: -12px;
+            top: 50%;
+          }
         }
       }
     }
