@@ -2,7 +2,7 @@
 
 const getStatusLine = (actual, expected) => {
   const actual_text = `Extracted ${actual} stroke${actual === 1 ? '' : 's'}`;
-  if (expected === undefined) {
+  if (!expected) {
     return {cls: 'error', message: `${actual_text}. True number unknown.`};
   } else if (actual !== expected) {
     return {cls: 'error', message: `${actual_text}, but expected ${expected}.`};
@@ -29,8 +29,13 @@ stages.strokes = class StrokesStage extends stages.AbstractStage {
                 'The final number of paths must agree with the stroke count ' +
                 'in the character metadata.');
     const include = this.include = {};
-    this.strokes = glyph.stages.strokes;
+    this.strokes = stroke_extractor.getStrokes(glyph).strokes;
     this.strokes.map((stroke) => include[stroke] = true);
+    if (glyph.stages.strokes && glyph.stages.strokes.length > 0 &&
+        glyph.stages.strokes.filter((x) => !include[x]).length === 0) {
+      this.strokes.map((stroke) => include[stroke] = false);
+      glyph.stages.strokes.map((stroke) => include[stroke] = true);
+    }
     this.refresh();
   }
   handleEvent(event, template) {

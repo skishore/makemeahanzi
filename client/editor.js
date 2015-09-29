@@ -23,6 +23,11 @@ const initialize = () => {
   }
 }
 
+const bindings = {
+  a: () => changeGlyph('getPreviousGlyph'),
+  d: () => changeGlyph('getNextGlyph'),
+};
+
 Template.editor.events({
   'click svg .selectable': function(event) {
     // We avoid the arrow function here so that this is bound to the template.
