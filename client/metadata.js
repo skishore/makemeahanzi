@@ -119,6 +119,13 @@ Template.metadata.helpers({
       label: `${x[0].toUpperCase()}${x.substr(1)}:`,
       value: glyph.metadata[x] || defaults[x] || unknown,
     }));
+    if (cjklib.radicals.radical_to_index_map.hasOwnProperty(glyph.character)) {
+      const index = cjklib.radicals.radical_to_index_map[glyph.character];
+      const primary = cjklib.radicals.primary_radical[index];
+      const variant = glyph.character !== primary;
+      result[0].extra = `; ${variant ? 'variant of ' : ''}` +
+                        `Kangxi radical ${index} ${variant ? primary : ''}`;
+    }
     for (let entry of result) {
       const element = $(`.metadata .field [data-field="${entry.field}"]`);
       if (element.text() != entry.value) {
