@@ -89,12 +89,16 @@ Template.metadata.events({
       }
     }
     const glyph = Session.get('editor.glyph');
-    if (glyph.metadata[this.field] !== value) {
+    const defaults = cjklib.getCharacterData(glyph.character);
+    if (value === defaults[this.field]) {
+      value = null;
+    }
+    if (value !== glyph.metadata[this.field]) {
       $(event.target).text('');
       glyph.metadata[this.field] = value;
       Session.set('editor.glyph', glyph);
     } else {
-      $(event.target).text(value || unknown);
+      $(event.target).text(value || defaults[this.field] || unknown);
     }
   },
 });
@@ -110,10 +114,17 @@ Template.metadata.helpers({
     if (!glyph) return;
     const defaults = cjklib.getCharacterData(glyph.character);
     const fields = ['definition', 'pinyin', 'strokes']
-    return fields.map((x) => ({
+    const result = fields.map((x) => ({
       field: x,
       label: `${x[0].toUpperCase()}${x.substr(1)}:`,
       value: glyph.metadata[x] || defaults[x] || unknown,
     }));
+    for (let entry of result) {
+      const element = $(`.metadata .field [data-field="${entry.field}"]`);
+      if (element.text() != entry.value) {
+        element.text('');
+      }
+    }
+    return result;
   },
 });
