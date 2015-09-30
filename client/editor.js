@@ -2,14 +2,14 @@
 
 Session.set('editor.glyph', undefined);
 
+let last_glyph = undefined;
 let stage = new stages.AbstractStage;
 
 const changeGlyph = (method, argument) => {
   argument = argument || Session.get('editor.glyph');
-  Meteor.call(method, argument, function(err, data) {
+  Meteor.call(method, argument, function(error, data) {
+    assert(!error);
     Session.set('editor.glyph', data);
-    stage = new stages.strokes(data);
-    stage.refresh();
   });
 }
 
@@ -50,9 +50,22 @@ Template.status.helpers({
   lines: () => Session.get('stage.status'),
 });
 
-Meteor.startup(function() {
-  $('body').on('keypress', function(e) {
-    var key = String.fromCharCode(e.which);
+Tracker.autorun(() => {
+  const glyph = Session.get('editor.glyph');
+  if (!glyph) return;
+  if (!last_glyph || glyph.character !== last_glyph.character) {
+    stage = new stages.strokes(glyph);
+    stage.refresh();
+  } else if (!_.isEqual(glyph.metadata, last_glyph.metadata)) {
+    stage.glyph = glyph;
+    stage.refresh();
+  }
+  last_glyph = glyph;
+});
+
+Meteor.startup(() => {
+  $('body').on('keypress', (event) => {
+    var key = String.fromCharCode(event.which);
     if (bindings.hasOwnProperty(key)) {
       bindings[key]();
     }
