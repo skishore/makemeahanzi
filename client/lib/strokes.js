@@ -1,11 +1,11 @@
 "use strict";
 
 const getStatusLine = (actual, expected) => {
-  const actual_text = `Extracted ${actual} stroke${actual === 1 ? '' : 's'}`;
+  const actual_text = `Selected ${actual} stroke${actual === 1 ? '' : 's'}`;
   if (!expected) {
     return {cls: 'error', message: `${actual_text}. True number unknown.`};
   } else if (actual !== expected) {
-    return {cls: 'error', message: `${actual_text}, but expected ${expected}.`};
+    return {cls: 'error', message: `${actual_text}, but need ${expected}.`};
   }
   return {cls: 'success', message: `${actual_text}.`};
 }
@@ -22,10 +22,10 @@ const getStrokePaths = (strokes, include, colors) => {
 
 stages.strokes = class StrokesStage extends stages.AbstractStage {
   constructor(glyph) {
-    super(glyph);
+    super();
     Session.set('stage.type', 'strokes');
     Session.set('stage.instructions',
-                'Choose paths to include in the glyph by clicking on them. ' +
+                'Select paths to include in the glyph by clicking on them. ' +
                 'The final number of paths must agree with the stroke count ' +
                 'in the character metadata.');
     const include = this.include = {};
@@ -37,18 +37,18 @@ stages.strokes = class StrokesStage extends stages.AbstractStage {
       glyph.stages.strokes.map((stroke) => include[stroke] = true);
     }
   }
-  handleEvent(event, template) {
+  handleEvent(glyph, event, template) {
     assert(this.include.hasOwnProperty(template.d));
     this.include[template.d] = !this.include[template.d];
-    this.glyph.stages.strokes = this.strokes.filter((x) => this.include[x]);
-    Session.set('editor.glyph', this.glyph);
+    glyph.stages.strokes = this.strokes.filter((x) => this.include[x]);
+    Session.set('editor.glyph', glyph);
   }
-  refresh() {
+  refresh(glyph) {
     Session.set('stage.paths',
                 getStrokePaths(this.strokes, this.include, this.colors));
-    const data = cjklib.getCharacterData(this.glyph.character);
-    const actual = this.glyph.stages.strokes.length;
-    const expected = this.glyph.metadata.strokes || data.strokes;
+    const data = cjklib.getCharacterData(glyph.character);
+    const actual = glyph.stages.strokes.length;
+    const expected = glyph.metadata.strokes || data.strokes;
     Session.set('stage.status', [getStatusLine(actual, expected)]);
   }
 }

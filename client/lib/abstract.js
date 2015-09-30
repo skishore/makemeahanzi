@@ -26,15 +26,14 @@ stages.AbstractStage = class AbstractStage {
     Session.set('stage.status', undefined);
     this.colors = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
                    '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
-    this.glyph = glyph;
   }
   // Update the stage's internal state and the editor.glyph Session variable
   // based on the event.
-  handleEvent(event, template) {
+  handleEvent(glyph, event, template) {
     assert(false, 'handleEvent was not implemented!');
   }
   // Refresh the stage UI based on the current state of this stage.
-  refresh() {
+  refresh(glyph) {
     assert(false, 'refresh was not implemented!');
   }
 }

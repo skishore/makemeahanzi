@@ -32,8 +32,7 @@ const bindings = {
 Template.editor.events({
   'click svg .selectable': function(event) {
     // We avoid the arrow function here so that this is bound to the template.
-    stage.handleEvent(event, this);
-    stage.refresh();
+    stage.handleEvent(Session.get('editor.glyph'), event, this);
   }
 });
 
@@ -55,11 +54,8 @@ Tracker.autorun(() => {
   if (!glyph) return;
   if (!last_glyph || glyph.character !== last_glyph.character) {
     stage = new stages.strokes(glyph);
-    stage.refresh();
-  } else if (!_.isEqual(glyph.metadata, last_glyph.metadata)) {
-    stage.glyph = glyph;
-    stage.refresh();
   }
+  stage.refresh(glyph);
   last_glyph = glyph;
 });
 
