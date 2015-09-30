@@ -2,6 +2,7 @@
 
 Session.set('editor.glyph', undefined);
 
+const types = ['path', 'bridges', 'strokes', 'analysis', 'order', 'settled'];
 let last_glyph = undefined;
 let stage = new stages.AbstractStage;
 
@@ -15,6 +16,17 @@ const changeGlyph = (method, argument) => {
 
 this.getGlyph = (selector) => changeGlyph('getGlyph', selector);
 
+const incrementStage = (amount) => {
+  const index = types.indexOf(stage._type);
+  if (index < 0) return;
+  const new_index = index + amount;
+  if (new_index < 0 || new_index >= types.length) return;
+  const glyph = Session.get('editor.glyph');
+  stage = new stages[types[new_index]](glyph);
+  stage._type = types[new_index];
+  stage.refresh(glyph);
+}
+
 const initialize = () => {
   const glyph = Session.get('editor.glyph');
   if (glyph === undefined) {
@@ -26,7 +38,9 @@ const initialize = () => {
 
 const bindings = {
   a: () => changeGlyph('getPreviousGlyph'),
+  w: () => incrementStage(-1),
   d: () => changeGlyph('getNextGlyph'),
+  s: () => incrementStage(1),
 };
 
 Template.editor.events({
@@ -53,7 +67,10 @@ Tracker.autorun(() => {
   const glyph = Session.get('editor.glyph');
   if (!glyph) return;
   if (!last_glyph || glyph.character !== last_glyph.character) {
-    stage = new stages.bridges(glyph);
+    let last_completed_stage = types[0];
+    types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
+    stage = new stages[last_completed_stage](glyph);
+    stage._type = last_completed_stage;
   }
   stage.refresh(glyph);
   last_glyph = glyph;
