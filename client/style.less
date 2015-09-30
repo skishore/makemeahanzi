@@ -51,6 +51,15 @@
           width: 96px;
         }
       }
+
+      .reference, .separator {
+        display: inline-block;
+        margin: 0 4px 4px 0;
+      }
+
+      .separator:last-child {
+        visibility: hidden;
+      }
     }
 
     .status {
@@ -70,7 +79,6 @@
 
           &:before {
             content: "•";
-            font-size: 1.5em;
             position: absolute;
             transform: translate(-50%, -50%) translateY(-1px);
             left: -12px;

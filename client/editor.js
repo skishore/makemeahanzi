@@ -61,9 +61,13 @@ Tracker.autorun(() => {
 
 Meteor.startup(() => {
   $('body').on('keypress', (event) => {
-    var key = String.fromCharCode(event.which);
+    const key = String.fromCharCode(event.which);
     if (bindings.hasOwnProperty(key)) {
       bindings[key]();
+    } else if ('1' <= key && key <= '9') {
+      const index = key.charCodeAt(0) - '1'.charCodeAt(0);
+      const href = $('.metadata .reference')[index].href;
+      window.open(href, '_blank').focus();
     }
   });
   cjklib.promise.then(initialize).catch(console.error.bind(console));

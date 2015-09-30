@@ -79,6 +79,13 @@
               data-field="{{field}}">{{value}}</span>{{extra}}
       </div>
     {{/each}}
+    <div class="field">
+      <label class="control-label">References:</label>
+        {{#each references}}
+          <a class="reference" href="{{href}}" target="_blank">{{label}}</a>
+          <div class="separator">•</div>
+        {{/each}}
+    </div>
   </div>
 </template>
 

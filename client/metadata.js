@@ -134,4 +134,21 @@ Template.metadata.helpers({
     }
     return result;
   },
+  references() {
+    const glyph = Session.get('editor.glyph');
+    if (!glyph) return;
+    const character = glyph.character;
+    return [{
+      href: 'http://www.archchinese.com/chinese_english_dictionary.html' +
+            `?find=${character}`,
+      label: 'Arch Chinese',
+    }, {
+      href: 'http://www.chineseetymology.org/CharacterEtymology.aspx' +
+            `?characterInput=${character}&submitButton1=Etymology`,
+      label: 'Chinese Etymology',
+    }, {
+      href: `https://en.wiktionary.org/wiki/${character}`,
+      label: 'Wiktionary',
+    }];
+  },
 });
