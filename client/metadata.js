@@ -1,5 +1,74 @@
 "use strict";
 
+const vowel_to_tone =
+    {0: "aeiouü", 1: "āēīōūǖ", 2: "áéíóúǘ", 3: "ǎěǐǒǔǚ", 4: "àèìòùǜ"};
+
+const tokenSet = (tokens) => {
+  const result = {};
+  tokens.split(' ').map((x) => result[x] = true);
+  return result;
+}
+
+const consonants = tokenSet('b p m f d t n l g k h j q x zh ch sh r z c s y w');
+const vowels = tokenSet('a ai an ang ao e ei en eng er i ia ian iang iao ie ' +
+                        'in ing io iong iu o ong ou u ua uai uan uang ue ui ' +
+                        'un uo v van vn');
+const two_syllables = tokenSet('iang iao ie io iong iu ua uai uan uang ue ui ' +
+                               'uo van');
+const unknown = '(unknown)';
+
+const numberedPinyinToTonePinyin = (numbered) => {
+  assert(numbered && numbered === numbered.toLowerCase());
+  let tone = 0;
+  if ('01234'.indexOf(numbered[numbered.length - 1]) >= 0) {
+    tone = parseInt(numbered[numbered.length - 1], 10);
+    numbered = numbered.substr(0, numbered.length - 1);
+  }
+  for (let i = 0; i < numbered.length; i++) {
+    for (let option = 1; option <= 4; option++) {
+      const index = vowel_to_tone[option].indexOf(numbered[i]);
+      if (index >= 0) {
+        tone = option;
+        const toneless = 'aeiouv'[index];
+        numbered = numbered.substr(0, i) + toneless + numbered.substr(i + 1);
+      }
+    }
+  }
+  let consonant = '';
+  for (let i = 1; i < numbered.length; i++) {
+    const candidate = numbered.substr(0, i);
+    if (consonants[candidate]) {
+      consonant = candidate;
+    } else {
+      break;
+    }
+  }
+  let vowel = numbered.substr(consonant.length);
+  assert((!consonant || consonants[consonant]) && vowels[vowel]);
+  if (two_syllables[vowel]) {
+    const index = 'aeiouv'.indexOf(vowel[1]);
+    vowel = vowel[0] + vowel_to_tone[tone][index] + vowel.substr(2);
+  } else {
+    const index = 'aeiouv'.indexOf(vowel[0]);
+    assert(index >= 0);
+    vowel = vowel_to_tone[tone][index] + vowel.substr(1);
+  }
+  return consonant + vowel.replace('v', 'ü');
+}
+
+const parseIntWithValidation = (text) => {
+  const result = parseInt(text, 10);
+  assert(!Number.isNaN(result));
+  return result;
+}
+
+const validators = {
+  pinyin: numberedPinyinToTonePinyin,
+  strokes: parseIntWithValidation,
+};
+
+window.validators = validators;
+
 Template.metadata.events({
   'keypress .value': function(event) {
     if (event.which === 13 /* \n */) {
@@ -10,7 +79,23 @@ Template.metadata.events({
   },
   'blur .value': function(event) {
     const text = $(event.target).text();
-    console.log(event, this, text);
+    let value = (text && text !== unknown ? text : null);
+    if (value && validators.hasOwnProperty(this.field)) {
+      try {
+        value = validators[this.field](text);
+      } catch (error) {
+        console.log(error);
+        value = null;
+      }
+    }
+    const glyph = Session.get('editor.glyph');
+    if (glyph.metadata[this.field] !== value) {
+      $(event.target).text('');
+      glyph.metadata[this.field] = value;
+      Session.set('editor.glyph', glyph);
+    } else {
+      $(event.target).text(value || unknown);
+    }
   },
 });
 
@@ -28,7 +113,7 @@ Template.metadata.helpers({
     return fields.map((x) => ({
       field: x,
       label: `${x[0].toUpperCase()}${x.substr(1)}:`,
-      value: glyph.metadata[x] || defaults[x] || '(unknown)',
+      value: glyph.metadata[x] || defaults[x] || unknown,
     }));
   },
 });
