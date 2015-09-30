@@ -53,7 +53,7 @@ Tracker.autorun(() => {
   const glyph = Session.get('editor.glyph');
   if (!glyph) return;
   if (!last_glyph || glyph.character !== last_glyph.character) {
-    stage = new stages.strokes(glyph);
+    stage = new stages.bridges(glyph);
   }
   stage.refresh(glyph);
   last_glyph = glyph;
