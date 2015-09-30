@@ -42,24 +42,6 @@ Template.editor.helpers({
   points: () => Session.get('stage.points'),
 });
 
-Template.metadata.helpers({
-  character() {
-    const glyph = Session.get('editor.glyph');
-    if (!glyph) return;
-    return glyph.character;
-  },
-  items() {
-    const glyph = Session.get('editor.glyph');
-    if (!glyph) return;
-    const defaults = cjklib.getCharacterData(glyph.character);
-    const fields = ['definition', 'pinyin', 'strokes']
-    return fields.map((x) => ({
-      field: `${x[0].toUpperCase()}${x.substr(1)}:`,
-      value: glyph.metadata[x] || defaults[x] || '(unknown)',
-    }));
-  },
-});
-
 Template.status.helpers({
   stage: () => Session.get('stage.type'),
   instructions: () => Session.get('stage.instructions'),
