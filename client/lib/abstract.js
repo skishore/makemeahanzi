@@ -2,6 +2,10 @@ if (this.stages !== undefined) throw new Error('Redifining stages global!');
 this.stages = {};
 
 stages.AbstractStage = class AbstractStage {
+  // Initialize this stage's internal state. The glyph may already include
+  // output from this stage. If the internal state can be initialized in such
+  // a way to achieve that output, it should be; doing so allows users to make
+  // some edits, switch to another glyph, and later resume where they left off.
   constructor(glyph) {
     // Session variables the interface by which the stage interacts with UI:
     //   - type - String type of this stage.
@@ -20,16 +24,17 @@ stages.AbstractStage = class AbstractStage {
     Session.set('stage.points', undefined);
     Session.set('stage.instructions', undefined);
     Session.set('stage.status', undefined);
+    this.colors = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
+                   '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
     this.glyph = glyph;
   }
-  getColors() {
-    return ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
-            '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
-  }
+  // Update the stage's internal state and the editor.glyph Session variable
+  // based on the event.
   handleEvent(event, template) {
     assert(false, 'handleEvent was not implemented!');
   }
-  refresh(glyph) {
+  // Refresh the stage UI based on the current state of this stage.
+  refresh() {
     assert(false, 'refresh was not implemented!');
   }
 }

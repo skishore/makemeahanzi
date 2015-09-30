@@ -9,6 +9,7 @@ const changeGlyph = (method, argument) => {
   Meteor.call(method, argument, function(err, data) {
     Session.set('editor.glyph', data);
     stage = new stages.strokes(data);
+    stage.refresh();
   });
 }
 
@@ -32,6 +33,7 @@ Template.editor.events({
   'click svg .selectable': function(event) {
     // We avoid the arrow function here so that this is bound to the template.
     stage.handleEvent(event, this);
+    stage.refresh();
   }
 });
 

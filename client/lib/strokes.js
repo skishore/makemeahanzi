@@ -36,19 +36,16 @@ stages.strokes = class StrokesStage extends stages.AbstractStage {
       this.strokes.map((stroke) => include[stroke] = false);
       glyph.stages.strokes.map((stroke) => include[stroke] = true);
     }
-    this.refresh();
   }
   handleEvent(event, template) {
     assert(this.include.hasOwnProperty(template.d));
     this.include[template.d] = !this.include[template.d];
-    this.refresh();
-  }
-  refresh(glyph) {
-    this.glyph = glyph || this.glyph;
     this.glyph.stages.strokes = this.strokes.filter((x) => this.include[x]);
     Session.set('editor.glyph', this.glyph);
+  }
+  refresh() {
     Session.set('stage.paths',
-                getStrokePaths(this.strokes, this.include, super.getColors()));
+                getStrokePaths(this.strokes, this.include, this.colors));
     const data = cjklib.getCharacterData(this.glyph.character);
     const actual = this.glyph.stages.strokes.length;
     const expected = this.glyph.metadata.strokes || data.strokes;
