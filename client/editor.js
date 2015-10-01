@@ -35,7 +35,8 @@ const incrementStage = (amount) => {
 const initialize = () => {
   const glyph = Session.get('editor.glyph');
   if (glyph === undefined) {
-    changeGlyph('getNextGlyph');
+    //changeGlyph('getNextGlyph');
+    getGlyph({character: '黽'});
   } else {
     getGlyph({character: glyph.character});
   }
@@ -58,7 +59,6 @@ Template.editor.events({
 });
 
 Template.editor.helpers({
-  stage: () => Session.get('stage.type'),
   paths: () => Session.get('stage.paths'),
   lines: () => Session.get('stage.lines'),
   points: () => Session.get('stage.points'),
@@ -66,7 +66,7 @@ Template.editor.helpers({
 
 Template.status.helpers({
   stage: () => Session.get('stage.type'),
-  instructions: () => Session.get('stage.instructions'),
+  template: () => `${Session.get('stage.type')}_stage`,
   lines: () => Session.get('stage.status'),
 });
 

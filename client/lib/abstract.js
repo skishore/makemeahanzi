@@ -19,11 +19,10 @@ stages.AbstractStage = class AbstractStage {
     // The class name 'selectable' is special for paths, lines, and points.
     // Including this class in cls for those objects will make them interactive
     // and will trigger the onClick callback when they are clicked.
-    Session.set('stage.type', undefined);
+    Session.set('stage.type', glyph);
     Session.set('stage.paths', undefined);
     Session.set('stage.lines', undefined);
     Session.set('stage.points', undefined);
-    Session.set('stage.instructions', undefined);
     Session.set('stage.status', undefined);
     this.colors = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
                    '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];

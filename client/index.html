@@ -43,7 +43,7 @@
 </template>
 
 <template name="editor">
-  <div id="editor" class="{{stage}}">
+  <div id="editor">
     <div class="left-pane">
       {{> metadata}}
       {{> status}}
@@ -94,7 +94,9 @@
     <div class="panel-heading">
       <h3 class="panel-title">Edit {{stage}}</h3>
     </div>
-    <div class="instructions">{{instructions}}</div>
+    <div class="template {{template}}">
+      {{> UI.dynamic template=template}}
+    </div>
     <ul class="log">
       {{#each lines}}
         <li class="line {{cls}}">{{message}}</li>

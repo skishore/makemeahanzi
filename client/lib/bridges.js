@@ -11,12 +11,7 @@ const removeBridge = (bridges, bridge) => {
 
 stages.bridges = class BridgesStage extends stages.AbstractStage {
   constructor(glyph) {
-    super();
-    Session.set('stage.type', 'bridges');
-    Session.set('stage.instructions',
-                'Connect each pair of points on the glyph outline such that ' +
-                'the segment connecting those points is part of some stroke ' +
-                'outline. Click on a bridge to drop it.');
+    super('bridges');
     const bridges = stroke_extractor.getBridges(glyph.stages.path);
     this.bridges = bridges.bridges;
     this.endpoints = [];

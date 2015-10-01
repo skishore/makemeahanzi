@@ -22,12 +22,7 @@ const getStrokePaths = (strokes, include, colors) => {
 
 stages.strokes = class StrokesStage extends stages.AbstractStage {
   constructor(glyph) {
-    super();
-    Session.set('stage.type', 'strokes');
-    Session.set('stage.instructions',
-                'Select paths to include in the glyph by clicking on them. ' +
-                'The final number of paths must agree with the stroke count ' +
-                'in the character metadata.');
+    super('strokes');
     const include = this.include = {};
     this.strokes = stroke_extractor.getStrokes(
         glyph.stages.path, glyph.stages.bridges).strokes;

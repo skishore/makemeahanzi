@@ -1,0 +1,18 @@
+<template name="path_stage">
+  Choose a source for glyph path data for this character:
+  {{#each options}}
+    <a class="option">{{label}}</a>
+    <div class="separator">•</div>
+  {{/each}}
+</template>
+
+<template name="bridges_stage">
+  Connect each pair of path points such that the segment between those points
+  is part of some stroke outline. Click on two points to connect them by a
+  bridge, or click on a bridge to drop it.
+</template>
+
+<template name="strokes_stage">
+  Select paths to include in the glyph by clicking on them. The final number of
+  strokes must agree with the stroke count in the character metadata.
+</template>

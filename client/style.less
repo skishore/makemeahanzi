@@ -63,8 +63,8 @@
     }
 
     .status {
-      .instructions {
-        margin: 8px;
+      .template {
+        margin: 8px 8px 4px;
       }
 
       .log {
@@ -104,6 +104,19 @@
       cursor: pointer;
       fill: blue;
       stroke: blue;
+    }
+  }
+}
+
+#editor .status .template {
+  &.path_stage {
+    .option, .separator {
+      display: inline-block;
+      margin-left: 4px;
+    }
+
+    .separator:last-child {
+      visibility: hidden;
     }
   }
 }
