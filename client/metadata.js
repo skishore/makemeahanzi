@@ -143,12 +143,12 @@ Template.metadata.helpers({
             `?find=${character}`,
       label: 'Arch Chinese',
     }, {
-      href: 'http://www.chineseetymology.org/CharacterEtymology.aspx' +
-            `?characterInput=${character}&submitButton1=Etymology`,
-      label: 'Chinese Etymology',
-    }, {
       href: `https://en.wiktionary.org/wiki/${character}`,
       label: 'Wiktionary',
+    }, {
+      href: 'http://www.yellowbridge.com/chinese/character-etymology.php' +
+            `?zi=${character}`,
+      label: 'YellowBridge',
     }];
   },
 });
