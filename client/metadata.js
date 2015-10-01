@@ -13,8 +13,8 @@ const consonants = tokenSet('b p m f d t n l g k h j q x zh ch sh r z c s y w');
 const vowels = tokenSet('a ai an ang ao e ei en eng er i ia ian iang iao ie ' +
                         'in ing io iong iu o ong ou u ua uai uan uang ue ui ' +
                         'un uo v van vn');
-const two_syllables = tokenSet('iang iao ie io iong iu ua uai uan uang ue ui ' +
-                               'uo van');
+const two_syllables = tokenSet('ia ian iang iao ie io iong iu ua uai uan ' +
+                               'uang ue ui uo van');
 const unknown = '(unknown)';
 
 const numberedPinyinToTonePinyin = (numbered) => {
@@ -93,7 +93,8 @@ Template.metadata.events({
     if (value === defaults[this.field]) {
       value = null;
     }
-    if (value !== glyph.metadata[this.field]) {
+    if (value !== glyph.metadata[this.field] &&
+        (value || glyph.metadata[this.field])) {
       $(event.target).text('');
       glyph.metadata[this.field] = value;
       Session.set('editor.glyph', glyph);
