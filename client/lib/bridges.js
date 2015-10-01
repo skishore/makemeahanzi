@@ -17,17 +17,16 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
                 'Connect each pair of points on the glyph outline such that ' +
                 'the segment connecting those points is part of some stroke ' +
                 'outline. Click on a bridge to drop it.');
-    const bridges = stroke_extractor.getBridges(glyph);
+    const bridges = stroke_extractor.getBridges(glyph.stages.path);
     this.bridges = bridges.bridges;
     this.endpoints = [];
     bridges.endpoints.map(
         (path) => this.endpoints = this.endpoints.concat(path));
     this.selected_point = undefined;
-    glyph.stages.strokes = glyph.stages.strokes || this.bridges;
+    glyph.stages.bridges = glyph.stages.bridges || this.bridges;
   }
   handleClickOnBridge(glyph, bridge) {
     glyph.stages.bridges = removeBridge(glyph.stages.bridges, bridge);
-    Session.set('editor.glyph', glyph);
   }
   handleClickOnPoint(glyph, point) {
     if (this.selected_point === undefined) {
@@ -47,7 +46,6 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
       return;
     }
     glyph.stages.bridges.push(bridge);
-    Session.set('editor.glyph', glyph);
   }
   handleEvent(glyph, event, template) {
     if (template.x1 !== undefined) {
@@ -87,7 +85,8 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
         stroke: color,
       }
     }));
-    const strokes = stroke_extractor.getStrokes(glyph);
+    const strokes = stroke_extractor.getStrokes(
+        glyph.stages.path, glyph.stages.bridges);
     const n = strokes.strokes.length;
     const message = `Extracted ${n} stroke${n == 1 ? '' : 's'}.`;
     Session.set('stage.status', strokes.log.concat([{message: message}]));
