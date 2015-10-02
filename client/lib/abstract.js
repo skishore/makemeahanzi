@@ -1,39 +1,56 @@
 if (this.stages !== undefined) throw new Error('Redifining stages global!');
 this.stages = {};
 
+// Each stage is supposed to compute a particular field for the glyph.
+// It computes an initial value for this field based only on previous stages,
+// then exposes a UI for manual correction of its output.
+//
+// NOTE: No stage methods should update the glyph. The framework will do so by
+// calling getStageOutput when appropriate.
 stages.AbstractStage = class AbstractStage {
-  // This method should fill in this stage's field in glyph.stages. The glyph
-  // may already have a value for this stage set. If so, this stage's internal
-  // state should be initialized in such a way to achieve that output, if that
-  // is possible; doing so allows users to make some edits, switch to another
-  // glyph, and then switch back and continue where they left off.
+  // Initialize this stage's values based only off previous stages. Then, if the
+  // glyph already has a value for this stage's field and it is possible to set
+  // up the internal state of this stage to achieve that value, set that state.
+  // This piece allows the user to resume editing a glyph.
+  //
+  // Typically, a stage will maintain a 'this.original' variable containing the
+  // value without any manual edits and a 'this.adjusted' variable containing
+  // the value with manual edits.
   constructor(glyph) {
+    // The super constructor should be passed a type, but subclass constructors
+    // will be passed a glyph instead, hence the variable name discrepancy.
+    this.type = glyph;
+    this.colors = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
+                   '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
     // Session variables the interface by which the stage interacts with UI:
     //   - type - String type of this stage.
     //   - paths - list of dicts with keys in [cls, d, fill, stroke].
     //   - lines - list of dicts with keys in [cls, stroke, x1, y1, x2, y2].
     //   - points - list of dicts with keys in [cls, cx, cy, fill, stroke].
-    //   - instructions - String instructions for the user
     //   - status - list of dicts with keys in [cls, message] to log.
     //
     // The class name 'selectable' is special for paths, lines, and points.
     // Including this class in cls for those objects will make them interactive
     // and will trigger the onClick callback when they are clicked.
-    Session.set('stage.type', glyph);
+    Session.set('stage.type', this.type);
     Session.set('stage.paths', undefined);
     Session.set('stage.lines', undefined);
     Session.set('stage.points', undefined);
     Session.set('stage.status', undefined);
-    this.colors = ['#0074D9', '#2ECC40', '#FFDC00', '#FF4136', '#7FDBFF',
-                   '#001F3F', '#39CCCC', '#3D9970', '#01FF70', '#FF851B'];
   }
-  // Update the stage's internal state and possibly update this stage's field
-  // in glyph.stages based on the event.
-  handleEvent(glyph, event, template) {
+  // Return this stage's value based on current internal state. The default
+  // implementation works for stages that follow the 'original/adjusted'
+  // convention described in the constructor.
+  getStageOutput() {
+    return this.adjusted;
+  }
+  // Update the stage's internal state based on the event.
+  handleEvent(event, template) {
     assert(false, 'handleEvent was not implemented!');
   }
-  // Refresh the stage UI based on the current state of this stage.
-  refresh(glyph) {
+  // Refresh the stage UI based on the current state of this stage and the
+  // glyph's character and current metadata.
+  refreshUI(character, metadata) {
     assert(false, 'refresh was not implemented!');
   }
 }

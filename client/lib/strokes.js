@@ -24,28 +24,27 @@ stages.strokes = class StrokesStage extends stages.AbstractStage {
   constructor(glyph) {
     super('strokes');
     const include = this.include = {};
-    this.strokes = stroke_extractor.getStrokes(
+    this.original = stroke_extractor.getStrokes(
         glyph.stages.path, glyph.stages.bridges).strokes;
-    this.strokes.map((stroke) => include[stroke] = true);
-    if (glyph.stages.strokes && glyph.stages.strokes.length > 0 &&
+    this.original.map((x) => this.include[x] = true);
+    if (glyph.stages.strokes &&
         glyph.stages.strokes.filter((x) => !include[x]).length === 0) {
-      this.strokes.map((stroke) => include[stroke] = false);
-      glyph.stages.strokes.map((stroke) => include[stroke] = true);
+      this.original.map((x) => this.include[x] = false);
+      glyph.stages.strokes.map((x) => include[x] = true);
     }
-    glyph.stages.strokes = this.strokes.filter((x) => this.include[x]);
+    this.adjusted = this.original.filter((x) => this.include[x]);
   }
-  handleEvent(glyph, event, template) {
+  handleEvent(event, template) {
     assert(this.include.hasOwnProperty(template.d));
     this.include[template.d] = !this.include[template.d];
-    glyph.stages.strokes = this.strokes.filter((x) => this.include[x]);
-    Session.set('editor.glyph', glyph);
+    this.adjusted = this.original.filter((x) => this.include[x]);
   }
-  refresh(glyph) {
+  refreshUI(character, metadata) {
     Session.set('stage.paths',
-                getStrokePaths(this.strokes, this.include, this.colors));
-    const data = cjklib.getCharacterData(glyph.character);
-    const actual = glyph.stages.strokes.length;
-    const expected = glyph.metadata.strokes || data.strokes;
+                getStrokePaths(this.original, this.include, this.colors));
+    const data = cjklib.getCharacterData(character);
+    const actual = this.adjusted.length;
+    const expected = metadata.strokes || data.strokes;
     Session.set('stage.status', [getStatusLine(actual, expected)]);
   }
 }

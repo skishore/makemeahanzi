@@ -13,52 +13,50 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
   constructor(glyph) {
     super('bridges');
     const bridges = stroke_extractor.getBridges(glyph.stages.path);
-    this.bridges = bridges.bridges;
-    this.endpoints = [];
-    bridges.endpoints.map(
-        (path) => this.endpoints = this.endpoints.concat(path));
+    this.original = bridges.bridges;
+    this.adjusted = glyph.stages.bridges || this.original;
+    this.endpoints = bridges.endpoints.reduce((x, y) => x.concat(y), []);
+    this.path = glyph.stages.path;
     this.selected_point = undefined;
-    glyph.stages.bridges = glyph.stages.bridges || this.bridges;
   }
-  handleClickOnBridge(glyph, bridge) {
-    glyph.stages.bridges = removeBridge(glyph.stages.bridges, bridge);
+  handleClickOnBridge(bridge) {
+    this.adjusted = removeBridge(this.adjusted, bridge);
   }
-  handleClickOnPoint(glyph, point) {
+  handleClickOnPoint(point) {
     if (this.selected_point === undefined) {
       this.selected_point = point;
-      this.refresh(glyph);
+      this.refreshUI();
       return;
     } else if (Point.equal(point, this.selected_point)) {
       this.selected_point = undefined;
-      this.refresh(glyph);
+      this.refreshUI();
       return;
     }
     const bridge = [point, this.selected_point];
     this.selected_point = undefined;
-    const without = removeBridge(glyph.stages.bridges, bridge);
-    if (without.length < glyph.stages.bridges.length) {
-      this.refresh(glyph);
+    const without = removeBridge(this.adjusted, bridge);
+    if (without.length < this.adjusted.length) {
+      this.refreshUI();
       return;
     }
-    glyph.stages.bridges.push(bridge);
+    this.adjusted.push(bridge);
   }
-  handleEvent(glyph, event, template) {
+  handleEvent(event, template) {
     if (template.x1 !== undefined) {
-      this.handleClickOnBridge(
-          glyph, [[template.x1, template.y1], [template.x2, template.y2]]);
+      const bridge = [[template.x1, template.y1], [template.x2, template.y2]];
+      this.handleClickOnBridge(bridge);
     } else if (template.cx !== undefined) {
-      this.handleClickOnPoint(glyph, [template.cx, template.cy]);
+      this.handleClickOnPoint([template.cx, template.cy]);
     }
   }
-  refresh(glyph) {
-    Session.set('stage.paths',
-                [{d: glyph.stages.path, fill: 'gray', stroke: 'gray'}]);
+  refreshUI() {
+    Session.set('stage.paths', [{d: this.path, fill: 'gray', stroke: 'gray'}]);
     const keys = {};
-    this.bridges.map((bridge) => {
+    this.original.map((bridge) => {
       keys[bridgeKey(bridge)] = true;
       keys[bridgeKey(bridge.reverse())] = true;
     });
-    Session.set('stage.lines', glyph.stages.bridges.map((bridge) => ({
+    Session.set('stage.lines', this.adjusted.map((bridge) => ({
       cls: 'selectable',
       stroke: keys[bridgeKey(bridge)] ? 'red' : 'purple',
       x1: bridge[0][0],
@@ -80,8 +78,7 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
         stroke: color,
       }
     }));
-    const strokes = stroke_extractor.getStrokes(
-        glyph.stages.path, glyph.stages.bridges);
+    const strokes = stroke_extractor.getStrokes(this.path, this.adjusted);
     const n = strokes.strokes.length;
     const message = `Extracted ${n} stroke${n == 1 ? '' : 's'}.`;
     Session.set('stage.status', strokes.log.concat([{message: message}]));

@@ -17,15 +17,15 @@ const changeGlyph = (method, argument) => {
 const constructStage = (type) => {
   const glyph = Session.get('editor.glyph');
   stage = new stages[type](glyph);
+  stage.refreshUI(glyph.character, glyph.metadata);
+  glyph.stages[stage.type] = stage.getStageOutput();
   Session.set('editor.glyph', glyph);
-  stage._type = type;
-  stage.refresh(glyph);
 }
 
 this.getGlyph = (selector) => changeGlyph('getGlyph', selector);
 
 const incrementStage = (amount) => {
-  const index = types.indexOf(stage._type);
+  const index = types.indexOf(stage.type);
   if (index < 0) return;
   const new_index = index + amount;
   if (new_index < 0 || new_index >= types.length) return;
@@ -52,8 +52,9 @@ const bindings = {
 Template.editor.events({
   'click svg .selectable': function(event) {
     // We avoid the arrow function here so that this is bound to the template.
+    stage.handleEvent(event, this);
     const glyph = Session.get('editor.glyph');
-    stage.handleEvent(glyph, event, this);
+    glyph.stages[stage.type] = stage.getStageOutput();
     Session.set('editor.glyph', glyph);
   }
 });
@@ -78,7 +79,7 @@ Tracker.autorun(() => {
     types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
     constructStage(last_completed_stage);
   }
-  stage.refresh(glyph);
+  stage.refreshUI(glyph.character, glyph.metadata);
   last_glyph = glyph;
 });
 
