@@ -17,13 +17,21 @@ const changeGlyph = (method, argument) => {
 const constructStage = (type) => {
   const glyph = Session.get('editor.glyph');
   stage = new stages[type](glyph);
-  stage.forceRefresh = () => {
-    const glyph = Session.get('editor.glyph');
-    stage.refreshUI(glyph.character, glyph.metadata);
-    glyph.stages[stage.type] = stage.getStageOutput();
+  stage.forceRefresh = forceRefresh;
+  stage.forceRefresh();
+}
+
+const forceRefresh = () => {
+  const glyph = Session.get('editor.glyph');
+  stage.refreshUI(glyph.character, glyph.metadata);
+  const output = stage.getStageOutput();
+  if (!_.isEqual(output, glyph.stages[stage.type])) {
+    glyph.stages[stage.type] = output;
+    for (let i = types.indexOf(stage.type) + 1; i < types.length; i++) {
+      glyph.stages[types[i]] = null;
+    }
     Session.set('editor.glyph', glyph);
   }
-  stage.forceRefresh();
 }
 
 this.getGlyph = (selector) => changeGlyph('getGlyph', selector);
