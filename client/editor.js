@@ -17,9 +17,13 @@ const changeGlyph = (method, argument) => {
 const constructStage = (type) => {
   const glyph = Session.get('editor.glyph');
   stage = new stages[type](glyph);
-  stage.refreshUI(glyph.character, glyph.metadata);
-  glyph.stages[stage.type] = stage.getStageOutput();
-  Session.set('editor.glyph', glyph);
+  stage.forceRefresh = () => {
+    const glyph = Session.get('editor.glyph');
+    stage.refreshUI(glyph.character, glyph.metadata);
+    glyph.stages[stage.type] = stage.getStageOutput();
+    Session.set('editor.glyph', glyph);
+  }
+  stage.forceRefresh();
 }
 
 this.getGlyph = (selector) => changeGlyph('getGlyph', selector);
@@ -35,8 +39,7 @@ const incrementStage = (amount) => {
 const initialize = () => {
   const glyph = Session.get('editor.glyph');
   if (glyph === undefined) {
-    //changeGlyph('getNextGlyph');
-    getGlyph({character: '黽'});
+    changeGlyph('getNextGlyph');
   } else {
     getGlyph({character: glyph.character});
   }
@@ -49,13 +52,11 @@ const bindings = {
   s: () => incrementStage(1),
 };
 
+// We avoid arrow functions in this map so that this is bound to the template.
 Template.editor.events({
   'click svg .selectable': function(event) {
-    // We avoid the arrow function here so that this is bound to the template.
     stage.handleEvent(event, this);
-    const glyph = Session.get('editor.glyph');
-    glyph.stages[stage.type] = stage.getStageOutput();
-    Session.set('editor.glyph', glyph);
+    stage.forceRefresh();
   }
 });
 
@@ -78,8 +79,9 @@ Tracker.autorun(() => {
     let last_completed_stage = types[0];
     types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
     constructStage(last_completed_stage);
+  } else if (!_.isEqual(glyph.metadata, last_glyph.metadata)) {
+    stage.refreshUI(glyph.character, glyph.metadata);
   }
-  stage.refreshUI(glyph.character, glyph.metadata);
   last_glyph = glyph;
 });
 

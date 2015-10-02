@@ -69,6 +69,7 @@ const validators = {
 
 window.validators = validators;
 
+// We avoid arrow functions in this map so that this is bound to the template.
 Template.metadata.events({
   'keypress .value': function(event) {
     if (event.which === 13 /* \n */) {

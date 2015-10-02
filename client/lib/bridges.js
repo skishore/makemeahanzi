@@ -25,18 +25,15 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
   handleClickOnPoint(point) {
     if (this.selected_point === undefined) {
       this.selected_point = point;
-      this.refreshUI();
       return;
     } else if (Point.equal(point, this.selected_point)) {
       this.selected_point = undefined;
-      this.refreshUI();
       return;
     }
     const bridge = [point, this.selected_point];
     this.selected_point = undefined;
     const without = removeBridge(this.adjusted, bridge);
     if (without.length < this.adjusted.length) {
-      this.refreshUI();
       return;
     }
     this.adjusted.push(bridge);
