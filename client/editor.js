@@ -47,7 +47,8 @@ const incrementStage = (amount) => {
 const initialize = () => {
   const glyph = Session.get('editor.glyph');
   if (glyph === undefined) {
-    changeGlyph('getNextGlyph');
+    //changeGlyph('getNextGlyph');
+    getGlyph({character: '龛'});
   } else {
     getGlyph({character: glyph.character});
   }
@@ -86,6 +87,7 @@ Tracker.autorun(() => {
   if (!last_glyph || glyph.character !== last_glyph.character) {
     let last_completed_stage = types[0];
     types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
+    last_completed_stage = 'analysis';
     constructStage(last_completed_stage);
   } else if (!_.isEqual(glyph.metadata, last_glyph.metadata)) {
     stage.refreshUI(glyph.character, glyph.metadata);

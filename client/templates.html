@@ -16,3 +16,12 @@
   Select paths to include in the glyph by clicking on them. The final number of
   strokes must agree with the stroke count in the character metadata.
 </template>
+
+<template name="analysis_stage">
+  Decompose the character into components, if possible. Additionally, if the
+  character is a phonetic-semantic compound, mark the components that play each
+  of those roles.
+
+  <div>Decomposition: {{decomposition}}</div>
+  <div>Kangxi radical: {{radical}}</div>
+</template>
