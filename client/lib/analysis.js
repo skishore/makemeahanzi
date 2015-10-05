@@ -83,6 +83,7 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
       Session.set('stages.analysis.radical', undefined);
     }
     stage = this;
+    checkAvailibility();
   }
   refreshUI() {
     Session.set('stage.paths', [{d: this.path, fill: 'gray', stroke: 'gray'}]);
@@ -159,10 +160,6 @@ Template.decomposition_tree.helpers({
   },
   details: (character) => {
     const glyph = Glyphs.get(character);
-    if (!glyph) {
-      return 'loading...';
-      return undefined;
-    }
     const data = cjklib.getCharacterData(character);
     let definition = glyph.metadata.definition || data.definition;
     let pinyin = glyph.metadata.pinyin || data.pinyin;
@@ -185,9 +182,25 @@ Template.decomposition_tree.helpers({
   },
 });
 
+const checkAvailibility = () => {
+  const characters = collectCharacters(Session.get('stages.analysis.tree'));
+  const missing = characters.filter((x) => !Glyphs.findOne({character: x}));
+  const log = [];
+  if (missing.length === 0) {
+    log.push({cls: 'success', message: 'All components available.'});
+  } else {
+    const error = `Missing components: ${missing.join(' ')}`;
+    log.push({cls: 'error', message: error});
+  }
+  if (stage && stage.type === 'analysis') {
+    Session.set('stage.status', log);
+  }
+}
+
 // We need to add the setTimeout here because client/lib is loaded before lib.
 // TODO(skishore): Find a better way to handle this load-order issue.
 Meteor.startup(() => Meteor.setTimeout(() => {
+  Tracker.autorun(checkAvailibility);
   cjklib.promise.then(() => Tracker.autorun(() => {
     const characters = collectCharacters(Session.get('stages.analysis.tree'));
     for (let character of [].concat(characters)) {
