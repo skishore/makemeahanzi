@@ -33,8 +33,12 @@
       <option {{selected type "compound"}}>Compound</option>
     </select>
     {{#if (equals type "character")}}
-      <div class="value" contenteditable="true">{{value}}</div>
-      - <a class="link" data-value="{{value}}">{{details value}}</a>
+      <div class="value" contenteditable="true">{{value}}</div> -
+      {{#if (equals value "?")}}
+        (unknown)
+      {{else}}
+        <a class="link" data-value="{{value}}">{{details value}}</a>
+      {{/if}}
     {{/if}}
     {{#if (equals type "compound")}}
       <select class="form-control compound-type">
