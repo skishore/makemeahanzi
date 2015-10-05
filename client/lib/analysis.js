@@ -34,7 +34,7 @@ const getSubtree = (tree, path) => {
 const parseDecomposition = (decomposition) => {
   const tree = decomposition ?
       decomposition_util.convertDecompositionToTree(decomposition) :
-      {type: 'unknown'};
+      {type: 'character', value: '?'};
   return augmentTreeWithTemplateData(tree, []);
 }
 
@@ -49,9 +49,6 @@ const setSubtreeType = (subtree, type) => {
     subtree.value = decomposition_util.ideograph_description_characters[0];
     subtree.children = [];
     fixSubtreeChildrenLength(subtree);
-  } else if (type === 'unknown') {
-    delete subtree.value;
-    delete subtree.children;
   } else {
     assert(false, `Unexpected subtree type: ${type}`);
   }
@@ -79,16 +76,7 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
   }
 }
 
-Template.analysis_stage.helpers({
-  radical: () => {
-    return Session.get('stages.analysis.radical') || '(unknown)';
-  },
-  tree: () => {
-    return Session.get('stages.analysis.tree');
-  },
-});
-
-Template.decomposition_tree.events({
+Template.analysis_stage.events({
   'keypress .value': function(event) {
     if (event.which === 13 /* \n */) {
       $(event.target).trigger('blur');
@@ -97,17 +85,28 @@ Template.decomposition_tree.events({
     event.stopPropagation();
   },
   'blur .value': function(event) {
+    // This line is not needed for correctness, so we ignore any errors in it.
+    try { window.getSelection().removeAllRanges(); } catch (e) { }
     const text = $(event.target).text();
     const subtree = getSubtree(stage.tree, this.path);
     if (text === subtree.value || subtree.type !== 'character') {
       return;
     }
-    if (text.length === 1) {
-      subtree.value = text;
+    const value = text.length === 1 ? text : '?';
+    if (value === subtree.value) {
+      $(event.target).text(value);
     } else {
-      setSubtreeType(subtree, 'unknown');
+      $(event.target).text('');
+      subtree.value = text.length === 1 ? text : '?';
     }
     stage.forceRefresh();
+  },
+  'click .value': function(event) {
+    const range = document.createRange();
+    range.selectNodeContents(event.target);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
   },
   'change .compound-type': function(event) {
     const type = $(event.target).val();
@@ -124,6 +123,15 @@ Template.decomposition_tree.events({
     const subtree = getSubtree(stage.tree, this.path);
     setSubtreeType(subtree, type);
     stage.forceRefresh();
+  },
+});
+
+Template.analysis_stage.helpers({
+  radical: () => {
+    return Session.get('stages.analysis.radical') || '(unknown)';
+  },
+  tree: () => {
+    return Session.get('stages.analysis.tree');
   },
 });
 

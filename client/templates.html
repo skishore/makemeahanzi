@@ -31,7 +31,6 @@
     <select class="form-control subtree-type">
       <option {{selected type "character"}}>Character</option>
       <option {{selected type "compound"}}>Compound</option>
-      <option {{selected type "unknown"}}>(unknown)</option>
     </select>
     {{#if (equals type "character")}}
       <span class="value" contenteditable="true">{{value}}</span>
