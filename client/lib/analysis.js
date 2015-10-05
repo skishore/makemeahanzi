@@ -11,6 +11,20 @@ const augmentTreeWithTemplateData = (tree, path) => {
   return tree;
 }
 
+const collectCharacters = (subtree, result) => {
+  if (!subtree) {
+    return [];
+  }
+  result = result || [];
+  if (subtree.type === 'character' && subtree.value !== '?') {
+    result.push(subtree.value);
+  }
+  for (let child of subtree.children || []) {
+    collectCharacters(child, result);
+  }
+  return result;
+}
+
 const fixSubtreeChildrenLength = (subtree) => {
   const data = decomposition_util.ids_data[subtree.value];
   assert(data, `Invalid ideograph description character: ${subtree.value}`);
@@ -20,20 +34,6 @@ const fixSubtreeChildrenLength = (subtree) => {
         subtree.children[i] || {type: 'character', value: '?'};
   }
   augmentTreeWithTemplateData(subtree, subtree.path);
-}
-
-const getGlyphsFromSubtree = (subtree, result) => {
-  if (!subtree) {
-    return [];
-  }
-  result = result || [];
-  if (subtree.type === 'character' && subtree.value !== '?') {
-    result.push(subtree.value);
-  }
-  for (let child of subtree.children || []) {
-    getGlyphsFromSubtree(child, result);
-  }
-  return result;
 }
 
 const getSubtree = (tree, path) => {
@@ -164,13 +164,41 @@ Template.decomposition_tree.helpers({
       return undefined;
     }
     const data = cjklib.getCharacterData(character);
-    const pinyin = glyph.metadata.pinyin || data.pinyin;
-    const definition = glyph.metadata.definition || data.definition;
-    return `${pinyin ? pinyin + ' - ' : ''}${definition}`;
+    let definition = glyph.metadata.definition || data.definition;
+    let pinyin = glyph.metadata.pinyin || data.pinyin;
+    let radical = '';
+    if (cjklib.radicals.radical_to_index_map.hasOwnProperty(character)) {
+      const index = cjklib.radicals.radical_to_index_map[character];
+      const primary = cjklib.radicals.primary_radical[index];
+      const variant = primary !== character;
+      radical = `; ${variant ? 'variant of ' : ''}` +
+                `Kangxi radical ${index} ${variant ? primary : ''}`;
+      if (variant && Glyphs.get(primary)) {
+        const glyph = Glyphs.get(primary);
+        const data = cjklib.getCharacterData(primary);
+        definition = definition || glyph.definition || data.definition;
+        pinyin = pinyin || glyph.pinyin || data.pinyin;
+      }
+    }
+    definition = definition || '(unknown)';
+    return `${pinyin ? pinyin + ' - ' : ''}${definition}${radical}`;
   },
 });
 
-Tracker.autorun(() => {
-  const glyphs = getGlyphsFromSubtree(Session.get('stages.analysis.tree'));
-  Meteor.subscribe('getAllGlyphs', glyphs);
-});
+// We need to add the setTimeout here because client/lib is loaded before lib.
+// TODO(skishore): Find a better way to handle this load-order issue.
+Meteor.startup(() => Meteor.setTimeout(() => {
+  cjklib.promise.then(() => Tracker.autorun(() => {
+    const characters = collectCharacters(Session.get('stages.analysis.tree'));
+    for (let character of [].concat(characters)) {
+      if (cjklib.radicals.radical_to_index_map.hasOwnProperty(character)) {
+        const index = cjklib.radicals.radical_to_index_map[character];
+        const primary = cjklib.radicals.primary_radical[index]
+        if (primary !== character) {
+          characters.push(primary);
+        }
+      }
+    }
+    Meteor.subscribe('getAllGlyphs', characters);
+  })).catch(console.error.bind(console));
+}, 0));
