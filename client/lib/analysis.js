@@ -123,6 +123,9 @@ Template.analysis_stage.events({
     selection.removeAllRanges();
     selection.addRange(range);
   },
+  'click .link': function(event) {
+    window.location.hash = $(event.target).attr('data-value');
+  },
   'change .compound-type': function(event) {
     const type = $(event.target).val();
     const subtree = getSubtree(stage.tree, this.path);
