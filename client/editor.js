@@ -34,7 +34,7 @@ const forceRefresh = () => {
   }
 }
 
-this.getGlyph = (selector) => changeGlyph('getGlyph', selector);
+this.getGlyph = (character) => changeGlyph('getGlyph', character);
 
 const incrementStage = (amount) => {
   const index = types.indexOf(stage.type);
@@ -48,7 +48,7 @@ const initialize = () => {
   const glyph = Session.get('editor.glyph');
   if (glyph === undefined) {
     //changeGlyph('getNextGlyph');
-    getGlyph({character: '龛'});
+    getGlyph('龛');
   } else {
     getGlyph({character: glyph.character});
   }

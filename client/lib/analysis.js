@@ -22,6 +22,20 @@ const fixSubtreeChildrenLength = (subtree) => {
   augmentTreeWithTemplateData(subtree, subtree.path);
 }
 
+const getGlyphsFromSubtree = (subtree, result) => {
+  if (!subtree) {
+    return [];
+  }
+  result = result || [];
+  if (subtree.type === 'character' && subtree.value !== '?') {
+    result.push(subtree.value);
+  }
+  for (let child of subtree.children || []) {
+    getGlyphsFromSubtree(child, result);
+  }
+  return result;
+}
+
 const getSubtree = (tree, path) => {
   let subtree = tree;
   for (let index of path) {
@@ -143,4 +157,20 @@ Template.decomposition_tree.helpers({
       value: value,
     }));
   },
+  details: (character) => {
+    const glyph = Glyphs.get(character);
+    if (!glyph) {
+      return 'loading...';
+      return undefined;
+    }
+    const data = cjklib.getCharacterData(character);
+    const pinyin = glyph.metadata.pinyin || data.pinyin;
+    const definition = glyph.metadata.definition || data.definition;
+    return `${pinyin ? pinyin + ' - ' : ''}${definition}`;
+  },
+});
+
+Tracker.autorun(() => {
+  const glyphs = getGlyphsFromSubtree(Session.get('stages.analysis.tree'));
+  Meteor.subscribe('getAllGlyphs', glyphs);
 });

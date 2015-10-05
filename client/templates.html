@@ -34,6 +34,7 @@
     </select>
     {{#if (equals type "character")}}
       <span class="value" contenteditable="true">{{value}}</span>
+      - {{details value}}
     {{/if}}
     {{#if (equals type "compound")}}
       <select class="form-control compound-type">
