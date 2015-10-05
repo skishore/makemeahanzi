@@ -11,6 +11,7 @@ const changeGlyph = (method, argument) => {
   Meteor.call(method, argument, function(error, data) {
     assert(!error);
     Session.set('editor.glyph', data);
+    window.location.hash = data.character;
   });
 }
 
@@ -34,8 +35,6 @@ const forceRefresh = () => {
   }
 }
 
-this.getGlyph = (character) => changeGlyph('getGlyph', character);
-
 const incrementStage = (amount) => {
   const index = types.indexOf(stage.type);
   if (index < 0) return;
@@ -44,13 +43,13 @@ const incrementStage = (amount) => {
   constructStage(types[new_index]);
 }
 
-const initialize = () => {
+const loadCharacter = () => {
+  const character = window.location.hash[1];
   const glyph = Session.get('editor.glyph');
-  if (glyph === undefined) {
-    //changeGlyph('getNextGlyph');
-    getGlyph('龛');
-  } else {
-    getGlyph({character: glyph.character});
+  if (!character) {
+    changeGlyph('getNextGlyph');
+  } else if (!glyph || glyph.character !== character) {
+    changeGlyph('getGlyph', character);
   }
 }
 
@@ -106,5 +105,6 @@ Meteor.startup(() => {
       window.open(href, '_blank').focus();
     }
   });
-  cjklib.promise.then(initialize).catch(console.error.bind(console));
+  $(window).on('hashchange', loadCharacter);
+  cjklib.promise.then(loadCharacter).catch(console.error.bind(console));
 });
