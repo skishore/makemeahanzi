@@ -130,7 +130,7 @@ Template.metadata.helpers({
     }
     for (let entry of result) {
       const element = $(`.metadata .field [data-field="${entry.field}"]`);
-      if (element.text() != entry.value) {
+      if (element.text() !== entry.value) {
         element.text('');
       }
     }

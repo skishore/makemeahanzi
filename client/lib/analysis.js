@@ -80,8 +80,8 @@ const updateCharacterValue = (target, text, path) => {
   } else {
     target.text('');
     subtree.value = text.length === 1 ? text : '?';
+    stage.forceRefresh();
   }
-  stage.forceRefresh();
 }
 
 const updateRadicalValue = (target, text) => {
@@ -91,8 +91,8 @@ const updateRadicalValue = (target, text) => {
   } else {
     target.text('');
     stage.radical = value;
+    stage.forceRefresh();
   }
-  stage.forceRefresh();
 }
 
 stages.analysis = class AnalysisStage extends stages.AbstractStage {
@@ -170,7 +170,9 @@ Template.analysis_stage.events({
 
 Template.analysis_stage.helpers({
   radical: () => {
-    return Session.get('stages.analysis.radical') || '(unknown)';
+    const result = Session.get('stages.analysis.radical') || '?';
+    $('.analysis_stage .radical .value').text('');
+    return result;
   },
   tree: () => {
     return Session.get('stages.analysis.tree');
