@@ -75,8 +75,7 @@
     {{#each items}}
       <div class="field">
         <label class="control-label">{{label}}</label>
-        <div class="value" contenteditable="true"
-             data-field="{{field}}">{{value}}</div>{{extra}}
+        {{{editable field value}}}{{extra}}
       </div>
     {{/each}}
     <div class="field">

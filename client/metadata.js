@@ -96,7 +96,6 @@ Template.metadata.events({
     }
     if (value !== glyph.metadata[this.field] &&
         (value || glyph.metadata[this.field])) {
-      $(event.target).text('');
       glyph.metadata[this.field] = value;
       Session.set('editor.glyph', glyph);
     } else {
@@ -127,12 +126,6 @@ Template.metadata.helpers({
       const variant = glyph.character !== primary;
       result[0].extra = `; ${variant ? 'variant of ' : ''}` +
                         `Kangxi radical ${index} ${variant ? primary : ''}`;
-    }
-    for (let entry of result) {
-      const element = $(`.metadata .field [data-field="${entry.field}"]`);
-      if (element.text() !== entry.value) {
-        element.text('');
-      }
     }
     return result;
   },

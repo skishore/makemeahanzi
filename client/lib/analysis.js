@@ -133,11 +133,14 @@ Template.analysis_stage.events({
     // This line is not needed for correctness, so we ignore any errors in it.
     try { window.getSelection().removeAllRanges(); } catch (e) { }
     const target = $(event.target);
+    const field = target.attr('data-field');
     const text = target.text();
-    if (this.path) {
+    if (field === 'character') {
       updateCharacterValue(target, text, this.path);
-    } else {
+    } else if (field === 'radical') {
       updateRadicalValue(target, text);
+    } else {
+      assert(false, `Unexpected editable field: ${field}`);
     }
   },
   'click .value': function(event) {
@@ -170,9 +173,7 @@ Template.analysis_stage.events({
 
 Template.analysis_stage.helpers({
   radical: () => {
-    const result = Session.get('stages.analysis.radical') || '?';
-    $('.analysis_stage .radical .value').text('');
-    return result;
+    return Session.get('stages.analysis.radical') || '?';
   },
   tree: () => {
     return Session.get('stages.analysis.tree');
