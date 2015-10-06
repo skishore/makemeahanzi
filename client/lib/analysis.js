@@ -69,6 +69,32 @@ const setSubtreeType = (subtree, type) => {
   subtree.type = type;
 }
 
+const updateCharacterValue = (target, text, path) => {
+  const subtree = getSubtree(stage.tree, path);
+  if (text === subtree.value || subtree.type !== 'character') {
+    return;
+  }
+  const value = text.length === 1 ? text : '?';
+  if (value === subtree.value) {
+    target.text(value);
+  } else {
+    target.text('');
+    subtree.value = text.length === 1 ? text : '?';
+  }
+  stage.forceRefresh();
+}
+
+const updateRadicalValue = (target, text) => {
+  const value = text.length > 0 ? text : '?';
+  if (value === stage.radical) {
+    target.text(value);
+  } else {
+    target.text('');
+    stage.radical = value;
+  }
+  stage.forceRefresh();
+}
+
 stages.analysis = class AnalysisStage extends stages.AbstractStage {
   constructor(glyph) {
     super('analysis');
@@ -106,19 +132,13 @@ Template.analysis_stage.events({
   'blur .value': function(event) {
     // This line is not needed for correctness, so we ignore any errors in it.
     try { window.getSelection().removeAllRanges(); } catch (e) { }
-    const text = $(event.target).text();
-    const subtree = getSubtree(stage.tree, this.path);
-    if (text === subtree.value || subtree.type !== 'character') {
-      return;
-    }
-    const value = text.length === 1 ? text : '?';
-    if (value === subtree.value) {
-      $(event.target).text(value);
+    const target = $(event.target);
+    const text = target.text();
+    if (this.path) {
+      updateCharacterValue(target, text, this.path);
     } else {
-      $(event.target).text('');
-      subtree.value = text.length === 1 ? text : '?';
+      updateRadicalValue(target, text);
     }
-    stage.forceRefresh();
   },
   'click .value': function(event) {
     const range = document.createRange();
@@ -207,6 +227,12 @@ const updateStatus = () => {
   } else if (characters.indexOf(radical) >= 0) {
     log.push({cls: 'success',
               message: `Radical ${radical} found in decomposition.`});
+  }
+  const nonradicals = (Array.from(radical || '')).filter(
+      (x) => !cjklib.radicals.radical_to_index_map.hasOwnProperty(x));
+  if (nonradicals.length > 0) {
+    log.push({cls: 'error', message: 'Radical field includes non-radicals: ' +
+                                     nonradicals.join(' ')});
   }
   if (stage && stage.type === 'analysis') {
     Session.set('stage.status', log);
