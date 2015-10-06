@@ -78,18 +78,16 @@ const updateCharacterValue = (target, text, path) => {
   if (value === subtree.value) {
     target.text(value);
   } else {
-    target.text('');
     subtree.value = text.length === 1 ? text : '?';
     stage.forceRefresh();
   }
 }
 
 const updateRadicalValue = (target, text) => {
-  const value = text.length > 0 ? text : '?';
+  const value = text && text !== '?' ? text : undefined;
   if (value === stage.radical) {
-    target.text(value);
+    target.text(value || '?');
   } else {
-    target.text('');
     stage.radical = value;
     stage.forceRefresh();
   }
@@ -100,8 +98,8 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
     super('analysis');
     this.path = glyph.stages.path;
     const data = cjklib.getCharacterData(glyph.character);
-    this.radical = undefined;
     this.tree = parseDecomposition(data.decomposition);
+    this.radical = undefined;
     if (cjklib.radicals.radical_to_index_map.hasOwnProperty(glyph.character)) {
       this.radical = glyph.character;
     } else if (data.kangxi_index) {
@@ -111,13 +109,15 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
       const included = radicals.filter((x) => characters.indexOf(x) >= 0);
       this.radical = included.length === 1 ? included[0] : radicals.join('');
     }
+    this.etymology = {};
     stage = this;
     updateStatus();
   }
   refreshUI() {
     Session.set('stage.paths', [{d: this.path, fill: 'gray', stroke: 'gray'}]);
-    Session.set('stages.analysis.radical', this.radical);
     Session.set('stages.analysis.tree', this.tree);
+    Session.set('stages.analysis.radical', this.radical);
+    Session.set('stages.analysis.etymology', this.etymology);
   }
 }
 
@@ -163,6 +163,11 @@ Template.analysis_stage.events({
     fixSubtreeChildrenLength(subtree);
     stage.forceRefresh();
   },
+  'change .etymology-type': function(event) {
+    const type = $(event.target).val();
+    stage.etymology.type = type;
+    stage.forceRefresh();
+  },
   'change .subtree-type': function(event) {
     const type = $(event.target).val();
     const subtree = getSubtree(stage.tree, this.path);
@@ -172,15 +177,27 @@ Template.analysis_stage.events({
 });
 
 Template.analysis_stage.helpers({
+  decomposition_data: () => {
+    return Session.get('stages.analysis.tree');
+  },
+  etymology_data: () => {
+    const result = Session.get('stages.analysis.etymology');
+    result.type = result.type || 'ideographic';
+    if (['ideographic', 'pictographic'].indexOf(result.type) >= 0) {
+      result.value = result.value || '?';
+    } else {
+      result.phonetic = result.phonetic || '?';
+      result.semantic = result.semantic || '?';
+      result.sense = result.sense || '?';
+    }
+    return result;
+  },
   radical: () => {
     return Session.get('stages.analysis.radical') || '?';
   },
-  tree: () => {
-    return Session.get('stages.analysis.tree');
-  },
 });
 
-Template.decomposition_tree.helpers({
+Template.tree.helpers({
   compounds: (value) => {
     return decomposition_util.ideograph_description_characters.map( (x) => ({
       compound: x,

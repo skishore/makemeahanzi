@@ -22,23 +22,18 @@
   character is a phonetic-semantic compound, mark the components that play each
   of those roles.
 
-  {{> decomposition_tree tree}}
+  <div class="decomposition">
+    {{> tree decomposition_data}}
+  </div>
   <div class="radical">
     <label class="control-label">Radical:</label>
     {{{editable "radical" radical}}}
   </div>
-  <div class="etymology">
-    <label class="control-label">Etymology:</label>
-    <select class="form-control subtree-type">
-      <option {{selected type "ideographic"}}>Ideographic</option>
-      <option {{selected type "pictographic"}}>Pictographic</option>
-      <option {{selected type "pictophonetic"}}>Pictophonetic</option>
-    </select>
-  </div>
+  {{> etymology etymology_data}}
 </template>
 
-<template name="decomposition_tree">
-  <div class="decomposition-tree" style="margin-left: {{path.length}}em;">
+<template name="tree">
+  <div class="tree" style="margin-left: {{path.length}}em;">
     <select class="form-control subtree-type">
       <option {{selected type "character"}}>Character</option>
       <option {{selected type "compound"}}>Compound</option>
@@ -60,6 +55,32 @@
     {{/if}}
   </div>
   {{#each children}}
-    {{> decomposition_tree this}}
+    {{> tree this}}
   {{/each}}
+</template>
+
+<template name="etymology">
+  <div class="etymology">
+    <label class="control-label">Etymology:</label>
+    <select class="form-control etymology-type">
+      <option {{selected type "ideographic"}}>Ideographic</option>
+      <option {{selected type "pictographic"}}>Pictographic</option>
+      <option {{selected type "pictophonetic"}}>Pictophonetic</option>
+    </select>
+    {{#if (equals type "pictophonetic")}}
+      <div class="component">
+        <div class="header">Semantic component:</div>
+        {{{editable "semantic" semantic}}}
+        {{{editable "sense" sense}}}
+      </div>
+      <div class="component">
+        <div class="header">Phonetic component:</div>
+        {{{editable "phonetic" phonetic}}}
+      </div>
+    {{else}}
+      <div class="component">
+        {{{editable "etymology" value}}}
+      </div>
+    {{/if}}
+  </div>
 </template>

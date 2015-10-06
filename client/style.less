@@ -46,7 +46,7 @@ div.value[contenteditable="true"] {
     width: 680px;
 
     .metadata, .status {
-      margin: 16px 16px 0 16px;
+      margin: 16px;
     }
 
     .metadata {
@@ -137,20 +137,31 @@ div.value[contenteditable="true"] {
       margin: 0 4px 0 0;
     }
 
-    .decomposition-tree, .etymology, .radical {
-      margin: 12px 0;
-    }
+    .decomposition, .radical, .etymology {
+      margin: 18px 0;
 
-    .form-control {
-      background-color: #f8f8f8;
-      display: inline-block;
-      height: 28px;
-      padding: 0;
-      width: auto;
-    }
+      .tree, .component {
+        margin: 6px 0;
+      }
 
-    .link {
-      cursor: pointer;
+      .form-control {
+        background-color: #f8f8f8;
+        display: inline-block;
+        height: 28px;
+        padding: 0;
+        width: auto;
+      }
+
+      .header {
+        display: inline-block;
+        margin-right: 4px;
+        text-align: right;
+        width: 150px;
+      }
+
+      .link {
+        cursor: pointer;
+      }
     }
   }
 }
