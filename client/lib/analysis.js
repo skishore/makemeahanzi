@@ -144,6 +144,9 @@ Template.analysis_stage.events({
     }
   },
   'click .value': function(event) {
+    if ($(event.target).text().length !== 1) {
+      return;
+    }
     const range = document.createRange();
     range.selectNodeContents(event.target);
     const selection = window.getSelection();
