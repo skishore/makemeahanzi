@@ -23,7 +23,18 @@
   of those roles.
 
   {{> decomposition_tree tree}}
-  <div>Kangxi radical: {{radical}}</div>
+  <div class="radical">
+    <label class="control-label">Radical:</label>
+    <div class="value" contenteditable="true">{{radical}}</div>
+  </div>
+  <div class="etymology">
+    <label class="control-label">Etymology:</label>
+    <select class="form-control subtree-type">
+      <option {{selected type "ideographic"}}>Ideographic</option>
+      <option {{selected type "pictographic"}}>Pictographic</option>
+      <option {{selected type "pictophonetic"}}>Pictophonetic</option>
+    </select>
+  </div>
 </template>
 
 <template name="decomposition_tree">

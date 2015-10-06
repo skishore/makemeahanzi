@@ -74,19 +74,23 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
     super('analysis');
     this.path = glyph.stages.path;
     const data = cjklib.getCharacterData(glyph.character);
+    this.radical = undefined;
     this.tree = parseDecomposition(data.decomposition);
-    if (data.kangxi_index) {
+    if (cjklib.radicals.radical_to_index_map.hasOwnProperty(glyph.character)) {
+      this.radical = glyph.character;
+    } else if (data.kangxi_index) {
+      const characters = collectCharacters(this.tree);
       const index = data.kangxi_index[0];
-      Session.set('stages.analysis.radical',
-                  cjklib.radicals.index_to_radical_map[index].join(' '));
-    } else {
-      Session.set('stages.analysis.radical', undefined);
+      const radicals = cjklib.radicals.index_to_radical_map[index];
+      const included = radicals.filter((x) => characters.indexOf(x) >= 0);
+      this.radical = included.length === 1 ? included[0] : radicals.join('');
     }
     stage = this;
-    checkAvailibility();
+    updateStatus();
   }
   refreshUI() {
     Session.set('stage.paths', [{d: this.path, fill: 'gray', stroke: 'gray'}]);
+    Session.set('stages.analysis.radical', this.radical);
     Session.set('stages.analysis.tree', this.tree);
   }
 }
@@ -185,8 +189,9 @@ Template.decomposition_tree.helpers({
   },
 });
 
-const checkAvailibility = () => {
+const updateStatus = () => {
   const characters = collectCharacters(Session.get('stages.analysis.tree'));
+  const radical = Session.get('stages.analysis.radical');
   const missing = characters.filter((x) => !Glyphs.findOne({character: x}));
   const log = [];
   if (missing.length === 0) {
@@ -194,6 +199,14 @@ const checkAvailibility = () => {
   } else {
     const error = `Missing components: ${missing.join(' ')}`;
     log.push({cls: 'error', message: error});
+  }
+  if (!radical || radical.length === 0) {
+    log.push({cls: 'error', message: 'No radical selected.'});
+  } else if (radical.length > 1) {
+    log.push({cls: 'error', message: 'Multiple radicals selected.'});
+  } else if (characters.indexOf(radical) >= 0) {
+    log.push({cls: 'success',
+              message: `Radical ${radical} found in decomposition.`});
   }
   if (stage && stage.type === 'analysis') {
     Session.set('stage.status', log);
@@ -203,7 +216,7 @@ const checkAvailibility = () => {
 // We need to add the setTimeout here because client/lib is loaded before lib.
 // TODO(skishore): Find a better way to handle this load-order issue.
 Meteor.startup(() => Meteor.setTimeout(() => {
-  Tracker.autorun(checkAvailibility);
+  Tracker.autorun(updateStatus);
   cjklib.promise.then(() => Tracker.autorun(() => {
     const characters = collectCharacters(Session.get('stages.analysis.tree'));
     for (let character of [].concat(characters)) {
