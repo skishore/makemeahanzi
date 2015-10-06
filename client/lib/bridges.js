@@ -5,7 +5,7 @@ const bridgeKey = (bridge) => bridge.map(Point.key).join('-');
 const removeBridge = (bridges, bridge) => {
   const keys = {};
   keys[bridgeKey(bridge)] = true;
-  keys[bridgeKey(bridge.reverse())] = true;
+  keys[bridgeKey([bridge[1], bridge[0]])] = true;
   return bridges.filter((bridge) => !keys[bridgeKey(bridge)]);
 }
 
@@ -51,7 +51,7 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
     const keys = {};
     this.original.map((bridge) => {
       keys[bridgeKey(bridge)] = true;
-      keys[bridgeKey(bridge.reverse())] = true;
+      keys[bridgeKey([bridge[1], bridge[0]])] = true;
     });
     Session.set('stage.lines', this.adjusted.map((bridge) => ({
       cls: 'selectable',
