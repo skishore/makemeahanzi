@@ -53,4 +53,10 @@ stages.AbstractStage = class AbstractStage {
   refreshUI(character, metadata) {
     assert(false, 'refresh was not implemented!');
   }
+  // Throws an error if there is an issue with this stage's output. The default
+  // implementation simply checks that none of the log lines are errors.
+  validate() {
+    const log = Session.get('stage.status');
+    assert(log && log.filter((x) => x.cls === 'error').length === 0);
+  }
 }

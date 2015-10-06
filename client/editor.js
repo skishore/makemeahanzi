@@ -17,16 +17,24 @@ const changeGlyph = (method, argument) => {
 
 const constructStage = (type) => {
   const glyph = Session.get('editor.glyph');
+  const current = glyph.stages[type];
+  if (!current || current.sentinel) {
+    delete glyph.stages[type];
+  }
   stage = new stages[type](glyph);
   stage.forceRefresh = forceRefresh;
-  stage.forceRefresh();
+  stage.forceRefresh(true /* from_construct_stage */);
 }
 
-const forceRefresh = () => {
+const forceRefresh = (from_construct_stage) => {
   const glyph = Session.get('editor.glyph');
   stage.refreshUI(glyph.character, glyph.metadata);
-  const output = stage.getStageOutput();
-  if (!_.isEqual(output, glyph.stages[stage.type])) {
+  let output = stage.getStageOutput();
+  const current = glyph.stages[stage.type];
+  if (from_construct_stage && (!current || current.sentinel)) {
+    output = {sentinel: true};
+  }
+  if (!_.isEqual(output, current)) {
     glyph.stages[stage.type] = output;
     for (let i = types.indexOf(stage.type) + 1; i < types.length; i++) {
       glyph.stages[types[i]] = null;
@@ -40,6 +48,10 @@ const incrementStage = (amount) => {
   if (index < 0) return;
   const new_index = index + amount;
   if (new_index < 0 || new_index >= types.length) return;
+  if (amount > 0) {
+    stage.validate();
+    stage.forceRefresh();
+  }
   constructStage(types[new_index]);
 }
 
@@ -86,10 +98,12 @@ Tracker.autorun(() => {
   if (!last_glyph || glyph.character !== last_glyph.character) {
     let last_completed_stage = types[0];
     types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
-    last_completed_stage = 'analysis';
     constructStage(last_completed_stage);
-  } else if (!_.isEqual(glyph.metadata, last_glyph.metadata)) {
-    stage.refreshUI(glyph.character, glyph.metadata);
+  } else {
+    // TODO(skishore): Save the glyph at this point.
+    if (!_.isEqual(glyph.metadata, last_glyph.metadata)) {
+      stage.refreshUI(glyph.character, glyph.metadata);
+    }
   }
   last_glyph = glyph;
 });
