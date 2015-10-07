@@ -2,6 +2,8 @@
 
 let stage = undefined;
 
+const etymology_fields = ['hint', 'phonetic', 'semantic']
+
 // Methods for querying and modifying decomposition trees.
 
 const augmentTreeWithTemplateData = (tree, path) => {
@@ -145,7 +147,7 @@ const initializeEtymology = (glyph, components) => {
     }
     return result;
   }
-  return {};
+  return {type: 'ideographic'};
 }
 
 stages.analysis = class AnalysisStage extends stages.AbstractStage {
@@ -158,6 +160,13 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
     this.etymology = initializeEtymology(glyph, components);
     stage = this;
     updateStatus();
+  }
+  getStageOutput() {
+    return {
+      decomposition: decomposition_util.convertTreeToDecomposition(this.tree),
+      etymology: _.extend({}, this.etymology),
+      radical: this.radical,
+    }
   }
   refreshUI() {
     Session.set('stage.paths', [{d: this.path, fill: 'gray', stroke: 'gray'}]);
@@ -185,7 +194,7 @@ Template.analysis_stage.events({
       updateCharacterValue(target, text, this.path);
     } else if (field === 'radical') {
       updateRadicalValue(target, text);
-    } else if (['hint', 'phonetic', 'semantic'].indexOf(field) >= 0) {
+    } else if (etymology_fields.indexOf(field) >= 0) {
       updateEtymology(target, text, field);
     } else {
       assert(false, `Unexpected editable field: ${field}`);
@@ -216,10 +225,7 @@ Template.analysis_stage.events({
   },
   'change .etymology-type': function(event) {
     const type = $(event.target).val();
-    if ((type === 'pictophonetic') !==
-        (stage.etymology.type === 'pictophonetic')) {
-      delete stage.etymology.hint;
-    }
+    etymology_fields.map((x) => delete stage.etymology[x]);
     stage.etymology.type = type;
     stage.forceRefresh();
   },
@@ -237,7 +243,6 @@ Template.analysis_stage.helpers({
   },
   etymology_data: () => {
     const result = Session.get('stages.analysis.etymology');
-    result.type = result.type || 'ideographic';
     result.hint = result.hint || '?';
     if (result.type === 'pictophonetic') {
       result.phonetic = result.phonetic || '?';
