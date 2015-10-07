@@ -2,6 +2,8 @@
 
 let stage = undefined;
 
+// Methods for querying and modifying decomposition trees.
+
 const augmentTreeWithTemplateData = (tree, path) => {
   tree.path = path;
   const children = tree.children ? tree.children.length : 0;
@@ -11,7 +13,7 @@ const augmentTreeWithTemplateData = (tree, path) => {
   return tree;
 }
 
-const collectCharacters = (subtree, result) => {
+const collectComponents = (subtree, result) => {
   if (!subtree) {
     return [];
   }
@@ -20,7 +22,7 @@ const collectCharacters = (subtree, result) => {
     result.push(subtree.value);
   }
   for (let child of subtree.children || []) {
-    collectCharacters(child, result);
+    collectComponents(child, result);
   }
   return result;
 }
@@ -69,6 +71,8 @@ const setSubtreeType = (subtree, type) => {
   subtree.type = type;
 }
 
+// Methods for handling updates to various non-decomposition analysis fields.
+
 const updateCharacterValue = (target, text, path) => {
   const subtree = getSubtree(stage.tree, path);
   if (text === subtree.value || subtree.type !== 'character') {
@@ -93,23 +97,55 @@ const updateRadicalValue = (target, text) => {
   }
 }
 
+// Methods for initializing different fields of the analysis.
+
+const initializeDecompositionTree = (character) => {
+  const data = cjklib.getCharacterData(character);
+  return parseDecomposition(data.decomposition);
+}
+
+const initializeRadical = (character, components) => {
+  if (cjklib.radicals.radical_to_index_map.hasOwnProperty(character)) {
+    return character;
+  }
+  const data = cjklib.getCharacterData(character);
+  if (data.kangxi_index) {
+    const index = data.kangxi_index[0];
+    const radicals = cjklib.radicals.index_to_radical_map[index];
+    const included = radicals.filter((x) => components.indexOf(x) >= 0);
+    return included.length === 1 ? included[0] : radicals.join('');
+  }
+  return undefined;
+}
+
+const initializeEtymology = (glyph, components) => {
+  const data = cjklib.getCharacterData(glyph.character);
+  const target = pinyin_util.dropTones(glyph.pinyin || data.pinyin || '');
+  const phonetic_match = (component) => {
+    const component_data = cjklib.getCharacterData(component);
+    const attempt = pinyin_util.dropTones(component_data.pinyin || '');
+    return attempt && attempt === target;
+  }
+  const phonetic = components.filter(phonetic_match);
+  if (phonetic.length === 1) {
+    const result = {type: 'pictophonetic', phonetic: phonetic[0]};
+    const semantic = components.filter((x) => !phonetic_match(x));
+    if (semantic.length === 1) {
+      result.semantic = semantic[0];
+    }
+    return result;
+  }
+  return {};
+}
+
 stages.analysis = class AnalysisStage extends stages.AbstractStage {
   constructor(glyph) {
     super('analysis');
     this.path = glyph.stages.path;
-    const data = cjklib.getCharacterData(glyph.character);
-    this.tree = parseDecomposition(data.decomposition);
-    this.radical = undefined;
-    if (cjklib.radicals.radical_to_index_map.hasOwnProperty(glyph.character)) {
-      this.radical = glyph.character;
-    } else if (data.kangxi_index) {
-      const characters = collectCharacters(this.tree);
-      const index = data.kangxi_index[0];
-      const radicals = cjklib.radicals.index_to_radical_map[index];
-      const included = radicals.filter((x) => characters.indexOf(x) >= 0);
-      this.radical = included.length === 1 ? included[0] : radicals.join('');
-    }
-    this.etymology = {};
+    this.tree = initializeDecompositionTree(glyph.character);
+    const components = collectComponents(this.tree);
+    this.radical = initializeRadical(glyph.character, components);
+    this.etymology = initializeEtymology(glyph, components);
     stage = this;
     updateStatus();
   }
@@ -233,9 +269,9 @@ Template.tree.helpers({
 });
 
 const updateStatus = () => {
-  const characters = collectCharacters(Session.get('stages.analysis.tree'));
+  const components = collectComponents(Session.get('stages.analysis.tree'));
   const radical = Session.get('stages.analysis.radical');
-  const missing = characters.filter((x) => !Glyphs.findOne({character: x}));
+  const missing = components.filter((x) => !Glyphs.findOne({character: x}));
   const log = [];
   if (missing.length === 0) {
     log.push({cls: 'success', message: 'All components available.'});
@@ -247,7 +283,7 @@ const updateStatus = () => {
     log.push({cls: 'error', message: 'No radical selected.'});
   } else if (radical.length > 1) {
     log.push({cls: 'error', message: 'Multiple radicals selected.'});
-  } else if (characters.indexOf(radical) >= 0) {
+  } else if (components.indexOf(radical) >= 0) {
     log.push({cls: 'success',
               message: `Radical ${radical} found in decomposition.`});
   }
@@ -267,16 +303,16 @@ const updateStatus = () => {
 Meteor.startup(() => Meteor.setTimeout(() => {
   Tracker.autorun(updateStatus);
   cjklib.promise.then(() => Tracker.autorun(() => {
-    const characters = collectCharacters(Session.get('stages.analysis.tree'));
-    for (let character of [].concat(characters)) {
-      if (cjklib.radicals.radical_to_index_map.hasOwnProperty(character)) {
-        const index = cjklib.radicals.radical_to_index_map[character];
+    const components = collectComponents(Session.get('stages.analysis.tree'));
+    for (let component of [].concat(components)) {
+      if (cjklib.radicals.radical_to_index_map.hasOwnProperty(component)) {
+        const index = cjklib.radicals.radical_to_index_map[component];
         const primary = cjklib.radicals.primary_radical[index]
-        if (primary !== character) {
-          characters.push(primary);
+        if (primary !== component) {
+          components.push(primary);
         }
       }
     }
-    Meteor.subscribe('getAllGlyphs', characters);
+    Meteor.subscribe('getAllGlyphs', components);
   })).catch(console.error.bind(console));
 }, 0));
