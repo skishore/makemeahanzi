@@ -153,7 +153,7 @@ const initializeEtymology = (glyph, components) => {
 stages.analysis = class AnalysisStage extends stages.AbstractStage {
   constructor(glyph) {
     super('analysis');
-    this.path = glyph.stages.path;
+    this.strokes = glyph.stages.strokes;
     this.tree = initializeDecompositionTree(glyph.character);
     const components = collectComponents(this.tree);
     this.radical = initializeRadical(glyph.character, components);
@@ -169,7 +169,8 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
     }
   }
   refreshUI() {
-    Session.set('stage.paths', [{d: this.path, fill: 'gray', stroke: 'gray'}]);
+    const to_path = (x) => ({d: x, fill: 'gray', stroke: 'gray'});
+    Session.set('stage.paths', this.strokes.map(to_path));
     Session.set('stages.analysis.tree', this.tree);
     Session.set('stages.analysis.radical', this.radical);
     Session.set('stages.analysis.etymology', this.etymology);
