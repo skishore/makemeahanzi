@@ -87,6 +87,16 @@ const updateCharacterValue = (target, text, path) => {
   }
 }
 
+const updateEtymology = (target, text, type) => {
+  const value = text && text !== '?' ? text : undefined;
+  if (value === stage.etymology[type]) {
+    target.text(value || '?');
+  } else {
+    stage.etymology[type] = value;
+    stage.forceRefresh();
+  }
+}
+
 const updateRadicalValue = (target, text) => {
   const value = text && text !== '?' ? text : undefined;
   if (value === stage.radical) {
@@ -175,6 +185,8 @@ Template.analysis_stage.events({
       updateCharacterValue(target, text, this.path);
     } else if (field === 'radical') {
       updateRadicalValue(target, text);
+    } else if (['hint', 'phonetic', 'semantic'].indexOf(field) >= 0) {
+      updateEtymology(target, text, field);
     } else {
       assert(false, `Unexpected editable field: ${field}`);
     }
@@ -204,6 +216,10 @@ Template.analysis_stage.events({
   },
   'change .etymology-type': function(event) {
     const type = $(event.target).val();
+    if ((type === 'pictophonetic') !==
+        (stage.etymology.type === 'pictophonetic')) {
+      delete stage.etymology.hint;
+    }
     stage.etymology.type = type;
     stage.forceRefresh();
   },
@@ -222,12 +238,10 @@ Template.analysis_stage.helpers({
   etymology_data: () => {
     const result = Session.get('stages.analysis.etymology');
     result.type = result.type || 'ideographic';
-    if (['ideographic', 'pictographic'].indexOf(result.type) >= 0) {
-      result.value = result.value || '?';
-    } else {
+    result.hint = result.hint || '?';
+    if (result.type === 'pictophonetic') {
       result.phonetic = result.phonetic || '?';
       result.semantic = result.semantic || '?';
-      result.sense = result.sense || '?';
     }
     return result;
   },

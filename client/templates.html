@@ -69,18 +69,12 @@
     </select>
     {{#if (equals type "pictophonetic")}}
       <div class="component">
-        <div class="header">Semantic component:</div>
         {{{editable "semantic" semantic}}}
-        {{{editable "sense" sense}}}
-      </div>
-      <div class="component">
-        <div class="header">Phonetic component:</div>
-        {{{editable "phonetic" phonetic}}}
+        ({{{editable "hint" hint}}}) provides the meaning while
+        {{{editable "phonetic" phonetic}}} provides the pronunciation.
       </div>
     {{else}}
-      <div class="component">
-        {{{editable "etymology" value}}}
-      </div>
+      {{{editable "hint" hint}}}
     {{/if}}
   </div>
 </template>
