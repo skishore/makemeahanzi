@@ -7,6 +7,7 @@ stages.path = class PathStage extends stages.AbstractStage {
     super('path');
     this.adjusted = glyph.stages.path;
     this.character = glyph.character;
+    this.alternative = undefined;
     this.error = 'No path data.';
     stage = this;
   }
@@ -20,11 +21,22 @@ stages.path = class PathStage extends stages.AbstractStage {
     const d = this.adjusted;
     Session.set('stage.paths', [{d: d, fill: 'gray', stroke: 'gray'}]);
     Session.set('stage.status', d ? [] : [{cls: 'error', message: this.error}]);
+    Session.set('stages.path.alternative', this.alternative);
   }
 }
 
 // We avoid arrow functions in this map so that this is bound to the template.
 Template.path_stage.events({
+  'blur .value': function(event) {
+    const text = $(event.target).text();
+    const value = text.length === 1 ? text : undefined;
+    if (value === stage.alternative) {
+      $(event.target).text(value || '?');
+    } else {
+      stage.alternative = value;
+      stage.forceRefresh();
+    }
+  },
   'click .option': function(event) {
     const label = this.label;
     const character = stage.character;
@@ -52,6 +64,24 @@ Template.path_stage.events({
 });
 
 Template.path_stage.helpers({
+  alternative: () => Session.get('stages.path.alternative') || '?',
   options: () => [{font: 'arphic/gkai00mp.ttf', label: 'AR PL KaitiM GB'},
                   {font: 'arphic/UKaiCN.ttf', label: 'AR PL UKai'}],
+});
+
+Meteor.startup(() => {
+  Tracker.autorun(() => {
+    const alternative = Session.get('stages.path.alternative');
+    if (alternative) {
+      Meteor.subscribe('getAllGlyphs', [alternative]);
+      const glyph = Glyphs.findOne({character: alternative});
+      if (!glyph) {
+        stage.onGetPath(`Could not find glyph for ${alternative}.`);
+      } else if (!glyph.stages.path) {
+        stage.onGetPath(`No available path for ${alternative}.`);
+      } else {
+        stage.onGetPath(undefined, glyph.stages.path);
+      }
+    }
+  });
 });

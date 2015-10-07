@@ -1,9 +1,15 @@
 <template name="path_stage">
   Choose a source for glyph path data for this character:
-  {{#each options}}
-    <a class="option">{{label}}</a>
-    <div class="separator">•</div>
-  {{/each}}
+  <div class="options">
+    {{#each options}}
+      <a class="option">{{label}}</a>
+      <div class="separator">•</div>
+    {{/each}}
+  </div>
+  <div class="alternative">
+    Alternatively, use part of a glyph from another character:
+    {{{editable "alternative" alternative}}}
+  </div>
 </template>
 
 <template name="bridges_stage">

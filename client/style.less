@@ -123,17 +123,25 @@ div.value[contenteditable="true"] {
 
 #editor .status .template {
   &.path_stage {
-    .option, .separator {
+    .options {
       display: inline-block;
-      margin-left: 4px;
+
+      .option, .separator {
+        display: inline-block;
+        margin-left: 4px;
+      }
+
+      .option {
+        cursor: pointer;
+      }
+
+      .separator:last-child {
+        visibility: hidden;
+      }
     }
 
-    .option {
-      cursor: pointer;
-    }
-
-    .separator:last-child {
-      visibility: hidden;
+    .alternative {
+      margin: 8px 0;
     }
   }
 
