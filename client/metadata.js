@@ -15,13 +15,6 @@ const validators = {
 
 // We avoid arrow functions in this map so that this is bound to the template.
 Template.metadata.events({
-  'keypress .value': function(event) {
-    if (event.which === 13 /* \n */) {
-      $(event.target).trigger('blur');
-      event.preventDefault();
-    }
-    event.stopPropagation();
-  },
   'blur .value': function(event) {
     const text = $(event.target).text();
     let value = (text && text !== unknown ? text : null);
@@ -45,9 +38,6 @@ Template.metadata.events({
     } else {
       $(event.target).text(value || defaults[this.field] || unknown);
     }
-  },
-  'click .link': function(event) {
-    window.location.hash = $(event.target).attr('data-value');
   },
 });
 

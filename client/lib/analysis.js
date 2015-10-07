@@ -178,13 +178,6 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
 }
 
 Template.analysis_stage.events({
-  'keypress .value': function(event) {
-    if (event.which === 13 /* \n */) {
-      $(event.target).trigger('blur');
-      event.preventDefault();
-    }
-    event.stopPropagation();
-  },
   'blur .value': function(event) {
     // This line is not needed for correctness, so we ignore any errors in it.
     try { window.getSelection().removeAllRanges(); } catch (e) { }
@@ -200,19 +193,6 @@ Template.analysis_stage.events({
     } else {
       assert(false, `Unexpected editable field: ${field}`);
     }
-  },
-  'click .value': function(event) {
-    if ($(event.target).text().length !== 1) {
-      return;
-    }
-    const range = document.createRange();
-    range.selectNodeContents(event.target);
-    const selection = window.getSelection();
-    selection.removeAllRanges();
-    selection.addRange(range);
-  },
-  'click .link': function(event) {
-    window.location.hash = $(event.target).attr('data-value');
   },
   'change .compound-type': function(event) {
     const type = $(event.target).val();
