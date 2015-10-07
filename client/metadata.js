@@ -46,6 +46,9 @@ Template.metadata.events({
       $(event.target).text(value || defaults[this.field] || unknown);
     }
   },
+  'click .link': function(event) {
+    window.location.hash = $(event.target).attr('data-value');
+  },
 });
 
 Template.metadata.helpers({
@@ -67,9 +70,13 @@ Template.metadata.helpers({
     if (cjklib.radicals.radical_to_index_map.hasOwnProperty(glyph.character)) {
       const index = cjklib.radicals.radical_to_index_map[glyph.character];
       const primary = cjklib.radicals.primary_radical[index];
-      const variant = glyph.character !== primary;
-      result[0].extra = `; ${variant ? 'variant of ' : ''}` +
-                        `Kangxi radical ${index} ${variant ? primary : ''}`;
+      result[0].separator = '; ';
+      result[0].extra = `Kangxi radical ${index}`;
+      if (glyph.character !== primary) {
+        result[0].separator += 'variant of ';
+        result[0].extra = `<a class="link" data-value="${primary}">` +
+                          `${result[0].extra} ${primary}</a>`;
+      }
     }
     return result;
   },
