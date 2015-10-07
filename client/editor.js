@@ -19,7 +19,7 @@ const constructStage = (type) => {
   const glyph = Session.get('editor.glyph');
   const current = glyph.stages[type];
   if (!current || current.sentinel) {
-    delete glyph.stages[type];
+    glyph.stages[type] = null;
   }
   stage = new stages[type](glyph);
   stage.forceRefresh = forceRefresh;
@@ -65,11 +65,19 @@ const loadCharacter = () => {
   }
 }
 
+const resetStage = () => {
+  const glyph = Session.get('editor.glyph');
+  glyph.stages[stage.type] = null;
+  Session.set('editor.glyph', glyph);
+  constructStage(stage.type);
+}
+
 const bindings = {
   a: () => changeGlyph('getPreviousGlyph'),
-  w: () => incrementStage(-1),
   d: () => changeGlyph('getNextGlyph'),
+  r: resetStage,
   s: () => incrementStage(1),
+  w: () => incrementStage(-1),
 };
 
 // We avoid arrow functions in this map so that this is bound to the template.
