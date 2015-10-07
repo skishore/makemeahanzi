@@ -20,7 +20,10 @@ stages.path = class PathStage extends stages.AbstractStage {
   refreshUI() {
     const d = this.adjusted;
     Session.set('stage.paths', [{d: d, fill: 'gray', stroke: 'gray'}]);
-    Session.set('stage.status', d ? [] : [{cls: 'error', message: this.error}]);
+    Session.set(
+      'stage.status',
+      d ? [{cls: 'success', message: 'Got path data.'}]
+        : [{cls: 'error', message: this.error}]);
     Session.set('stages.path.alternative', this.alternative);
   }
 }

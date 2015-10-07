@@ -78,6 +78,7 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
     const strokes = stroke_extractor.getStrokes(this.path, this.adjusted);
     const n = strokes.strokes.length;
     const message = `Extracted ${n} stroke${n == 1 ? '' : 's'}.`;
-    Session.set('stage.status', strokes.log.concat([{message: message}]));
+    const entry = {cls: 'success', message: message};
+    Session.set('stage.status', strokes.log.concat([entry]));
   }
 }
