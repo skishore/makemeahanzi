@@ -107,11 +107,15 @@ stages.order = class OrderStage extends stages.AbstractStage {
     this.medians = this.strokes.map(findPathMedian);
   }
   refreshUI() {
-    const to_path = (x) => ({d: x, fill: 'gray', stroke: 'black'});
+    const to_path = (x) => ({d: x, fill: 'gray', stroke: 'gray'});
     Session.set('stage.paths', this.strokes.map(to_path));
+    const colors = this.colors;
     const points = [];
-    const to_point = (x) => ({cx: x[0], cy: x[1], fill: 'red', stroke: 'red'});
-    this.medians.map((x) => x.map((y) => points.push(y)));
-    Session.set('stage.points', points.map(to_point));
+    const to_point = (x, i) => {
+      const color = colors[i % colors.length];
+      return {cx: x[0], cy: x[1], fill: color, stroke: color};
+    }
+    this.medians.map((x, i) => x.map((y) => points.push(to_point(y, i))));
+    Session.set('stage.points', points);
   }
 }
