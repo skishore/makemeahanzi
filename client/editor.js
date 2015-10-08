@@ -22,6 +22,7 @@ const constructStage = (type) => {
     glyph.stages[type] = null;
   }
   stage = new stages[type](glyph);
+  assert(stage.type === type);
   stage.forceRefresh = forceRefresh;
   stage.forceRefresh(true /* from_construct_stage */);
 }
