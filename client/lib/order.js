@@ -1,33 +1,10 @@
 "use strict";
 
-const convertSegmentToBezier = (segment) => {
-  const start = {x: segment.start[0], y: segment.start[1]};
-  if (!segment.control) {
-    segment.control = [(segment.start[0] + segment.end[0])/2,
-                       (segment.start[1] + segment.end[1])/2];
-  }
-  const control = {x: segment.control[0], y: segment.control[1]};
-  const end = {x: segment.end[0], y: segment.end[1]};
-  return new Bezier([start, control, end]);
-}
-
-const findApproximatePolygon = (path, error) => {
-  assert(error);
-  const paths = svg.convertSVGPathToPaths(path);
-  assert(paths.length === 1);
-  const result = [];
-  for (let segment of paths[0]) {
-    const bezier = convertSegmentToBezier(segment);
-    const n = Math.max(bezier.length()/error, 1);
-    const points = bezier.getLUT(n);
-    points.map((point) => result.push([point.x, point.y]));
-  }
-  return result;
-}
-
 const findPathMedian = (path) => {
   const result = [];
-  const polygon = findApproximatePolygon(path, 32);
+  const paths = svg.convertSVGPathToPaths(path);
+  assert(paths.length === 1, `Got stroke with multiple loops: ${path}`);
+  const polygon = svg.getPolygonApproximation(paths[0]);
   for (let i = 0; i < polygon.length; i++) {
     const point1 = polygon[i];
     const point2 = polygon[(i + 1) % polygon.length];
