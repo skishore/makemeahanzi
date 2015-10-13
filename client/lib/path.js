@@ -32,7 +32,7 @@ stages.path = class PathStage extends stages.AbstractStage {
 Template.path_stage.events({
   'blur .value': function(event) {
     const text = $(event.target).text();
-    const value = text.length === 1 ? text : undefined;
+    const value = text.length === 1 && text !== '?' ? text : undefined;
     if (value === stage.alternative) {
       $(event.target).text(value || '?');
     } else {
@@ -47,6 +47,7 @@ Template.path_stage.events({
     Session.set('modal.text', `Loading ${label}...`);
     Session.set('modal.value', 0);
     opentype.load(this.font, (error, font) => {
+      stage.alternative = undefined;
       if (error) {
         stage.onGetPath(`Error loading ${label}: ${error}`);
         return;
