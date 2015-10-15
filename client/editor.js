@@ -15,12 +15,18 @@ const changeGlyph = (method, argument) => {
   });
 }
 
+const clearStageSessionKeys = (type) => {
+  Object.keys(Session.keys).filter((x) => x.startsWith(`stages.${type}.`))
+                           .map((x) => Session.set(x, undefined));
+}
+
 const constructStage = (type) => {
   const glyph = Session.get('editor.glyph');
   const current = glyph.stages[type];
   if (!current || current.sentinel) {
     glyph.stages[type] = null;
   }
+  clearStageSessionKeys(stage.type);
   stage = new stages[type](glyph);
   assert(stage.type === type);
   stage.forceRefresh = forceRefresh;

@@ -223,7 +223,7 @@ Template.analysis_stage.helpers({
     return Session.get('stages.analysis.tree');
   },
   etymology_data: () => {
-    const result = Session.get('stages.analysis.etymology');
+    const result = Session.get('stages.analysis.etymology') || {};
     result.hint = result.hint || '?';
     if (result.type === 'pictophonetic') {
       result.phonetic = result.phonetic || '?';
@@ -293,7 +293,7 @@ const updateStatus = () => {
     log.push({cls: 'error', message: 'Radical field includes non-radicals: ' +
                                      nonradicals.join(' ')});
   }
-  if (stage && stage.type === 'analysis') {
+  if (Session.get('stage.type') === 'analysis') {
     Session.set('stage.status', log);
   }
 }
