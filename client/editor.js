@@ -107,6 +107,17 @@ Tracker.autorun(() => {
   if (!last_glyph || glyph.character !== last_glyph.character) {
     let last_completed_stage = types[0];
     types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
+
+    // TODO(skishore): This block is a terrible hack used to force us through
+    // the analysis stage and into the order stage.
+    if (last_completed_stage === 'strokes') {
+      const intermediate = new stages.analysis(glyph);
+      glyph.stages.analysis = intermediate.getStageOutput();
+      return Session.set('editor.glyph', glyph);
+    } else if (last_completed_stage === 'analysis') {
+      last_completed_stage = 'order';
+    }
+
     constructStage(last_completed_stage);
   } else {
     // TODO(skishore): Save the glyph at this point.
