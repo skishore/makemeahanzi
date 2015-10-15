@@ -1,5 +1,6 @@
 "use strict";
 
+let stage = undefined;
 let voronoi = undefined;
 
 const findLongestShortestPath = (adjacency, vertices, node) => {
@@ -92,6 +93,10 @@ stages.order = class OrderStage extends stages.AbstractStage {
         glyph.stages.analysis.decomposition);
     Session.set('stages.order.components',
                 decomposition_util.collectComponents(tree));
+    stage = this;
+  }
+  onAllComponentsReady() {
+    console.log(Session.get('stages.order.components'));
   }
   refreshUI() {
     const to_path = (x) => ({d: x, fill: 'gray', stroke: 'gray'});
@@ -118,5 +123,13 @@ Meteor.startup(() => {
   Tracker.autorun(() => {
     const components = Session.get('stages.order.components') || [];
     Meteor.subscribe('getAllGlyphs', components);
+  });
+  Tracker.autorun(() => {
+    const components = Session.get('stages.order.components') || [];
+    const found = components.filter((x) => Glyphs.findOne({character: x}));
+    if (found.length === components.length &&
+        Session.get('stage.type') === 'order') {
+      stage.onAllComponentsReady();
+    }
   });
 });
