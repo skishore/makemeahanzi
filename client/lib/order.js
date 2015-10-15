@@ -46,9 +46,7 @@ const findStrokeMedian = (stroke) => {
       (x) => diagram.vertices[x[0]].include && diagram.vertices[x[1]].include);
   voronoi.recycle(diagram);
 
-  if (edges.length === 0) {
-    return [];
-  }
+  assert(edges.length > 0);
   const adjacency = {};
   for (let edge of edges) {
     adjacency[edge[0]] = adjacency[edge[0]] || [];
@@ -62,7 +60,26 @@ const findStrokeMedian = (stroke) => {
 
   const tolerance = 4;
   const simple = simplify(points.map((x) => ({x: x[0], y: x[1]})), tolerance);
-  return simple.slice(1).map((x, i) => [simple[i], x].map((x) => [x.x, x.y]));
+  return simple.map((x) => [x.x, x.y]);
+}
+
+const selectPrincipalLine = (medians) => {
+  const starts = medians.map((x) => [x[0], x[x.length - 1]]);
+  const ends = medians.map((x) => [x[x.length - 1], x[0]]);
+  const endpoints = starts.concat(ends);
+  let best_pair = undefined;
+  let best_score = 0;
+  for (let endpoint1 of endpoints) {
+    for (let endpoint2 of endpoints) {
+      const difference = Point.subtract(endpoint1[0], endpoint2[0]);
+      const score = Math.min(Math.abs(difference[0]), Math.abs(difference[1]));
+      if (score > best_score) {
+        [best_pair, best_score] = [[endpoint1, endpoint2], score];
+      }
+    }
+  }
+  assert(best_pair);
+  return best_pair;
 }
 
 stages.order = class OrderStage extends stages.AbstractStage {
@@ -70,17 +87,36 @@ stages.order = class OrderStage extends stages.AbstractStage {
     super('order');
     this.strokes = glyph.stages.strokes;
     this.medians = this.strokes.map(findStrokeMedian);
+    this.principal = selectPrincipalLine(this.medians);
+    const tree = decomposition_util.convertDecompositionToTree(
+        glyph.stages.analysis.decomposition);
+    Session.set('stages.order.components',
+                decomposition_util.collectComponents(tree));
   }
   refreshUI() {
     const to_path = (x) => ({d: x, fill: 'gray', stroke: 'gray'});
     Session.set('stage.paths', this.strokes.map(to_path));
     const colors = this.colors;
-    const lines = [];
-    const to_line = (x, i) => {
-      const c = colors[i % colors.length];
-      return {x1: x[0][0], y1: x[0][1], x2: x[1][0], y2: x[1][1], stroke: c};
+    const points = [];
+    const to_point = (x, i) => {
+      const color = colors[i % colors.length];
+      return {cx: x[0], cy: x[1], fill: color, stroke: color};
     }
-    this.medians.map((x, i) => x.map((y) => lines.push(to_line(y, i))));
-    Session.set('stage.lines', lines);
+    this.medians.map((x, i) => x.map((y) => points.push(to_point(y, i))));
+    Session.set('stage.points', points);
+    Session.set('stage.lines', [{
+      x1: this.principal[0][0][0],
+      y1: this.principal[0][0][1],
+      x2: this.principal[1][0][0],
+      y2: this.principal[1][0][1],
+      stroke: 'black',
+    }]);
   }
 }
+
+Meteor.startup(() => {
+  Tracker.autorun(() => {
+    const components = Session.get('stages.order.components') || [];
+    Meteor.subscribe('getAllGlyphs', components);
+  });
+});

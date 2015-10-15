@@ -15,18 +15,8 @@ const augmentTreeWithTemplateData = (tree, path) => {
   return tree;
 }
 
-const collectComponents = (subtree, result) => {
-  if (!subtree) {
-    return [];
-  }
-  result = result || [];
-  if (subtree.type === 'character' && subtree.value !== '?') {
-    result.push(subtree.value);
-  }
-  for (let child of subtree.children || []) {
-    collectComponents(child, result);
-  }
-  return result;
+const collectComponents = (subtree) => {
+  return subtree ? decomposition_util.collectComponents(subtree) : [];
 }
 
 const fixSubtreeChildrenLength = (subtree) => {
