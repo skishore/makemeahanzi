@@ -111,9 +111,9 @@ const updateRadicalValue = (target, text) => {
 
 // Methods for initializing different fields of the analysis.
 
-const initializeDecompositionTree = (character) => {
+const initializeDecompositionTree = (analysis, character) => {
   const data = cjklib.getCharacterData(character);
-  return parseDecomposition(data.decomposition);
+  return parseDecomposition(analysis.decomposition || data.decomposition);
 }
 
 const initializeRadical = (character, components) => {
@@ -154,10 +154,13 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
   constructor(glyph) {
     super('analysis');
     this.strokes = glyph.stages.strokes;
-    this.tree = initializeDecompositionTree(glyph.character);
+    const analysis = glyph.stages.analysis || {};
+    this.tree = initializeDecompositionTree(analysis, glyph.character);
     const components = collectComponents(this.tree);
-    this.radical = initializeRadical(glyph.character, components);
-    this.etymology = initializeEtymology(glyph, components);
+    this.radical = analysis.radical ||
+                   initializeRadical(glyph.character, components);
+    this.etymology = analysis.etymology ||
+                     initializeEtymology(glyph, components);
     stage = this;
     updateStatus();
   }
