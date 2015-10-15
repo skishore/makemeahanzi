@@ -64,7 +64,7 @@ Template.metadata.helpers({
       result[0].extra = `Kangxi radical ${index}`;
       if (glyph.character !== primary) {
         result[0].separator += 'variant of ';
-        result[0].extra = `<a class="link" data-value="${primary}">` +
+        result[0].extra = `<a class="link" href="#${primary}">` +
                           `${result[0].extra} ${primary}</a>`;
       }
     }

@@ -49,7 +49,7 @@
       {{#if (equals value "?")}}
         (unknown)
       {{else}}
-        <a class="link" data-value="{{value}}">{{details value}}</a>
+        <a class="link" href="#{{value}}">{{details value}}</a>
       {{/if}}
     {{/if}}
     {{#if (equals type "compound")}}

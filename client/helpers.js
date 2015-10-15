@@ -8,9 +8,6 @@ Handlebars.registerHelper('editable', (field, value) =>
        `data-field="${field}">${value}</div>`);
 
 Template.body.events({
-  'click a.link': function(event) {
-    window.location.hash = $(event.target).attr('data-value');
-  },
   'click div.value[contenteditable="true"]': function(event) {
     if ($(event.target).text().length !== 1) {
       return;
