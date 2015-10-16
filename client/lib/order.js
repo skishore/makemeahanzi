@@ -64,10 +64,39 @@ const findStrokeMedian = (stroke) => {
   return simple.map((x) => [x.x, x.y]);
 }
 
-const selectPrincipalLine = (medians) => {
+const alike = (line1, line2) => {
+  const diff1 = Point.subtract(line1[0], line1[1]);
+  const diff2 = Point.subtract(line2[0], line2[1]);
+  // TODO(skishore): We may want a strongler likeness condition here. If we
+  // decrease the threshold to 45 degrees, we will reduce the number of
+  // alignments between the character and its component that we check, which
+  // would speed up our algorithm but potentially cost us recall.
+  const angle = Angle.subtract(Point.angle(diff1), Point.angle(diff2));
+  return Math.abs(angle) < 0.5*Math.PI;
+}
+
+const getMedianEndpoints = (medians) => {
   const starts = medians.map((x) => [x[0], x[x.length - 1]]);
   const ends = medians.map((x) => [x[x.length - 1], x[0]]);
-  const endpoints = starts.concat(ends);
+  return starts.concat(ends);
+}
+
+const getPossibleAlignments = (character, component) => {
+  const principal = getPrincipalLine(getMedianEndpoints(component));
+  const endpoints = getMedianEndpoints(character);
+  const test = [principal[0][0], principal[1][0]];
+  const result = [];
+  for (let endpoint1 of endpoints.filter((x) => alike(x, principal[0]))) {
+    for (let endpoint2 of endpoints.filter((x) => alike(x, principal[1]))) {
+      if (alike([endpoint1[0], endpoint2[0]], test)) {
+        result.push([endpoint1, endpoint2]);
+      }
+    }
+  }
+  return result;
+}
+
+const getPrincipalLine = (endpoints) => {
   let best_pair = undefined;
   let best_score = 0;
   for (let endpoint1 of endpoints) {
@@ -88,15 +117,36 @@ stages.order = class OrderStage extends stages.AbstractStage {
     super('order');
     this.strokes = glyph.stages.strokes;
     this.medians = this.strokes.map(findStrokeMedian);
-    this.principal = selectPrincipalLine(this.medians);
+    this.principal = getPrincipalLine(getMedianEndpoints(this.medians));
     const tree = decomposition_util.convertDecompositionToTree(
         glyph.stages.analysis.decomposition);
     Session.set('stages.order.components',
                 decomposition_util.collectComponents(tree));
     stage = this;
   }
+  alignmentToLine(alignment, color) {
+    return {
+      x1: alignment[0][0][0],
+      y1: alignment[0][0][1],
+      x2: alignment[1][0][0],
+      y2: alignment[1][0][1],
+      stroke: color,
+    }
+  }
   onAllComponentsReady() {
-    console.log(Session.get('stages.order.components'));
+    const components = Session.get('stages.order.components');
+    if (components.length === 0) {
+      return;
+    }
+    const glyph = Glyphs.findOne({character: components[0]});
+    const medians = glyph.stages.strokes.map(findStrokeMedian);
+    const alignments = getPossibleAlignments(this.medians, medians);
+    console.log(`Got ${alignments.length} possible alignments.`);
+    Meteor.setTimeout(() => {
+      const lines = Session.get('stage.lines');
+      const display = alignments.map((x) => this.alignmentToLine(x, 'red'));
+      Session.set('stage.lines', display.concat([lines[0]]));
+    }, 0);
   }
   refreshUI() {
     const to_path = (x) => ({d: x, fill: 'gray', stroke: 'gray'});
@@ -109,13 +159,7 @@ stages.order = class OrderStage extends stages.AbstractStage {
     }
     this.medians.map((x, i) => x.map((y) => points.push(to_point(y, i))));
     Session.set('stage.points', points);
-    Session.set('stage.lines', [{
-      x1: this.principal[0][0][0],
-      y1: this.principal[0][0][1],
-      x2: this.principal[1][0][0],
-      y2: this.principal[1][0][1],
-      stroke: 'black',
-    }]);
+    Session.set('stage.lines', [this.alignmentToLine(this.principal, 'black')]);
   }
 }
 
