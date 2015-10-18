@@ -198,7 +198,7 @@ const scoreAlignment = (character, component, alignment) => {
   const inverse = getAffineTransform(target, source);
   const border = [inverse([0, 0]), inverse([size, size])];
 
-  return matching.score;
+  return matching;
 }
 
 const scoreStrokes = (stroke1, stroke2) => {
@@ -212,6 +212,7 @@ const scoreStrokes = (stroke1, stroke2) => {
 stages.order = class OrderStage extends stages.AbstractStage {
   constructor(glyph) {
     super('order');
+    this.character = glyph.character;
     this.strokes = glyph.stages.strokes;
     this.medians = this.strokes.map(findStrokeMedian);
     this.principal = getPrincipalLine(getMedianEndpoints(this.medians));
@@ -244,14 +245,19 @@ stages.order = class OrderStage extends stages.AbstractStage {
     const component = medians.map((x) => filterMedian(x, 8));
 
     const alignments = getPossibleAlignments(character, component);
-    console.log(`Got ${alignments.length} possible alignments.`);
     let best_alignment = undefined;
-    let best_score = -Infinity;
+    let best_result = {score: -Infinity};
     alignments.map((x) => {
-      const score = scoreAlignment(character, component, x);
-      if (score > best_score) {
-        [best_alignment, best_score] = [x, score];
+      const result = scoreAlignment(character, component, x);
+      if (result.score > best_result.score) {
+        [best_alignment, best_result] = [x, result];
       }
+    });
+    Session.set('stages.order.matching', {
+      character: this.character,
+      component: components[0],
+      matching: best_result.matching,
+      colors: this.colors,
     });
 
     Meteor.setTimeout(() => {
@@ -277,6 +283,46 @@ stages.order = class OrderStage extends stages.AbstractStage {
     Session.set('stage.lines', [this.alignmentToLine(this.principal, 'black')]);
   }
 }
+
+Template.order_stage.helpers({
+  matching: () => {
+    const matching = Session.get('stages.order.matching') || {};
+    const character = Session.get('editor.glyph');
+    const component = Glyphs.findOne({character: matching.component});
+    if (!matching || !character || !component) {
+      return;
+    }
+    const matched = {};
+    const match = [[], []];
+    for (let i = 0; i < component.stages.strokes.length; i++) {
+      const color = matching.colors[i % matching.colors.length];
+      match[0].push({
+        d: component.stages.strokes[i],
+        fill: color,
+        stroke: 'black',
+      });
+      const j = matching.matching[i];
+      if (j < character.stages.strokes.length) {
+        match[1].push({
+          d: character.stages.strokes[j],
+          fill: color,
+          stroke: 'black',
+        });
+        matched[j] = true;
+      }
+    }
+    for (let i = 0; i < character.stages.strokes.length; i++) {
+      if (!matched[i]) {
+        match[1].push({
+          d: character.stages.strokes[i],
+          fill: 'lightgray',
+          stroke: 'lightgray',
+        });
+      }
+    }
+    return [match];
+  },
+});
 
 Meteor.startup(() => {
   Tracker.autorun(() => {

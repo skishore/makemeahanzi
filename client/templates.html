@@ -84,3 +84,23 @@
     {{/if}}
   </div>
 </template>
+
+<template name="order_stage">
+  Detect the position of each component of this character and use that
+  information to determine this character's stroke order.
+  {{#each matching}}
+    <div class="match">
+      {{#each this}}
+        <svg viewbox="0 0 1024 1024">
+          <g transform="scale(1, -1) translate(0, -900)">
+            {{#each this}}
+              <path class="{{cls}}" fill="{{fill}}"
+                    stroke="{{stroke}}" d="{{d}}"></path>
+            {{/each}}
+          </g>
+        </svg>
+      {{/each}}
+      <div class="clear"></div>
+    </div>
+  {{/each}}
+</template>
