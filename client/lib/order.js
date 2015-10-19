@@ -203,10 +203,13 @@ const scoreAlignment = (character, component, alignment) => {
 
 const scoreStrokes = (stroke1, stroke2) => {
   assert(stroke1.length === stroke2.length);
-  let result = 0;
-  _.range(stroke1.length).map(
-      (i) => result -= Point.distance2(stroke1[i], stroke2[i]));
-  return Math.floor(result);
+  let option1 = 0;
+  let option2 = 0;
+  _.range(stroke1.length).map((i) => {
+    option1 -= Point.distance2(stroke1[i], stroke2[i]);
+    option2 -= Point.distance2(stroke1[i], stroke2[stroke2.length - i - 1]);
+  });
+  return Math.floor(Math.max(option1, option2));
 }
 
 stages.order = class OrderStage extends stages.AbstractStage {
