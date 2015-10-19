@@ -6,15 +6,6 @@ const etymology_fields = ['hint', 'phonetic', 'semantic']
 
 // Methods for querying and modifying decomposition trees.
 
-const augmentTreeWithTemplateData = (tree, path) => {
-  tree.path = path;
-  const children = tree.children ? tree.children.length : 0;
-  for (let i = 0; i < children; i++) {
-    augmentTreeWithTemplateData(tree.children[i], path.concat([i]));
-  }
-  return tree;
-}
-
 const collectComponents = (subtree) => {
   return subtree ? decomposition_util.collectComponents(subtree) : [];
 }
@@ -26,24 +17,8 @@ const fixSubtreeChildrenLength = (subtree) => {
   for (let i = 0; i < subtree.children.length; i++) {
     subtree.children[i] =
         subtree.children[i] || {type: 'character', value: '?'};
+    subtree.children[i].path = subtree.path.concat([i]);
   }
-  augmentTreeWithTemplateData(subtree, subtree.path);
-}
-
-const getSubtree = (tree, path) => {
-  let subtree = tree;
-  for (let index of path) {
-    assert(0 <= index && index < subtree.children.length);
-    subtree = subtree.children[index];
-  }
-  return subtree;
-}
-
-const parseDecomposition = (decomposition) => {
-  const tree = decomposition ?
-      decomposition_util.convertDecompositionToTree(decomposition) :
-      {type: 'character', value: '?'};
-  return augmentTreeWithTemplateData(tree, []);
 }
 
 const setSubtreeType = (subtree, type) => {
@@ -66,7 +41,7 @@ const setSubtreeType = (subtree, type) => {
 // Methods for handling updates to various non-decomposition analysis fields.
 
 const updateCharacterValue = (target, text, path) => {
-  const subtree = getSubtree(stage.tree, path);
+  const subtree = decomposition_util.getSubtree(stage.tree, path);
   if (text === subtree.value || subtree.type !== 'character') {
     return;
   }
@@ -103,7 +78,8 @@ const updateRadicalValue = (target, text) => {
 
 const initializeDecompositionTree = (analysis, character) => {
   const data = cjklib.getCharacterData(character);
-  return parseDecomposition(analysis.decomposition || data.decomposition);
+  return decomposition_util.convertDecompositionToTree(
+      analysis.decomposition || data.decomposition);
 }
 
 const initializeRadical = (character, components) => {
@@ -189,7 +165,7 @@ Template.analysis_stage.events({
   },
   'change .compound-type': function(event) {
     const type = $(event.target).val();
-    const subtree = getSubtree(stage.tree, this.path);
+    const subtree = decomposition_util.getSubtree(stage.tree, this.path);
     if (type === subtree.value || subtree.type != 'compound') {
       return;
     }
@@ -205,7 +181,7 @@ Template.analysis_stage.events({
   },
   'change .subtree-type': function(event) {
     const type = $(event.target).val();
-    const subtree = getSubtree(stage.tree, this.path);
+    const subtree = decomposition_util.getSubtree(stage.tree, this.path);
     setSubtreeType(subtree, type);
     stage.forceRefresh();
   },
