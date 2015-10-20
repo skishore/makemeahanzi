@@ -191,7 +191,7 @@ const matchStrokes = (character, components) => {
     }
   }
   const matching = new Hungarian(matrix);
-  matching.x_match.map((j, i) => strokes[i].median.match = j);
+  strokes.map((x, i) => x.median.match = matching.x_match[i]);
   return components.map((x) => {
     return {value: x.value, matching: x.medians.map((y) => y.match)};
   });
