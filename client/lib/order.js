@@ -96,6 +96,41 @@ const findStrokeMedian = (stroke) => {
   return simple.map((x) => [x.x, x.y]);
 }
 
+const rad2 = Math.sqrt(1/2);
+const compound_bounds = {
+  '⿰': [[[0, 0], [1/2, 1]], [[1/2, 0], [1/2, 1]]],
+  '⿱': [[[0, 0], [1, 1/2]], [[0, 1/2], [1, 1/2]]],
+  '⿴': [[[0, 0], [1, 1]], [[(1 - rad2)/2, (1 - rad2)/2], [rad2, rad2]]],
+  '⿵': [[[0, 0], [1, 1]], [[(1 - rad2)/2, 1 - rad2], [rad2, rad2]]],
+  '⿶': [[[0, 0], [1, 1]], [[(1 - rad2)/2, 0], [rad2, rad2]]],
+  '⿷': [[[0, 0], [1, 1]], [[1 - rad2, (1 - rad2)/2], [rad2, rad2]]],
+  '⿸': [[[0, 0], [1, 1]], [[1 - rad2, 1 - rad2], [rad2, rad2]]],
+  '⿹': [[[0, 0], [1, 1]], [[0, 1 - rad2], [rad2, rad2]]],
+  '⿺': [[[0, 0], [1, 1]], [[1 - rad2, 0], [rad2, rad2]]],
+  '⿻': [[[0, 0], [1, 1]], [[0, 0], [1, 1]]],
+  '⿳': [[[0, 0], [1, 1/3]], [[0, 1/3], [1, 1/3]], [[0, 2/3], [1, 1/3]]],
+  '⿲': [[[0, 0], [1/3, 1]], [[1/3, 0], [1/3, 1]], [[2/3, 0], [1/3, 1]]],
+}
+
+const augmentTreeWithBoundsData = (tree, bounds) => {
+  tree.bounds = bounds;
+  if (tree.type === 'compound') {
+    const diff = Point.subtract(bounds[1], bounds[0]);
+    const targets = compound_bounds[tree.value];
+    assert(targets && targets.length === tree.children.length);
+    for (let i = 0; i < targets.length; i++) {
+      const target = [targets[i][0], Point.add(targets[i][0], targets[i][1])];
+      const child_bounds = target.map(
+          (x) => [x[0]*diff[0] + bounds[0][0], x[1]*diff[1] + bounds[0][1]].map(
+              Math.floor));
+      augmentTreeWithBoundsData(tree.children[i], child_bounds);
+    }
+  } else {
+    assert(!tree.children);
+  }
+  return tree;
+}
+
 const alike = (line1, line2) => {
   const diff1 = Point.subtract(line1[0], line1[1]);
   const diff2 = Point.subtract(line2[0], line2[1]);
@@ -221,8 +256,9 @@ stages.order = class OrderStage extends stages.AbstractStage {
     this.principal = getPrincipalLine(getMedianEndpoints(this.medians));
     const tree = decomposition_util.convertDecompositionToTree(
         glyph.stages.analysis.decomposition);
+    this.tree = augmentTreeWithBoundsData(tree, [[0, 0], [size, size]]);
     Session.set('stages.order.components',
-                decomposition_util.collectComponents(tree));
+                decomposition_util.collectComponents(this.tree));
     stage = this;
   }
   alignmentToLine(alignment, color) {
