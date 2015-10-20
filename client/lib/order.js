@@ -96,7 +96,9 @@ const findStrokeMedian = (stroke) => {
   return simple.map((x) => [x.x, x.y]);
 }
 
-const rad2 = Math.sqrt(1/2);
+// TODO(skishore): Consider using sqrt(1/2) in place of 1/2 here. This constant
+// is used to compute bounds for components that are surrounded.
+const rad2 = 1/2;
 const compound_bounds = {
   '⿰': [[[0, 0], [1/2, 1]], [[1/2, 0], [1/2, 1]]],
   '⿱': [[[0, 0], [1, 1/2]], [[0, 1/2], [1, 1/2]]],
