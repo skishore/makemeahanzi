@@ -131,25 +131,14 @@ const augmentTreeWithBoundsData = (tree, bounds) => {
   return tree;
 }
 
-const alike = (line1, line2) => {
-  const diff1 = Point.subtract(line1[0], line1[1]);
-  const diff2 = Point.subtract(line2[0], line2[1]);
-  // TODO(skishore): We may want a strongler likeness condition here. If we
-  // decrease the threshold to 45 degrees, we will reduce the number of
-  // alignments between the character and its component that we check, which
-  // would speed up our algorithm but potentially cost us recall.
-  const angle = Angle.subtract(Point.angle(diff1), Point.angle(diff2));
-  return Math.abs(angle) < 0.5*Math.PI;
-}
-
-const getAlignmentBounds = (alignment, tolerance) => {
-  const result = [[Math.min(alignment[0][0][0], alignment[1][0][0]),
-                   Math.min(alignment[0][0][1], alignment[1][0][1])],
-                  [Math.max(alignment[0][0][0], alignment[1][0][0]),
-                   Math.max(alignment[0][0][1], alignment[1][0][1])]];
-  tolerance = tolerance || 8;
-  _.range(2).filter((i) => result[1][i] < result[0][i] + tolerance)
-            .map((i) => result[1][i] = result[0][i] + tolerance);
+const collectComponentNodes = (tree, result) => {
+  result = result || [];
+  if (tree.type === 'character' && tree.value !== '?') {
+    result.push(tree);
+  }
+  for (let child of tree.children || []) {
+    collectComponentNodes(child, result);
+  }
   return result;
 }
 
@@ -161,79 +150,53 @@ const getAffineTransform = (source, target) => {
                      ratio[1]*(point[1] - source[0][1]) + target[0][1]];
 }
 
-const getMedianEndpoints = (medians) => {
-  const starts = medians.map((x) => [x[0], x[x.length - 1]]);
-  const ends = medians.map((x) => [x[x.length - 1], x[0]]);
-  return starts.concat(ends);
-}
-
-const getPossibleAlignments = (character, component) => {
-  const principal = getPrincipalLine(getMedianEndpoints(component));
-  const endpoints = getMedianEndpoints(character);
-  const test = [principal[0][0], principal[1][0]];
-  const result = [];
-  for (let endpoint1 of endpoints.filter((x) => alike(x, principal[0]))) {
-    for (let endpoint2 of endpoints.filter((x) => alike(x, principal[1]))) {
-      if (alike([endpoint1[0], endpoint2[0]], test)) {
-        result.push([endpoint1, endpoint2]);
-      }
-    }
-  }
+const getSegmentBounds = (segment, tolerance) => {
+  const result = [[Math.min(segment[0][0][0], segment[1][0][0]),
+                   Math.min(segment[0][0][1], segment[1][0][1])],
+                  [Math.max(segment[0][0][0], segment[1][0][0]),
+                   Math.max(segment[0][0][1], segment[1][0][1])]];
+  tolerance = tolerance || 8;
+  _.range(2).filter((i) => result[1][i] < result[0][i] + tolerance)
+            .map((i) => result[1][i] = result[0][i] + tolerance);
   return result;
 }
 
-const getPrincipalLine = (endpoints) => {
-  let best_pair = undefined;
-  let best_score = 0;
-  for (let endpoint1 of endpoints) {
-    for (let endpoint2 of endpoints) {
-      const difference = Point.subtract(endpoint1[0], endpoint2[0]);
-      const score = Math.min(Math.abs(difference[0]), Math.abs(difference[1]));
-      if (score > best_score) {
-        [best_pair, best_score] = [[endpoint1, endpoint2], score];
-      }
+const matchStrokes = (character, components) => {
+  character = character.map(normalizeMedian);
+  components.map((x) => x.medians = x.medians.map(normalizeMedian));
+
+  const strokes = [];
+  const source = [[0, 0], [size, size]];
+  for (let component of components) {
+    const transform = getAffineTransform(source, component.bounds);
+    for (let median of component.medians) {
+      const stroke = median.map(transform);
+      stroke.median = median;
+      strokes.push(stroke);
     }
   }
-  assert(best_pair);
-  return best_pair;
-}
 
-const matchStrokes = (character, component) => {
-  const n = Math.max(character.length, component.length);
   const matrix = [];
+  const n = Math.max(strokes.length, character.length);
   for (let i = 0; i < n; i++) {
     matrix.push([]);
     for (let j = 0; j < n; j++) {
-      if (i < component.length && j < character.length) {
-        matrix[i].push(scoreStrokes(component[i], character[j]));
+      if (i < strokes.length && j < character.length) {
+        matrix[i].push(scoreStrokes(strokes[i], character[j]));
       } else {
-        matrix[i].push(i < component.length ? -size*size*size : 0);
+        matrix[i].push(i < strokes.length ? -size*size*size : 0);
       }
     }
   }
-  let score = 0;
   const matching = new Hungarian(matrix);
-  matching.x_match.map((j, i) => score += matrix[i][j]);
-  return {matching: matching.x_match, score: score};
+  matching.x_match.map((j, i) => strokes[i].median.match = j);
+  return components.map((x) => {
+    return {value: x.value, matching: x.medians.map((y) => y.match)};
+  });
 }
 
-const scoreAlignment = (character, component, alignment) => {
-  const principal = getPrincipalLine(getMedianEndpoints(component));
-  const source = getAlignmentBounds(alignment);
-  const target = getAlignmentBounds(principal);
-
-  // Compute a map from points in the character to points in the component
-  // and use it to compute a mapping between component and character strokes.
-  const transform = getAffineTransform(source, target);
-  const transformed = character.map((x) => x.map(transform));
-  const matching = matchStrokes(transformed, component);
-
-  // Compute a map from points in the component to points in the character
-  // and use it to see where the component's glyph bounds would be mapped to.
-  const inverse = getAffineTransform(target, source);
-  const border = [inverse([0, 0]), inverse([size, size])];
-
-  return matching;
+const normalizeMedian = (median) => {
+  return filterMedian(median, 8).map((x) => [x[0], 900 - x[1]]);
 }
 
 const scoreStrokes = (stroke1, stroke2) => {
@@ -253,7 +216,6 @@ stages.order = class OrderStage extends stages.AbstractStage {
     this.character = glyph.character;
     this.strokes = glyph.stages.strokes;
     this.medians = this.strokes.map(findStrokeMedian);
-    this.principal = getPrincipalLine(getMedianEndpoints(this.medians));
     const tree = decomposition_util.convertDecompositionToTree(
         glyph.stages.analysis.decomposition);
     this.tree = augmentTreeWithBoundsData(tree, [[0, 0], [size, size]]);
@@ -261,51 +223,18 @@ stages.order = class OrderStage extends stages.AbstractStage {
                 decomposition_util.collectComponents(this.tree));
     stage = this;
   }
-  alignmentToLine(alignment, color) {
-    return {
-      x1: alignment[0][0][0],
-      y1: alignment[0][0][1],
-      x2: alignment[1][0][0],
-      y2: alignment[1][0][1],
-      stroke: color,
-    }
-  }
   onAllComponentsReady() {
-    const components = Session.get('stages.order.components');
-    if (components.length === 0) {
-      return;
-    }
-    const glyph = Glyphs.findOne({character: components[0]});
-
-    // Compute a list of 'filtered medians' that represent the character and
-    // its component. All the filtered medians will have exactly 8 points.
-    const medians = glyph.stages.strokes.map(findStrokeMedian);
-    const character = this.medians.map((x) => filterMedian(x, 8));
-    const component = medians.map((x) => filterMedian(x, 8));
-
-    const alignments = getPossibleAlignments(character, component);
-    let best_alignment = undefined;
-    let best_result = {score: -Infinity};
-    alignments.map((x) => {
-      const result = scoreAlignment(character, component, x);
-      if (result.score > best_result.score) {
-        [best_alignment, best_result] = [x, result];
-      }
+    const nodes = collectComponentNodes(this.tree);
+    nodes.map((node) => {
+      const glyph = Glyphs.findOne({character: node.value});
+      node.medians = glyph.stages.strokes.map(findStrokeMedian);
     });
+    const matching = matchStrokes(this.medians, nodes);
     Session.set('stages.order.matching', {
       character: this.character,
-      component: components[0],
-      matching: best_result.matching,
       colors: this.colors,
+      matching: matching,
     });
-
-    Meteor.setTimeout(() => {
-      //const lines = Session.get('stage.lines');
-      //const display = alignments.map((x) => this.alignmentToLine(x, 'red'));
-      //Session.set('stage.lines', display.concat([lines[0]]));
-      Session.set('stage.lines', [Session.get('stage.lines')[0],
-                                  this.alignmentToLine(best_alignment, 'red')]);
-    }, 0);
   }
   refreshUI() {
     const to_path = (x) => ({d: x, fill: 'gray', stroke: 'gray'});
@@ -319,7 +248,6 @@ stages.order = class OrderStage extends stages.AbstractStage {
     this.medians.map((x) => filterMedian(x, 8))
                 .map((x, i) => x.map((y) => points.push(to_point(y, i))));
     Session.set('stage.points', points);
-    Session.set('stage.lines', [this.alignmentToLine(this.principal, 'black')]);
   }
 }
 
@@ -327,39 +255,40 @@ Template.order_stage.helpers({
   matching: () => {
     const matching = Session.get('stages.order.matching') || {};
     const character = Session.get('editor.glyph');
-    const component = Glyphs.findOne({character: matching.component});
-    if (!matching || !character || !component) {
-      return;
-    }
-    const matched = {};
-    const match = [[], []];
-    for (let i = 0; i < component.stages.strokes.length; i++) {
-      const color = matching.colors[i % matching.colors.length];
-      match[0].push({
-        d: component.stages.strokes[i],
-        fill: color,
-        stroke: 'black',
-      });
-      const j = matching.matching[i];
-      if (j < character.stages.strokes.length) {
-        match[1].push({
-          d: character.stages.strokes[j],
+    const result = [];
+    for (let block of matching.matching || []) {
+      const matched = {};
+      const match = [[], []];
+      const component = Glyphs.findOne({character: block.value});
+      for (let i = 0; i < component.stages.strokes.length; i++) {
+        const color = matching.colors[i % matching.colors.length];
+        match[0].push({
+          d: component.stages.strokes[i],
           fill: color,
           stroke: 'black',
         });
-        matched[j] = true;
+        const j = block.matching[i];
+        if (j < character.stages.strokes.length) {
+          match[1].push({
+            d: character.stages.strokes[j],
+            fill: color,
+            stroke: 'black',
+          });
+          matched[j] = true;
+        }
       }
-    }
-    for (let i = 0; i < character.stages.strokes.length; i++) {
-      if (!matched[i]) {
-        match[1].push({
-          d: character.stages.strokes[i],
-          fill: 'lightgray',
-          stroke: 'lightgray',
-        });
+      for (let i = 0; i < character.stages.strokes.length; i++) {
+        if (!matched[i]) {
+          match[1].push({
+            d: character.stages.strokes[i],
+            fill: 'lightgray',
+            stroke: 'lightgray',
+          });
+        }
       }
+      result.push(match);
     }
-    return [match];
+    return result;
   },
 });
 
