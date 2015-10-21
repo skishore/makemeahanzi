@@ -29,8 +29,7 @@ const augmentTreeWithBoundsData = (tree, bounds) => {
     for (let i = 0; i < targets.length; i++) {
       const target = [targets[i][0], Point.add(targets[i][0], targets[i][1])];
       const child_bounds = target.map(
-          (x) => [x[0]*diff[0] + bounds[0][0], x[1]*diff[1] + bounds[0][1]].map(
-              Math.floor));
+          (x) => [x[0]*diff[0] + bounds[0][0], x[1]*diff[1] + bounds[0][1]]);
       augmentTreeWithBoundsData(tree.children[i], child_bounds);
     }
   } else {
@@ -99,7 +98,7 @@ const scoreStrokes = (stroke1, stroke2) => {
     option1 -= Point.distance2(stroke1[i], stroke2[i]);
     option2 -= Point.distance2(stroke1[i], stroke2[stroke2.length - i - 1]);
   });
-  return Math.floor(Math.max(option1, option2));
+  return Math.max(option1, option2);
 }
 
 stages.order = class OrderStage extends stages.AbstractStage {
