@@ -216,13 +216,12 @@ stages.order = class OrderStage extends stages.AbstractStage {
   constructor(glyph) {
     super('order');
     this.character = glyph.character;
-    this.strokes = glyph.stages.strokes;
-    this.medians = this.strokes.map(findStrokeMedian);
+    this.matching = undefined;
+    this.medians = glyph.stages.strokes.map(findStrokeMedian);
     const tree = decomposition_util.convertDecompositionToTree(
         glyph.stages.analysis.decomposition);
+    this.strokes = glyph.stages.strokes;
     this.tree = augmentTreeWithBoundsData(tree, [[0, 0], [size, size]]);
-    Session.set('stages.order.components',
-                decomposition_util.collectComponents(this.tree));
     stage = this;
   }
   onAllComponentsReady() {
@@ -231,12 +230,8 @@ stages.order = class OrderStage extends stages.AbstractStage {
       const glyph = Glyphs.findOne({character: node.value});
       node.medians = glyph.stages.strokes.map(findStrokeMedian);
     });
-    const matching = matchStrokes(this.medians, nodes);
-    Session.set('stages.order.matching', {
-      character: this.character,
-      colors: this.colors,
-      matching: matching,
-    });
+    this.matching = matchStrokes(this.medians, nodes);
+    this.forceRefresh();
   }
   refreshUI() {
     const to_path = (x) => ({d: x, fill: 'gray', stroke: 'gray'});
@@ -250,6 +245,19 @@ stages.order = class OrderStage extends stages.AbstractStage {
     this.medians.map((x) => filterMedian(x, 8))
                 .map((x, i) => x.map((y) => points.push(to_point(y, i))));
     Session.set('stage.points', points);
+    Session.set('stage.status', [{
+      cls: this.matching ? 'success' : 'error',
+      message: this.matching ?
+          'Stroke order determined by decomposition.' :
+          'Loading component data...',
+    }]);
+    Session.set('stages.order.components',
+                decomposition_util.collectComponents(this.tree));
+    Session.set('stages.order.matching', {
+      character: this.character,
+      colors: this.colors,
+      matching: this.matching,
+    });
   }
 }
 
