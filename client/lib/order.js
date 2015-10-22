@@ -125,16 +125,6 @@ stages.order = class OrderStage extends stages.AbstractStage {
     this.forceRefresh();
   }
   refreshUI() {
-    const to_path = (x) => ({d: x, fill: 'gray', stroke: 'gray'});
-    Session.set('stage.paths', this.strokes.map(to_path));
-    const colors = this.colors;
-    const points = [];
-    const to_point = (x, i) => {
-      const color = colors[i % colors.length];
-      return {cx: x[0], cy: x[1], fill: color, stroke: color};
-    }
-    this.medians.map((x, i) => x.map((y) => points.push(to_point(y, i))));
-    Session.set('stage.points', points);
     Session.set('stage.status', [{
       cls: this.matching ? 'success' : 'error',
       message: this.matching ?
@@ -156,7 +146,8 @@ Template.order_stage.helpers({
     const matching = Session.get('stages.order.matching') || {};
     const character = Session.get('editor.glyph');
     const result = [];
-    for (let block of matching.matching || []) {
+    for (let i = 0; i < (matching.matching || []).length; i++) {
+      const block = matching.matching[i];
       const matched = {};
       const match = [[], []];
       const component = Glyphs.findOne({character: block.value});
@@ -186,6 +177,7 @@ Template.order_stage.helpers({
           });
         }
       }
+      match.top = `${198*i + 8}px`;
       result.push(match);
     }
     return result;
