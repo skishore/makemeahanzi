@@ -88,19 +88,24 @@
 <template name="order_stage">
   Detect the position of each component of this character and use that
   information to determine this character's stroke order.
-  {{#each matching}}
-    <div class="match" style="top: {{top}};">
-      {{#each this}}
-        <svg viewbox="0 0 1024 1024">
-          <g transform="scale(1, -1) translate(0, -900)">
-            {{#each this}}
-              <path class="{{cls}}" fill="{{fill}}"
-                    stroke="{{stroke}}" d="{{d}}"></path>
-            {{/each}}
-          </g>
-        </svg>
-      {{/each}}
+  {{#each components}}
+    <div class="component" style="top: {{top}};">
+      {{> glyph this}}
       <div class="clear"></div>
     </div>
   {{/each}}
+  <div class="character">
+    {{> glyph character}}
+  </div>
+</template>
+
+<template name="glyph">
+  <svg viewbox="0 0 1024 1024">
+    <g transform="scale(1, -1) translate(0, -900)">
+      {{#each this}}
+        <path class="{{cls}}" fill="{{fill}}"
+              stroke="{{stroke}}" d="{{d}}"></path>
+      {{/each}}
+    </g>
+  </svg>
 </template>

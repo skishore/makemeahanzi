@@ -165,7 +165,7 @@ stages.order = class OrderStage extends stages.AbstractStage {
   }
   refreshUI() {
     Session.set('stage.status', [{
-      cls: this.matching ? 'success' : 'error',
+      cls: this.order ? 'success' : 'error',
       message: this.order ?
           'Stroke order determined by decomposition.' :
           'Loading component data...',
@@ -181,38 +181,58 @@ stages.order = class OrderStage extends stages.AbstractStage {
 }
 
 Template.order_stage.helpers({
-  matching: () => {
+  character: () => {
     const matching = Session.get('stages.order.matching') || {};
     const character = Session.get('editor.glyph');
     const indices = {};
     const result = [];
-    for (let i = 0; i < (matching.order || []).length; i++) {
-      const match = [[], []];
-      const order = matching.order[i];
-
-      const key = JSON.stringify(order.match);
-      const index = indices.hasOwnProperty(key) ?
-          indices[key] : Object.keys(indices).length;
-      indices[key] = index;
-      const color = matching.colors[index % matching.colors.length];
-
+    for (let order of matching.order || []) {
+      let color = 'lightgray';
+      let index = -1;
       if (order.match) {
-        const subtree = decomposition_util.getSubtree(
-            matching.tree, order.match);
-        const component = Glyphs.findOne({character: subtree.value});
-        for (let stroke of component.stages.strokes) {
-          match[0].push({d: stroke, fill: color, stroke: 'black'});
-        }
+        const key = JSON.stringify(order.match);
+        index = indices.hasOwnProperty(key) ?
+            indices[key] : Object.keys(indices).length;
+        indices[key] = index;
+        color = matching.colors[index % matching.colors.length];
       }
-      for (let j = 0; j < character.stages.strokes.length; j++) {
-        match[1].push({
-          d: character.stages.strokes[j],
-          fill: order.stroke === j ? color : 'lightgray',
-          stroke: order.stroke === j ? 'black' : 'lightgray',
-        });
+
+      result.push({
+        d: character.stages.strokes[order.stroke],
+        fill: color,
+        stroke: index < 0 ? color : 'black',
+      });
+    }
+    return result;
+  },
+  components: () => {
+    const matching = Session.get('stages.order.matching') || {};
+    const character = Session.get('editor.glyph');
+    const indices = {};
+    const result = [];
+    for (let order of matching.order || []) {
+      let color = 'lightgray';
+      let index = -1;
+      if (order.match) {
+        const key = JSON.stringify(order.match);
+        index = indices.hasOwnProperty(key) ?
+            indices[key] : Object.keys(indices).length;
+        indices[key] = index;
+        color = matching.colors[index % matching.colors.length];
       }
-      match.top = `${198*i + 8}px`;
-      result.push(match);
+
+      if (!order.match || index < result.length) {
+        continue;
+      }
+      const subtree = decomposition_util.getSubtree(
+          matching.tree, order.match);
+      const glyph = Glyphs.findOne({character: subtree.value});
+      const component = [];
+      for (let stroke of glyph.stages.strokes) {
+        component.push({d: stroke, fill: color, stroke: 'black'});
+      }
+      component.top = `${198*index + 8}px`;
+      result.push(component);
     }
     return result;
   },
