@@ -38,6 +38,49 @@ const augmentTreeWithBoundsData = (tree, bounds) => {
   return tree;
 }
 
+const buildStrokeOrder = (tree, log) => {
+  if (tree.type === 'character') {
+    if (!tree.medians) {
+      log.push(`Missing component: ${tree.value}`);
+      return [];
+    }
+    return tree.medians.map((x, i) => ({
+      character: tree.value,
+      index: i,
+      median: x,
+      path: tree.path,
+    }));
+  }
+  const parts = tree.children.map((x) => buildStrokeOrder(x, log));
+  const child = tree.children[0].value;
+  if (tree.value === '⿻') {
+    log.push('Cannot infer stroke order for compound ⿻.');
+  } else if (tree.value === '⿴') {
+    assert(parts.length === 2);
+    if (parts[0].length !== 3) {
+      log.push('Compound ⿴ requires first component 囗. ' +
+               `Got ${child} instead.`);
+    } else {
+      return parts[0].slice(0, 2).concat(parts[1]).concat([parts[0][2]]);
+    }
+  } else if (tree.value === '⿷') {
+    assert(parts.length === 2);
+    if (parts[0].length !== 2) {
+      log.push('Compound ⿷ requires first component ⼕ or ⼖. ' +
+               `Got ${child} instead.`);
+    } else {
+      return parts[0].slice(0, 1).concat(parts[1]).concat([parts[0][1]]);
+    }
+  } else if (tree.value === '⿶' ||
+             (tree.value === '⿺' && '辶廴乙'.indexOf(child) >= 0)) {
+    assert(parts.length === 2);
+    return parts[1].concat(parts[0]);
+  }
+  const result = [];
+  parts.map((x) => x.map((y) => result.push(y)));
+  return result;
+}
+
 const collectComponentNodes = (tree, result) => {
   result = result || [];
   if (tree.type === 'character' && tree.value !== '?') {
@@ -120,6 +163,11 @@ stages.order = class OrderStage extends stages.AbstractStage {
       const glyph = Glyphs.findOne({character: node.value});
       node.medians = glyph.stages.strokes.map(median_util.findStrokeMedian);
     });
+
+    // TODO(skishore): Combine this stroke order with the matching.
+    const log = [];
+    const result = buildStrokeOrder(this.tree, log);
+
     this.matching = matchStrokes(this.medians, nodes);
     this.forceRefresh();
   }
