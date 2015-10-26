@@ -58,33 +58,34 @@ const getAffineTransform = (source, target) => {
 }
 
 const matchStrokes = (character, components) => {
-  const source = [[0, 0], [1, 1]];
-  const strokes = [];
+  const normalize = median_util.normalizeForMatch;
+  const sources = character.map(normalize);
+  const targets = [];
   for (let component of components) {
-    const transform = getAffineTransform(source, component.bounds);
+    const transform = getAffineTransform([[0, 0], [1, 1]], component.bounds);
     for (let median of component.medians) {
-      const stroke = median.map(transform);
+      const stroke = normalize(median).map(transform);
       stroke.median = median;
-      strokes.push(stroke);
+      targets.push(stroke);
     }
   }
 
   const matrix = [];
   const missing_penalty = 1024;
-  const n = Math.max(strokes.length, character.length);
+  const n = Math.max(sources.length, targets.length);
   for (let i = 0; i < n; i++) {
     matrix.push([]);
     for (let j = 0; j < n; j++) {
-      if (i < strokes.length && j < character.length) {
-        matrix[i].push(scoreStrokes(strokes[i], character[j]));
+      if (i < sources.length && j < targets.length) {
+        matrix[i].push(scoreStrokes(sources[i], targets[j]));
       } else {
-        matrix[i].push(i < strokes.length ? -missing_penalty : 0);
+        matrix[i].push(-missing_penalty);
       }
     }
   }
 
   const matching = new Hungarian(matrix);
-  strokes.map((x, i) => x.median.match = matching.x_match[i]);
+  targets.map((y, j) => y.median.match = matching.y_match[j]);
   return components.map((x) => {
     return {value: x.value, matching: x.medians.map((y) => y.match)};
   });
@@ -114,14 +115,12 @@ stages.order = class OrderStage extends stages.AbstractStage {
     stage = this;
   }
   onAllComponentsReady() {
-    const medians = this.medians.map(median_util.normalizeForMatch);
     const nodes = collectComponentNodes(this.tree);
     nodes.map((node) => {
       const glyph = Glyphs.findOne({character: node.value});
-      node.medians = glyph.stages.strokes.map(median_util.findStrokeMedian)
-                                         .map(median_util.normalizeForMatch);
+      node.medians = glyph.stages.strokes.map(median_util.findStrokeMedian);
     });
-    this.matching = matchStrokes(medians, nodes);
+    this.matching = matchStrokes(this.medians, nodes);
     this.forceRefresh();
   }
   refreshUI() {
