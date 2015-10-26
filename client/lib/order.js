@@ -231,7 +231,7 @@ Template.order_stage.helpers({
       for (let stroke of glyph.stages.strokes) {
         component.push({d: stroke, fill: color, stroke: 'black'});
       }
-      component.top = `${198*index + 8}px`;
+      component.top = `${138*index + 8}px`;
       result.push(component);
     }
     return result;
