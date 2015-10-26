@@ -44,12 +44,7 @@ const buildStrokeOrder = (tree, log) => {
       log.push(`Missing component: ${tree.value}`);
       return [];
     }
-    return tree.medians.map((x, i) => ({
-      character: tree.value,
-      index: i,
-      median: x,
-      path: tree.path,
-    }));
+    return tree.medians.map((x) => ({median: x, node: tree}));
   }
   const parts = tree.children.map((x) => buildStrokeOrder(x, log));
   const child = tree.children[0].value;
@@ -104,14 +99,11 @@ const matchStrokes = (character, components) => {
   const normalize = median_util.normalizeForMatch;
   const sources = character.map(normalize);
   const targets = [];
-  for (let component of components) {
-    const transform = getAffineTransform([[0, 0], [1, 1]], component.bounds);
-    for (let median of component.medians) {
-      const stroke = normalize(median).map(transform);
-      stroke.median = median;
-      targets.push(stroke);
-    }
-  }
+  components.map((x) => {
+    const transform = getAffineTransform([[0, 0], [1, 1]], x.node.bounds);
+    const target = normalize(x.median).map(transform);
+    targets.push(target);
+  });
 
   const matrix = [];
   const missing_penalty = 1024;
@@ -126,12 +118,7 @@ const matchStrokes = (character, components) => {
       }
     }
   }
-
-  const matching = new Hungarian(matrix);
-  targets.map((y, j) => y.median.match = matching.y_match[j]);
-  return components.map((x) => {
-    return {value: x.value, matching: x.medians.map((y) => y.match)};
-  });
+  return new Hungarian(matrix).x_match;
 }
 
 const scoreStrokes = (stroke1, stroke2) => {
@@ -148,12 +135,10 @@ const scoreStrokes = (stroke1, stroke2) => {
 stages.order = class OrderStage extends stages.AbstractStage {
   constructor(glyph) {
     super('order');
-    this.character = glyph.character;
     this.matching = undefined;
     this.medians = glyph.stages.strokes.map(median_util.findStrokeMedian);
     const tree = decomposition_util.convertDecompositionToTree(
         glyph.stages.analysis.decomposition);
-    this.strokes = glyph.stages.strokes;
     this.tree = augmentTreeWithBoundsData(tree, [[0, 0], [1, 1]]);
     stage = this;
   }
@@ -163,27 +148,34 @@ stages.order = class OrderStage extends stages.AbstractStage {
       const glyph = Glyphs.findOne({character: node.value});
       node.medians = glyph.stages.strokes.map(median_util.findStrokeMedian);
     });
-
-    // TODO(skishore): Combine this stroke order with the matching.
     const log = [];
-    const result = buildStrokeOrder(this.tree, log);
-
-    this.matching = matchStrokes(this.medians, nodes);
+    const order = buildStrokeOrder(this.tree, log);
+    const matching = matchStrokes(this.medians, order);
+    const indices = _.range(this.medians.length).sort(
+        (a, b) => matching[a] - matching[b]);
+    this.order = indices.map((x) => {
+      const match = order[matching[x]];
+      return {
+        match: match ? match.node.path : undefined,
+        median: this.medians[x],
+        stroke: x,
+      };
+    });
     this.forceRefresh();
   }
   refreshUI() {
     Session.set('stage.status', [{
       cls: this.matching ? 'success' : 'error',
-      message: this.matching ?
+      message: this.order ?
           'Stroke order determined by decomposition.' :
           'Loading component data...',
     }]);
     Session.set('stages.order.components',
                 decomposition_util.collectComponents(this.tree));
     Session.set('stages.order.matching', {
-      character: this.character,
       colors: this.colors,
-      matching: this.matching,
+      order: this.order,
+      tree: this.tree,
     });
   }
 }
@@ -192,37 +184,32 @@ Template.order_stage.helpers({
   matching: () => {
     const matching = Session.get('stages.order.matching') || {};
     const character = Session.get('editor.glyph');
+    const indices = {};
     const result = [];
-    for (let i = 0; i < (matching.matching || []).length; i++) {
-      const block = matching.matching[i];
-      const matched = {};
+    for (let i = 0; i < (matching.order || []).length; i++) {
       const match = [[], []];
-      const component = Glyphs.findOne({character: block.value});
-      for (let i = 0; i < component.stages.strokes.length; i++) {
-        const color = matching.colors[i % matching.colors.length];
-        match[0].push({
-          d: component.stages.strokes[i],
-          fill: color,
-          stroke: 'black',
-        });
-        const j = block.matching[i];
-        if (j < character.stages.strokes.length) {
-          match[1].push({
-            d: character.stages.strokes[j],
-            fill: color,
-            stroke: 'black',
-          });
-          matched[j] = true;
+      const order = matching.order[i];
+
+      const key = JSON.stringify(order.match);
+      const index = indices.hasOwnProperty(key) ?
+          indices[key] : Object.keys(indices).length;
+      indices[key] = index;
+      const color = matching.colors[index % matching.colors.length];
+
+      if (order.match) {
+        const subtree = decomposition_util.getSubtree(
+            matching.tree, order.match);
+        const component = Glyphs.findOne({character: subtree.value});
+        for (let stroke of component.stages.strokes) {
+          match[0].push({d: stroke, fill: color, stroke: 'black'});
         }
       }
-      for (let i = 0; i < character.stages.strokes.length; i++) {
-        if (!matched[i]) {
-          match[1].push({
-            d: character.stages.strokes[i],
-            fill: 'lightgray',
-            stroke: 'lightgray',
-          });
-        }
+      for (let j = 0; j < character.stages.strokes.length; j++) {
+        match[1].push({
+          d: character.stages.strokes[j],
+          fill: order.stroke === j ? color : 'lightgray',
+          stroke: order.stroke === j ? 'black' : 'lightgray',
+        });
       }
       match.top = `${198*i + 8}px`;
       result.push(match);
