@@ -132,6 +132,25 @@ const scoreStrokes = (stroke1, stroke2) => {
   return Math.max(option1, option2);
 }
 
+// This method adds two extra fields to each element of the stroke-order list:
+//   - component: The character of the component that stroke belongs to.
+//                Set to '?' for strokes that were not matched.
+//   - index: The index of that component in the list of components.
+//            Set to -1 for strokes that were not matched.
+
+const augmentOrderListWithComponentData = (order, tree) => {
+  const indices = {null: -1};
+  return (order || []).map((x) => {
+    const component = x.match ?
+        decomposition_util.getSubtree(tree, x.match).value : '?';
+    const key = JSON.stringify(x.match || null);
+    const index = indices.hasOwnProperty(key) ?
+        indices[key] : Object.keys(indices).length - 1;
+    indices[key] = index;
+    return _.extend({component: component, index: index}, x);
+  });
+}
+
 stages.order = class OrderStage extends stages.AbstractStage {
   constructor(glyph) {
     super('order');
@@ -141,6 +160,18 @@ stages.order = class OrderStage extends stages.AbstractStage {
         glyph.stages.analysis.decomposition);
     this.tree = augmentTreeWithBoundsData(tree, [[0, 0], [1, 1]]);
     stage = this;
+  }
+  handleEvent(event, template) {
+    let matches = {};
+    let max = -1;
+    const order = augmentOrderListWithComponentData(this.order, this.tree);
+    order.map((x) => {
+      matches[x.index] = x.match;
+      max = Math.max(max, x.index);
+    });
+    const index = ((order[template.i].index + 2) % (max + 2)) - 1;
+    this.order[template.i].match = matches[index];
+    this.forceRefresh();
   }
   onAllComponentsReady() {
     const nodes = collectComponentNodes(this.tree);
@@ -174,8 +205,7 @@ stages.order = class OrderStage extends stages.AbstractStage {
                 decomposition_util.collectComponents(this.tree));
     Session.set('stages.order.matching', {
       colors: this.colors,
-      order: this.order,
-      tree: this.tree,
+      order: augmentOrderListWithComponentData(this.order, this.tree),
     });
   }
 }
@@ -184,54 +214,33 @@ Template.order_stage.helpers({
   character: () => {
     const matching = Session.get('stages.order.matching') || {};
     const character = Session.get('editor.glyph');
-    const indices = {};
     const result = [];
-    for (let order of matching.order || []) {
-      let color = 'lightgray';
-      let index = -1;
-      if (order.match) {
-        const key = JSON.stringify(order.match);
-        index = indices.hasOwnProperty(key) ?
-            indices[key] : Object.keys(indices).length;
-        indices[key] = index;
-        color = matching.colors[index % matching.colors.length];
-      }
-
+    (matching.order || []).map((order, i) => {
+      const color = matching.colors[order.index % matching.colors.length];
       result.push({
+        cls: 'selectable',
         d: character.stages.strokes[order.stroke],
-        fill: color,
-        stroke: index < 0 ? color : 'black',
+        fill: order.index < 0 ? 'lightgray' : color,
+        stroke: order.index < 0 ? 'lightgray' : 'black',
+        i: i,
       });
-    }
+    });
     return result;
   },
   components: () => {
     const matching = Session.get('stages.order.matching') || {};
-    const character = Session.get('editor.glyph');
-    const indices = {};
     const result = [];
     for (let order of matching.order || []) {
-      let color = 'lightgray';
-      let index = -1;
-      if (order.match) {
-        const key = JSON.stringify(order.match);
-        index = indices.hasOwnProperty(key) ?
-            indices[key] : Object.keys(indices).length;
-        indices[key] = index;
-        color = matching.colors[index % matching.colors.length];
-      }
-
-      if (!order.match || index < result.length) {
+      if (order.index < result.length) {
         continue;
       }
-      const subtree = decomposition_util.getSubtree(
-          matching.tree, order.match);
-      const glyph = Glyphs.findOne({character: subtree.value});
+      const color = matching.colors[order.index % matching.colors.length];
+      const glyph = Glyphs.findOne({character: order.component});
       const component = [];
       for (let stroke of glyph.stages.strokes) {
         component.push({d: stroke, fill: color, stroke: 'black'});
       }
-      component.top = `${138*index + 8}px`;
+      component.top = `${138*order.index + 8}px`;
       result.push(component);
     }
     return result;
