@@ -248,6 +248,9 @@ Template.order_stage.helpers({
     for (let index = 0; index < components.length; index++) {
       const color = colors[index % colors.length];
       const glyph = Glyphs.findOne({character: components[index]});
+      if (!glyph) {
+        continue;
+      }
       const component = [];
       for (let stroke of glyph.stages.strokes) {
         component.push({d: stroke, fill: color, stroke: 'black'});
@@ -258,7 +261,8 @@ Template.order_stage.helpers({
     return result;
   },
   items: () => {
-    return Order.find({}, {limit: stage ? stage.medians.length : 0});
+    const order = Session.get('stages.order.order');
+    return Order.find({}, {limit: (order || []).length});
   },
   options: () => {
     return {
