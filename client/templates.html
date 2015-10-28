@@ -99,10 +99,13 @@
   </div>
   <div class="permutation">
     {{#sortable items=items options=options sortField="index"}}
-      <div class="entry" style="border-color: {{color}}">
-        <div class="background" style="background-color: {{color}}"></div>
-        {{>glyph glyph}}
-        <div class="clear"></div>
+      <div class="entry" style="border-color: {{color}};">
+        <div class="wrapper">
+          <div class="background" style="background-color: {{color}};"></div>
+          <div class="small">{{>glyph glyph}}</div>
+          <div class="clear"></div>
+        </div>
+        <div class="character">{{>glyph glyph}}</div>
       </div>
     {{/sortable}}
   </div>

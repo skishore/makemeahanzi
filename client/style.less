@@ -207,30 +207,49 @@ div.value[contenteditable="true"] {
     }
 
     .permutation {
+      margin: 8px 0;
+
       .entry {
         border: 1px dotted gray;
         cursor: pointer;
-        margin: 8px 0;
-        padding: 2px 8px;
-        position: relative;
+        margin: 0;
 
-        .background {
-          opacity: 0.1;
-          position: absolute;
+        .wrapper {
+          padding: 2px 8px;
+          position: relative;
 
-          bottom: 0;
-          left: 0;
-          right: 0;
-          top: 0;
+          .background {
+            opacity: 0.1;
+            position: absolute;
+
+            bottom: 0;
+            left: 0;
+            right: 0;
+            top: 0;
+          }
+
+          .small svg {
+            height: 24px;
+            width: 24px;
+          }
+
+          .clear {
+            clear: both;
+          }
         }
 
-        svg {
-          height: 18px;
-          width: 18px;
+        .character {
+          display: none;
+
+          path {
+            fill: red;
+            stroke: black;
+            stroke-width: 8px;
+          }
         }
 
-        .clear {
-          clear: both;
+        &:hover .character {
+          display: block;
         }
       }
     }
