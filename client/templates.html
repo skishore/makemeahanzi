@@ -90,7 +90,7 @@
   information to determine this character's stroke order.
   {{#each components}}
     <div class="component" style="top: {{top}};">
-      {{> glyph this}}
+      {{> glyph glyph}}
       <div class="clear"></div>
     </div>
   {{/each}}
@@ -113,10 +113,19 @@
 
 <template name="glyph">
   <svg viewbox="0 0 1024 1024">
+    <defs>
+      <marker id="arrow" markerWidth="4" markerHeight="4"
+              orient="auto" refX="3" refY="2">
+        <path d="M0,0 L0,4 L4,2 L0,0" style="fill: red;"></path>
+      </marker>
+    </defs>
     <g transform="scale(1, -1) translate(0, -900)">
-      {{#each this}}
+      {{#each paths}}
         <path class="{{cls}}" fill="{{fill}}"
               stroke="{{stroke}}" d="{{d}}"></path>
+      {{/each}}
+      {{#each lines}}
+        <line x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}"></line>
       {{/each}}
     </g>
   </svg>

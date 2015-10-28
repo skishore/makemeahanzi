@@ -205,11 +205,20 @@ stages.order = class OrderStage extends stages.AbstractStage {
     Order.remove({});
     (this.order || []).map((x, i) => {
       const key = JSON.stringify(x.match || null);
+      const glyph = {
+        lines: [{
+          x1: x.median[0][0],
+          y1: x.median[0][1],
+          x2: x.median[x.median.length - 1][0],
+          y2: x.median[x.median.length - 1][1],
+        }],
+        paths: [{d: this.strokes[x.stroke]}],
+      };
       Order.insert({
         color: this.colors[this.indices[key]] || 'lightgray',
-        glyph: [{d: this.strokes[x.stroke]}],
-        stroke_index: x.stroke,
+        glyph: glyph,
         index: i,
+        stroke_index: x.stroke,
       });
     });
   }
@@ -221,14 +230,14 @@ Template.order_stage.helpers({
     const indices = Session.get('stages.order.indices');
     const order = Session.get('stages.order.order');
     const character = Session.get('editor.glyph');
-    const result = [];
+    const result = {paths: []};
     if (!colors || !indices || !order || !character) {
       return result;
     }
     for (let element of order) {
       const index = indices[JSON.stringify(element.match || null)];
       const color = colors[index % colors.length];
-      result.push({
+      result.paths.push({
         cls: 'selectable',
         d: character.stages.strokes[element.stroke],
         fill: index < 0 ? 'lightgray' : color,
@@ -255,8 +264,7 @@ Template.order_stage.helpers({
       for (let stroke of glyph.stages.strokes) {
         component.push({d: stroke, fill: color, stroke: 'black'});
       }
-      component.top = `${138*index + 8}px`;
-      result.push(component);
+      result.push({glyph: {paths: component}, top: `${138*index + 8}px`});
     }
     return result;
   },
