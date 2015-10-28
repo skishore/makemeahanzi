@@ -185,6 +185,11 @@ stages.order = class OrderStage extends stages.AbstractStage {
     });
     this.forceRefresh();
   }
+  onReverseStroke(stroke) {
+    const element = this.order.filter((x) => x.stroke === stroke)[0];
+    element.median.reverse();
+    this.forceRefresh();
+  }
   onSort(old_index, new_index) {
     const elements = this.order.splice(old_index, 1);
     assert(elements.length === 1);
@@ -192,11 +197,9 @@ stages.order = class OrderStage extends stages.AbstractStage {
     this.forceRefresh();
   }
   refreshUI() {
-    Session.set('stage.status', [{
-      cls: this.order ? 'success' : 'error',
-      message: this.order ?
-          'Stroke order determined by decomposition.' :
-          'Loading component data...',
+    Session.set('stage.status', this.order ? [] : [{
+      cls: 'error',
+      message: 'Loading component data...',
     }]);
     Session.set('stages.order.colors', this.colors);
     Session.set('stages.order.components', this.components);
@@ -205,6 +208,7 @@ stages.order = class OrderStage extends stages.AbstractStage {
     Order.remove({});
     (this.order || []).map((x, i) => {
       const key = JSON.stringify(x.match || null);
+      const color = this.colors[this.indices[key]] || 'lightgray';
       const glyph = {
         lines: [{
           x1: x.median[0][0],
@@ -214,8 +218,13 @@ stages.order = class OrderStage extends stages.AbstractStage {
         }],
         paths: [{d: this.strokes[x.stroke]}],
       };
+      const lighten = (color, alpha) => {
+        const c = parseInt(color.substr(1), 16);
+        return `rgba(${c >> 16}, ${(c >> 8) & 0xFF}, ${c & 0xFF}, ${alpha})`;
+      };
       Order.insert({
-        color: this.colors[this.indices[key]] || 'lightgray',
+        background: lighten(color, 0.1),
+        color: color,
         glyph: glyph,
         index: i,
         stroke_index: x.stroke,
@@ -223,6 +232,12 @@ stages.order = class OrderStage extends stages.AbstractStage {
     });
   }
 }
+
+Template.order_stage.events({
+  'click .permutation .entry .reverse': function(event) {
+    stage && stage.onReverseStroke(this.stroke_index);
+  },
+});
 
 Template.order_stage.helpers({
   character: () => {

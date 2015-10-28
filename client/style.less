@@ -213,29 +213,29 @@ div.value[contenteditable="true"] {
         border: 1px dotted gray;
         cursor: pointer;
         margin: 0;
+        padding: 2px 8px;
 
-        .wrapper {
-          padding: 2px 8px;
-          position: relative;
+        .background {
+          opacity: 0.1;
+          position: absolute;
 
-          .background {
-            opacity: 0.1;
-            position: absolute;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          top: 0;
+        }
 
-            bottom: 0;
-            left: 0;
-            right: 0;
-            top: 0;
-          }
+        .reverse {
+          float: right;
+        }
 
-          .small svg {
-            height: 24px;
-            width: 24px;
-          }
+        .small svg {
+          height: 24px;
+          width: 24px;
+        }
 
-          .clear {
-            clear: both;
-          }
+        .clear {
+          clear: both;
         }
 
         .character {

@@ -86,8 +86,8 @@
 </template>
 
 <template name="order_stage">
-  Detect the position of each component of this character and use that
-  information to determine this character's stroke order.
+  Click on the strokes to the right to set the component they belong to.
+  Then reorder the strokes by clicking and dragging elements in the list below.
   {{#each components}}
     <div class="component" style="top: {{top}};">
       {{> glyph glyph}}
@@ -99,12 +99,11 @@
   </div>
   <div class="permutation">
     {{#sortable items=items options=options sortField="index"}}
-      <div class="entry" style="border-color: {{color}};">
-        <div class="wrapper">
-          <div class="background" style="background-color: {{color}};"></div>
-          <div class="small">{{>glyph glyph}}</div>
-          <div class="clear"></div>
-        </div>
+      <div class="entry" style="background-color: {{background}};
+                                border-color: {{color}};">
+        <a class="reverse">Reverse</a>
+        <div class="small">{{>glyph glyph}}</div>
+        <div class="clear"></div>
         <div class="character">{{>glyph glyph}}</div>
       </div>
     {{/sortable}}
