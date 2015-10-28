@@ -38,6 +38,12 @@ stages.AbstractStage = class AbstractStage {
     Session.set('stage.points', undefined);
     Session.set('stage.status', undefined);
   }
+  // Returns true if the difference between the two outputs is significant
+  // enough that the output from all later stages must be erased. By default,
+  // we return true to be safe. We should be very careful when returning false.
+  clearLaterStages(output1, output2) {
+    return true;
+  }
   // Return this stage's value based on current internal state. The default
   // implementation works for stages that follow the 'original/adjusted'
   // convention described in the constructor.

@@ -43,8 +43,10 @@ const forceRefresh = (from_construct_stage) => {
   }
   if (!_.isEqual(output, current)) {
     glyph.stages[stage.type] = output;
-    for (let i = types.indexOf(stage.type) + 1; i < types.length; i++) {
-      glyph.stages[types[i]] = null;
+    if (!output || !current || stage.clearLaterStages(output, current)) {
+      for (let i = types.indexOf(stage.type) + 1; i < types.length; i++) {
+        glyph.stages[types[i]] = null;
+      }
     }
     Session.set('editor.glyph', glyph);
   }

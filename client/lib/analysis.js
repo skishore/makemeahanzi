@@ -130,6 +130,9 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
     stage = this;
     updateStatus();
   }
+  clearLaterStages(output1, output2) {
+    return output1.decomposition !== output2.decomposition;
+  }
   getStageOutput() {
     return {
       decomposition: decomposition_util.convertTreeToDecomposition(this.tree),
