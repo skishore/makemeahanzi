@@ -123,6 +123,19 @@ const matchStrokes = (character, components) => {
   return new Hungarian(matrix).x_match;
 }
 
+const maybeReverse = (median, match) => {
+  const diff1 = Point.subtract(median[median.length - 1], median[0]);
+  let diff2 = [1, -2]
+  if (match) {
+    const target = match.median;
+    diff2 = Point.subtract(target[target.length - 1], target[0]);
+  }
+  if (Point.dot(diff1, diff2) < 0) {
+    median.reverse();
+  }
+  return median;
+}
+
 const scoreStrokes = (stroke1, stroke2) => {
   assert(stroke1.length === stroke2.length);
   let option1 = 0;
@@ -181,7 +194,7 @@ stages.order = class OrderStage extends stages.AbstractStage {
       const match = order[matching[x]];
       return {
         match: match ? match.node.path : undefined,
-        median: this.medians[x],
+        median: maybeReverse(this.medians[x], match),
         stroke: x,
       };
     });
