@@ -137,7 +137,7 @@ const scoreStrokes = (stroke1, stroke2) => {
 stages.order = class OrderStage extends stages.AbstractStage {
   constructor(glyph) {
     super('order');
-    this.matching = undefined;
+    this.adjusted = glyph.stages.order;
     this.medians = glyph.stages.strokes.map(median_util.findStrokeMedian);
     this.strokes = glyph.stages.strokes;
 
@@ -157,14 +157,16 @@ stages.order = class OrderStage extends stages.AbstractStage {
     stage = this;
   }
   handleEvent(event, template) {
-    const element = this.order.filter(
+    const element = this.adjusted.filter(
         (x) => x.stroke === template.stroke_index)[0];
     const old_index = this.indices[JSON.stringify(element.match || null)];
     const new_index = ((old_index + 2) % (this.components.length + 1)) - 1;
     element.match = this.paths[new_index];
-    this.forceRefresh();
   }
   onAllComponentsReady() {
+    if (this.adjusted) {
+      return;
+    }
     const nodes = collectComponentNodes(this.tree);
     nodes.map((node) => {
       const glyph = Glyphs.findOne({character: node.value});
@@ -175,7 +177,7 @@ stages.order = class OrderStage extends stages.AbstractStage {
     const matching = matchStrokes(this.medians, order);
     const indices = _.range(this.medians.length).sort(
         (a, b) => matching[a] - matching[b]);
-    this.order = indices.map((x) => {
+    this.adjusted = indices.map((x) => {
       const match = order[matching[x]];
       return {
         match: match ? match.node.path : undefined,
@@ -183,30 +185,30 @@ stages.order = class OrderStage extends stages.AbstractStage {
         stroke: x,
       };
     });
-    this.forceRefresh();
+    this.forceRefresh(true /* from_construct_stage */);
   }
   onReverseStroke(stroke) {
-    const element = this.order.filter((x) => x.stroke === stroke)[0];
+    const element = this.adjusted.filter((x) => x.stroke === stroke)[0];
     element.median.reverse();
     this.forceRefresh();
   }
   onSort(old_index, new_index) {
-    const elements = this.order.splice(old_index, 1);
+    const elements = this.adjusted.splice(old_index, 1);
     assert(elements.length === 1);
-    this.order.splice(new_index, 0, elements[0]);
+    this.adjusted.splice(new_index, 0, elements[0]);
     this.forceRefresh();
   }
   refreshUI() {
-    Session.set('stage.status', this.order ? [] : [{
+    Session.set('stage.status', this.adjusted ? [] : [{
       cls: 'error',
       message: 'Loading component data...',
     }]);
     Session.set('stages.order.colors', this.colors);
     Session.set('stages.order.components', this.components);
     Session.set('stages.order.indices', this.indices);
-    Session.set('stages.order.order', this.order);
+    Session.set('stages.order.order', this.adjusted);
     Order.remove({});
-    (this.order || []).map((x, i) => {
+    (this.adjusted || []).map((x, i) => {
       const key = JSON.stringify(x.match || null);
       const color = this.colors[this.indices[key]] || 'lightgray';
       const glyph = {
