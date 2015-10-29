@@ -116,7 +116,18 @@ const matchStrokes = (character, components) => {
       if (i < sources.length && j < targets.length) {
         matrix[i].push(scoreStrokes(sources[i], targets[j]));
       } else {
-        matrix[i].push(-missing_penalty);
+        let top_left_penalty = 0;
+        if (j >= targets.length) {
+          // We want strokes that are not matched with components to be sorted
+          // by their proximity to the top-left corner of the glyph. We compute
+          // a penalty which is smaller for strokes closer to this corner,
+          // then multiply the penalty by j so that those strokes come first.
+          const direction = [0.01, 0.02];
+          top_left_penalty = -j*Math.min(
+              Point.dot(direction, sources[i][0]),
+              Point.dot(direction, sources[i][sources[i].length - 1]));
+        }
+        matrix[i].push(-missing_penalty - top_left_penalty);
       }
     }
   }
