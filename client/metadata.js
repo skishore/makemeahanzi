@@ -8,8 +8,13 @@ const parseIntWithValidation = (text) => {
   return result;
 }
 
+const parsePinyin = (text) => {
+  const pinyin = text.split(',').map((x) => x.trim()).filter((x) => x.length);
+  return pinyin.map(pinyin_util.numberedPinyinToTonePinyin).join(', ');
+}
+
 const validators = {
-  pinyin: pinyin_util.numberedPinyinToTonePinyin,
+  pinyin: parsePinyin,
   strokes: parseIntWithValidation,
 };
 
