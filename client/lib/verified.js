@@ -2,6 +2,7 @@
 
 let stage = undefined;
 
+const delay = 0.2;
 const width = 128;
 
 const getMedianLength = (median) => {
@@ -31,17 +32,18 @@ stages.verified = class VerifiedStage extends stages.AbstractStage {
     this.lengths = this.order.map((x) => getMedianLength(x.median) + width);
     this.paths = this.order.map((x) => getMedianPath(x.median));
 
+    requestAnimationFrame(this.updateCompletion.bind(this));
     this.completion = 0;
-    Meteor.setTimeout(this.updateCompletion.bind(this), 0);
     stage = this;
   }
   getStrokeAnimations(completion) {
     const index = Math.floor(completion);
     const max = Math.min(index, this.strokes.length - 1);
+    const partial = Math.max((completion - index - delay)/(1 - delay), 0);
     const result = [];
     for (let i = 0; i <= max; i++) {
       const element = this.order[i];
-      const fraction = i < index ? 1 : completion - index;
+      const fraction = i < index ? 1 : partial;
       result.push({
         clip: `animation${i}`,
         stroke: this.strokes[element.stroke],
@@ -63,13 +65,12 @@ stages.verified = class VerifiedStage extends stages.AbstractStage {
   }
   updateCompletion() {
     if (Session.get('editor.glyph').character !== this.character ||
-        Session.get('stage.type') !== this.type || stage !== this) {
+        Session.get('stage.type') !== this.type || stage !== this ||
+        this.completion >= this.strokes.length) {
       return;
     }
-    if (this.completion < this.strokes.length) {
-      this.completion += 0.02;
-      this.refreshUI();
-      Meteor.setTimeout(this.updateCompletion.bind(this), 10);
-    }
+    requestAnimationFrame(this.updateCompletion.bind(this));
+    this.completion = Math.min(this.completion + 0.03, this.strokes.length);
+    this.refreshUI();
   }
 }
