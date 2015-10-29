@@ -2,7 +2,7 @@
 
 Session.set('editor.glyph', undefined);
 
-const types = ['path', 'bridges', 'strokes', 'analysis', 'order', 'settled'];
+const types = ['path', 'bridges', 'strokes', 'analysis', 'order', 'verified'];
 let last_glyph = undefined;
 let stage = new stages.AbstractStage;
 
@@ -101,6 +101,7 @@ Template.editor.helpers({
   paths: () => Session.get('stage.paths'),
   lines: () => Session.get('stage.lines'),
   points: () => Session.get('stage.points'),
+  animations: () => Session.get('stage.animations'),
 });
 
 Template.status.helpers({
@@ -115,6 +116,16 @@ Tracker.autorun(() => {
   if (!last_glyph || glyph.character !== last_glyph.character) {
     let last_completed_stage = types[0];
     types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
+
+    // TODO(skishore): This hack is even worse than the hack below. It boots
+    // us straight to the verified stage for a certain character so that we
+    // can test out animations.
+    if (glyph.character === '龟' && !glyph.stages.verified) {
+      glyph.stages.analysis = 'wtfamidoing';
+      glyph.stages.order = [{"match":[0],"median":[[442,845],[462,804],[456,786],[371,689],[307,636],[273,616]],"stroke":4},{"match":[0],"median":[[435,714],[558,741],[583,742],[615,727],[565,647],[496,569]],"stroke":3},{"match":[1],"median":[[213,535],[239,514],[263,480],[294,283],[314,216]],"stroke":5},{"match":[1],"median":[[262,529],[298,517],[552,558],[654,566],[688,560],[718,528],[667,304],[651,265],[655,245]],"stroke":2},{"match":[1],"median":[[345,379],[545,412],[587,406]],"stroke":6},{"match":[1],"median":[[335,224],[351,240],[547,272],[597,277],[607,263]],"stroke":1},{"match":[1],"median":[[423,518],[466,497],[478,485],[471,325],[474,184],[490,96],[498,77],[523,49],[562,27],[635,12],[758,11],[832,23],[878,48],[886,200]],"stroke":0}];
+      glyph.stages.verified = {sentinel: true};
+      return Session.set('editor.glyph', glyph);
+    }
 
     // TODO(skishore): This block is a terrible hack used to force us through
     // the analysis stage and into the order stage.

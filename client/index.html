@@ -62,6 +62,13 @@
           <circle class="{{cls}}" fill="{{fill}}" stroke="{{stroke}}"
                   cx={{cx}} cy={{cy}} r="8"></circle>
         {{/each}}
+        {{#each animations}}
+          <clipPath id="{{clip}}">
+            <path d={{stroke}}></path>
+          </clipPath>
+          <path class="animation" clip-path="url(#{{clip}})" d="{{median}}"
+                stroke-dasharray="{{length}}" stroke-dashoffset="{{advance}}"/>
+        {{/each}}
       </g>
     </svg>
   </div>

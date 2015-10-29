@@ -37,6 +37,14 @@ stages.AbstractStage = class AbstractStage {
     Session.set('stage.lines', undefined);
     Session.set('stage.points', undefined);
     Session.set('stage.status', undefined);
+    // Only used for the verified stage. This variable should be a list of
+    // objects with the following keys:
+    //   - clip - a unique id for the given stroke.
+    //   - stroke - the actual stroke path.
+    //   - median - the path along just the median.
+    //   - length - the total length of the median.
+    //   - advance - the length left along the median. 0 when complete.
+    Session.set('stage.animations', undefined);
   }
   // Returns true if the difference between the two outputs is significant
   // enough that the output from all later stages must be erased. By default,
