@@ -194,7 +194,7 @@ stages.order = class OrderStage extends stages.AbstractStage {
     const nodes = collectComponentNodes(this.tree);
     nodes.map((node) => {
       const glyph = Glyphs.findOne({character: node.value});
-      node.medians = glyph.stages.strokes.map(median_util.findStrokeMedian);
+      node.medians = glyph.stages.order.map((x) => x.median);
     });
     const log = [];
     const order = buildStrokeOrder(this.tree, log);

@@ -243,12 +243,15 @@ Template.tree.helpers({
 const updateStatus = () => {
   const components = collectComponents(Session.get('stages.analysis.tree'));
   const radical = Session.get('stages.analysis.radical');
-  const missing = components.filter((x) => !Glyphs.findOne({character: x}));
+  const missing = components.filter((x) => {
+    const glyph = Glyphs.findOne({character: x});
+    return !glyph || !glyph.stages.verified;
+  });
   const log = [];
   if (missing.length === 0) {
-    log.push({cls: 'success', message: 'All components available.'});
+    log.push({cls: 'success', message: 'All components ready.'});
   } else {
-    const error = `Missing components: ${missing.join(' ')}`;
+    const error = `Incomplete components: ${missing.join(' ')}`;
     log.push({cls: 'error', message: error});
   }
   if (!radical || radical.length === 0) {
