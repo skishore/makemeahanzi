@@ -52,6 +52,9 @@ Template.metadata.helpers({
     if (!glyph) return;
     return glyph.character;
   },
+  display() {
+    return Session.get('stage.type') === 'order' ? 'none' : undefined;
+  },
   items() {
     const glyph = Session.get('editor.glyph');
     if (!glyph) return;
