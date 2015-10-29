@@ -8,6 +8,44 @@ const checkStrokeExtractorStability = (glyph) => {
   }
 }
 
+const migrateOldGlyphSchemaToNew = (glyph) => {
+  const codepoint = parseInt(glyph.name.substr(3), 16);
+  const character = String.fromCodePoint(codepoint);
+  const data = cjklib.getCharacterData(character);
+  assert(glyph.manual.verified !== undefined);
+  const result = {
+    character: character,
+    codepoint: codepoint,
+    metadata: {
+      definition: undefined,
+      kangxi_index: data.kangxi_index,
+      pinyin: undefined,
+      strokes: undefined,
+    },
+    stages: {
+      path: Glyphs.get_svg_path(glyph),
+      bridges: glyph.manual.bridges,
+      strokes: glyph.derived.strokes,
+      analysis: undefined,
+      order: undefined,
+      verified: undefined,
+    },
+  };
+  assert(result.stages.path !== undefined);
+  assert(result.stages.bridges !== undefined);
+  assert(result.stages.strokes !== undefined);
+  return result;
+}
+
+const setAnalysisStageToReady = (glyph) => {
+  const data = cjklib.getCharacterData(glyph.character);
+  if (data && data.strokes === glyph.stages.strokes.length) {
+    glyph.stages.analysis = {sentinel: true};
+  } else {
+    console.log(`Different stroke count for ${glyph.character}`);
+  }
+}
+
 const completionCallback = undefined;
 
 const perGlyphCallback = undefined;
