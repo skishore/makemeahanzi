@@ -118,7 +118,8 @@ Tracker.autorun(() => {
     types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
     constructStage(last_completed_stage);
   } else {
-    // TODO(skishore): Save the glyph at this point.
+    Meteor.call('saveGlyph', glyph,
+                (error, data) => { if (error) console.error(error) });
     if (!_.isEqual(glyph.metadata, last_glyph.metadata)) {
       stage.refreshUI(glyph.character, glyph.metadata);
     }
