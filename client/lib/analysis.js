@@ -178,7 +178,12 @@ Template.analysis_stage.events({
   },
   'change .etymology-type': function(event) {
     const type = $(event.target).val();
-    etymology_fields.map((x) => delete stage.etymology[x]);
+    etymology_fields.map(
+        (x) => { if (x !== 'hint') delete stage.etymology[x]; });
+    if ((type === 'pictophonetic') !==
+        (stage.etymology.type === 'pictophonetic')) {
+      delete stage.etymology.hint;
+    }
     stage.etymology.type = type;
     stage.forceRefresh();
   },
