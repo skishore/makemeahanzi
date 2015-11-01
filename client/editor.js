@@ -9,7 +9,7 @@ let stage = new stages.AbstractStage;
 const changeGlyph = (method, argument) => {
   argument = argument || Session.get('editor.glyph');
   Meteor.call(method, argument, function(error, data) {
-    assert(!error);
+    assert(!error, error);
     Session.set('editor.glyph', data);
     window.location.hash = data.character;
   });
@@ -83,7 +83,9 @@ const resetStage = () => {
 
 const bindings = {
   a: () => changeGlyph('getPreviousGlyph'),
+  A: () => changeGlyph('getPreviousUnverifiedGlyph'),
   d: () => changeGlyph('getNextGlyph'),
+  D: () => changeGlyph('getNextUnverifiedGlyph'),
   r: resetStage,
   s: () => incrementStage(1),
   w: () => incrementStage(-1),
