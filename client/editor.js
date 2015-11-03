@@ -84,8 +84,10 @@ const resetStage = () => {
 const bindings = {
   a: () => changeGlyph('getPreviousGlyph'),
   A: () => changeGlyph('getPreviousUnverifiedGlyph'),
+  q: () => changeGlyph('getPreviousVerifiedGlyph'),
   d: () => changeGlyph('getNextGlyph'),
   D: () => changeGlyph('getNextUnverifiedGlyph'),
+  e: () => changeGlyph('getNextVerifiedGlyph'),
   r: resetStage,
   s: () => incrementStage(1),
   w: () => incrementStage(-1),
