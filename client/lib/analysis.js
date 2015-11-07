@@ -98,7 +98,8 @@ const initializeRadical = (character, components) => {
 
 const initializeEtymology = (glyph, components) => {
   const data = cjklib.getCharacterData(glyph.character);
-  const target = pinyin_util.dropTones(glyph.pinyin || data.pinyin || '');
+  const target = pinyin_util.dropTones(
+      glyph.metadata.pinyin || data.pinyin || '');
   const phonetic_match = (component) => {
     const component_data = cjklib.getCharacterData(component);
     const attempt = pinyin_util.dropTones(component_data.pinyin || '');
@@ -114,6 +115,34 @@ const initializeEtymology = (glyph, components) => {
     return result;
   }
   return {type: 'ideographic'};
+}
+
+// Methods for automatically inferring a phonetic-semantic decomposition.
+
+const doubleAlphabeticCharacters = (pinyin) => {
+  const numbered = pinyin_util.tonePinyinToNumberedPinyin(pinyin);
+  return Array.from(numbered).map((x) => /[a-z]/.test(x) ? x + x : x).join('');
+}
+
+const guessPhoneticAndSemanticComponents = (glyph, components) => {
+  const data = cjklib.getCharacterData(glyph.character);
+  const target = doubleAlphabeticCharacters(
+      glyph.metadata.pinyin || data.pinyin || '');
+  const distance = (component) => {
+    const component_data = cjklib.getCharacterData(component);
+    const attempt = doubleAlphabeticCharacters(component_data.pinyin || '');
+    return s.levenshtein(attempt, target);
+  }
+  const pairs = components.map((x) => [x, distance(x)]);
+  const sorted = pairs.sort((a, b) => a[1] - b[1]).map((x) => x[0]);
+  const result = {};
+  if (sorted.length > 0) {
+    result.phonetic = sorted[0];
+    if (sorted.length === 2) {
+      result.semantic = sorted[1];
+    }
+  }
+  return result;
 }
 
 stages.analysis = class AnalysisStage extends stages.AbstractStage {
@@ -185,6 +214,10 @@ Template.analysis_stage.events({
       delete stage.etymology.hint;
     }
     stage.etymology.type = type;
+    if (type === 'pictophonetic') {
+      _.extend(stage.etymology, guessPhoneticAndSemanticComponents(
+          Session.get('editor.glyph'), collectComponents(stage.tree)));
+    }
     stage.forceRefresh();
   },
   'change .subtree-type': function(event) {
