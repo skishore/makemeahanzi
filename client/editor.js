@@ -4,6 +4,7 @@ Session.set('editor.glyph', undefined);
 
 const types = ['path', 'bridges', 'strokes', 'analysis', 'order', 'verified'];
 let last_glyph = undefined;
+let last_json = undefined;
 let stage = new stages.AbstractStage;
 
 const changeGlyph = (method, argument) => {
@@ -116,8 +117,10 @@ Template.status.helpers({
 
 Tracker.autorun(() => {
   const glyph = Session.get('editor.glyph');
-  if (!glyph) return;
-  if (!last_glyph || glyph.character !== last_glyph.character) {
+  const json = JSON.stringify(glyph);
+  if (!glyph || json === last_json) {
+    return;
+  } else if (!last_glyph || glyph.character !== last_glyph.character) {
     let last_completed_stage = types[0];
     types.map((x) => { if (glyph.stages[x]) last_completed_stage = x; });
     constructStage(last_completed_stage);
@@ -129,6 +132,7 @@ Tracker.autorun(() => {
     }
   }
   last_glyph = glyph;
+  last_json = json;
 });
 
 Meteor.startup(() => {
