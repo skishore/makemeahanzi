@@ -39,6 +39,30 @@ div.value[contenteditable="true"] {
       padding-left: 4px;
     }
   }
+
+  .navbar-right {
+    margin-right: 12px;
+
+    .navbar-brand {
+      -webkit-user-select: none !important;
+      cursor: pointer;
+      font-size: 30px;
+      line-height: 60px;
+      min-width: 60px;
+      padding: 0;
+      text-align: center;
+
+      &:hover {
+        background-color: rgb(66, 93, 132);
+      }
+
+      &.disabled, &.disabled:hover {
+        background-color: inherit;
+        cursor: default;
+        color: rgb(110, 155, 220) !important;
+      }
+    }
+  }
 }
 
 // Styling for the 'editor' template.

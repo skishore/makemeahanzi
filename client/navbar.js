@@ -1,6 +1,19 @@
 "use strict";
 
+Template.navbar.events({
+  'click .backup': () => {
+    const progress = Progress.findOne();
+    if (!(progress && progress.backup)) {
+      Meteor.call('backup');
+    }
+  },
+});
+
 Template.navbar.helpers({
+  backup() {
+    const progress = Progress.findOne();
+    return (progress && progress.backup) ? 'disabled' : undefined;
+  },
   complete() {
     const progress = Progress.findOne();
     return progress ? progress.complete : '?';
