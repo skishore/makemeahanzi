@@ -78,6 +78,12 @@ Template.metadata.helpers({
     }
     return result;
   },
+  rank() {
+    const glyph = Session.get('editor.glyph');
+    if (!glyph) return '?';
+    const data = cjklib.getCharacterData(glyph.character);
+    return data.frequency || '?';
+  },
   references() {
     const glyph = Session.get('editor.glyph');
     if (!glyph) return;
