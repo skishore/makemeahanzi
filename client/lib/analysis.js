@@ -55,7 +55,12 @@ const updateCharacterValue = (target, text, path) => {
 }
 
 const updateEtymology = (target, text, type) => {
-  const value = text && text !== '?' ? text : undefined;
+  let value = text && text !== '?' ? text : undefined;
+  const expansion = ' aptp';
+  if (type === 'hint' && value && value.endsWith(expansion)) {
+    const suffix = 'also provides the pronunciation'
+    value = `${value.substr(0, value.length - expansion.length)} ${suffix}`;
+  }
   if (value === stage.etymology[type]) {
     target.text(value || '?');
   } else {
