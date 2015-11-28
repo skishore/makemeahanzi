@@ -1,5 +1,11 @@
 "use strict";
 
+const addFrequencyField = (glyph) => {
+  const data = cjklib.getCharacterData(glyph.character);
+  glyph.metadata.frequency = data.frequency;
+  Glyphs.save(glyph);
+}
+
 const checkStrokeExtractorStability = (glyph) => {
   const strokes = stroke_extractor.getStrokes(
       glyph.stages.path, glyph.stages.bridges);
@@ -36,6 +42,7 @@ const migrateOldGlyphSchemaToNew = (glyph) => {
     codepoint: codepoint,
     metadata: {
       definition: undefined,
+      frequency: data.frequency,
       kangxi_index: data.kangxi_index,
       pinyin: undefined,
       strokes: undefined,

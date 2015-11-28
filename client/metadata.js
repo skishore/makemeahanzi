@@ -80,9 +80,7 @@ Template.metadata.helpers({
   },
   rank() {
     const glyph = Session.get('editor.glyph');
-    if (!glyph) return '?';
-    const data = cjklib.getCharacterData(glyph.character);
-    return data.frequency || '?';
+    return (glyph && glyph.metadata.frequency) || '?';
   },
   references() {
     const glyph = Session.get('editor.glyph');
