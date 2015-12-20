@@ -72,7 +72,8 @@
             <path d={{stroke}}></path>
           </clipPath>
           <path class="animation" clip-path="url(#{{clip}})" d="{{median}}"
-                stroke-dasharray="{{length}}" stroke-dashoffset="{{advance}}"/>
+                stroke-dasharray="{{length}} {{spacing}}"
+                stroke-dashoffset="{{advance}}"/>
         {{/each}}
       </g>
     </svg>

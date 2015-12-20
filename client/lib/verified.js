@@ -49,6 +49,7 @@ stages.verified = class VerifiedStage extends stages.AbstractStage {
         stroke: this.strokes[element.stroke],
         median: this.paths[i],
         length: this.lengths[i],
+        spacing: 2*this.lengths[i],
         advance: (1 - fraction)*this.lengths[i] + width,
       });
     }
