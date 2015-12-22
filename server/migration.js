@@ -6,6 +6,13 @@ const addFrequencyField = (glyph) => {
   Glyphs.save(glyph);
 }
 
+const addSimplifiedAndTraditionalFields = (glyph) => {
+  const data = cjklib.getCharacterData(glyph.character);
+  glyph.simplified = data.simplified;
+  glyph.traditional = data.traditional;
+  Glyphs.save(glyph);
+}
+
 const checkStrokeExtractorStability = (glyph) => {
   const strokes = stroke_extractor.getStrokes(
       glyph.stages.path, glyph.stages.bridges);
@@ -55,6 +62,8 @@ const migrateOldGlyphSchemaToNew = (glyph) => {
       order: undefined,
       verified: undefined,
     },
+    simplified: data.simplified,
+    traditional: data.traditional,
   };
   assert(result.stages.path !== undefined);
   assert(result.stages.bridges !== undefined);
