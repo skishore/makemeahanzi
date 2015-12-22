@@ -44,14 +44,24 @@ const migrateOldGlyphSchemaToNew = (glyph) => {
   const data = cjklib.getCharacterData(character);
   assert(glyph.manual && glyph.manual.verified !== undefined,
          `Glyph ${character} was not verified.`);
+  // Pull definition and pinyin from simplified character, if available.
+  let definition = undefined;
+  let pinyin = undefined;
+  if (data.simplified) {
+    const simplified = Glyphs.get(data.simplified);
+    const metadata = (simplified || {metadata: {}}).metadata;
+    const base = cjklib.getCharacterData(data.simplified);
+    definition = metadata.definition || base.definition;
+    pinyin = metadata.pinyin || base.pinyin;
+  }
   const result = {
     character: character,
     codepoint: codepoint,
     metadata: {
-      definition: undefined,
+      definition: definition,
       frequency: data.frequency,
       kangxi_index: data.kangxi_index,
-      pinyin: undefined,
+      pinyin: pinyin,
       strokes: undefined,
     },
     stages: {
@@ -94,6 +104,8 @@ const loadFromOldSchemaJSON = (filename) => {
     const lines = data.split('\n').filter((x) => x.length > 0);
     console.log(`Loaded ${lines.length} old-schema glyphs.`);
     let migrated = 0;
+    let definition = 0;
+    let pinyin = 0;
     for (var line of lines) {
       try {
         const old_glyph = JSON.parse(line);
@@ -101,11 +113,15 @@ const loadFromOldSchemaJSON = (filename) => {
         setAnalysisStageToReady(new_glyph);
         Glyphs.save(new_glyph);
         migrated += 1;
+        definition += new_glyph.metadata.definition ? 1 : 0;
+        pinyin += new_glyph.metadata.pinyin ? 1 : 0;
       } catch (error) {
         console.error(error);
       }
     }
     console.log(`Successfully migrated ${migrated} glyphs.`);
+    console.log(`Pulled definitions for ${definition} glyphs.`);
+    console.log(`Pulled pinyin for ${pinyin} glyphs.`);
   }));
 }
 
