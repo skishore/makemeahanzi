@@ -131,6 +131,33 @@ const runMigration = () => {
   console.log('Migration complete.');
 }
 
+const scanForPairs = () => {
+  const glyphs = [];
+  const glyph_set = {};
+  Glyphs.find({}, {fields: {character: 1}, sort: {codepoint: 1}}).forEach(
+      (x) => {glyphs.push(x.character); glyph_set[x.character] = 1});
+  const getCharacterInfo = (x) => {
+    const data = cjklib.getCharacterData(x);
+    const metadata = Glyphs.get(x).metadata;
+    return `${x} - ${metadata.pinyin || data.pinyin} - ` +
+           `${metadata.definition || data.definition}`;
+  }
+  glyphs.map((x) => {
+    const data = cjklib.getCharacterData(x);
+    if (glyph_set[data.simplified]) {
+      const value0 = getCharacterInfo(x);
+      const value1 = getCharacterInfo(data.simplified);
+      if (value0.substr(1) !== value1.substr(1)) {
+        console.log('');
+        console.log(`Got pair: ${x} -> ${data.simplified}`);
+        console.log(getCharacterInfo(x));
+        console.log(getCharacterInfo(data.simplified));
+      }
+    }
+  });
+  console.log(`Checked ${glyphs.length} glyphs.`);
+}
+
 Meteor.methods({
   'loadFromOldSchemaJSON': (filename) => {
     cjklib.promise.then(
@@ -140,6 +167,8 @@ Meteor.methods({
 });
 
 Meteor.startup(() => {
+  cjklib.promise.then(Meteor.bindEnvironment(scanForPairs))
+                .catch(console.error.bind(console));
   if (!perGlyphCallback && !completionCallback) {
     return;
   }
