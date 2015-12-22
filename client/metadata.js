@@ -99,4 +99,8 @@ Template.metadata.helpers({
       label: 'YellowBridge',
     }];
   },
+  simplified() {
+    const glyph = Session.get('editor.glyph');
+    return glyph && glyph.simplified;
+  },
 });

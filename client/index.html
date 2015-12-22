@@ -83,7 +83,12 @@
 <template name="metadata">
   <div class="panel panel-primary metadata" style="display: {{display}};">
     <div class="panel-heading">
-      <h3 class="panel-title">Metadata for {{rank}} - {{character}}</h3>
+      <h3 class="panel-title">
+        Metadata for {{rank}} - {{character}}
+        {{#if simplified}}
+          - <a href="#{{simplified}}">(simplified: {{simplified}})</a>
+        {{/if}}
+      </h3>
     </div>
     {{#each items}}
       <div class="field">

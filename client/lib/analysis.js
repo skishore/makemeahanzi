@@ -161,6 +161,7 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
                    initializeRadical(glyph.character, components);
     this.etymology = analysis.etymology ||
                      initializeEtymology(glyph, components);
+    this.simplified = cjklib.getCharacterData(glyph.character).simplified;
     stage = this;
     updateStatus();
   }
@@ -180,6 +181,7 @@ stages.analysis = class AnalysisStage extends stages.AbstractStage {
     Session.set('stages.analysis.tree', this.tree);
     Session.set('stages.analysis.radical', this.radical);
     Session.set('stages.analysis.etymology', this.etymology);
+    Session.set('stages.analysis.simplified', this.simplified);
   }
 }
 
@@ -285,6 +287,9 @@ Template.tree.helpers({
 
 const updateStatus = () => {
   const components = collectComponents(Session.get('stages.analysis.tree'));
+  if (Session.get('stages.analysis.simplified')) {
+    components.push(Session.get('stages.analysis.simplified'));
+  }
   const radical = Session.get('stages.analysis.radical');
   const missing = components.filter((x) => {
     const glyph = Glyphs.findOne({character: x});
@@ -322,6 +327,9 @@ Meteor.startup(() => Meteor.setTimeout(() => {
   Tracker.autorun(updateStatus);
   cjklib.promise.then(() => Tracker.autorun(() => {
     const components = collectComponents(Session.get('stages.analysis.tree'));
+    if (Session.get('stages.analysis.simplified')) {
+      components.push(Session.get('stages.analysis.simplified'));
+    }
     for (let component of [].concat(components)) {
       if (cjklib.radicals.radical_to_index_map.hasOwnProperty(component)) {
         const index = cjklib.radicals.radical_to_index_map[component];
