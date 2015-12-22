@@ -110,7 +110,11 @@ const loadFromOldSchemaJSON = (filename) => {
       try {
         const old_glyph = JSON.parse(line);
         const new_glyph = migrateOldGlyphSchemaToNew(old_glyph);
-        setAnalysisStageToReady(new_glyph);
+        const glyph = Glyphs.get(new_glyph.character);
+        if (glyph && glyph.stages.verified) {
+          console.log(`Glyph already verified: ${glyph.character}`);
+          continue;
+        }
         Glyphs.save(new_glyph);
         migrated += 1;
         definition += new_glyph.metadata.definition ? 1 : 0;
