@@ -285,6 +285,48 @@ Template.tree.helpers({
   },
 });
 
+const traditionalEtymologyHack = () => {
+  // Only compute the traditional etymology based on simplified once, and only
+  // if this character does not already have an etymology computed.
+  if (!stage || !stage.simplified ||
+      stage.inferred_etymology_from_simplified_form) {
+    return;
+  }
+  const glyph = Session.get('editor.glyph');
+  const simplified = Glyphs.findOne({character: stage.simplified});
+  if (!glyph || !simplified) {
+    return;
+  }
+  stage.inferred_etymology_from_simplified_form = true;
+  if ((glyph.stages.analysis && glyph.stages.analysis.etymology &&
+       glyph.stages.analysis.etymology.hint) ||
+      !(simplified.stages.analysis && simplified.stages.analysis.etymology &&
+        simplified.stages.analysis.etymology.hint)) {
+    return;
+  }
+  // Try to pull components for the simplified character up to components for
+  // the traditional character.
+  const mapping = {};
+  const analysis = simplified.stages.analysis;
+  const decomposition =
+      decomposition_util.convertTreeToDecomposition(stage.tree);
+  if (decomposition.length === analysis.decomposition.length &&
+      decomposition[0] === analysis.decomposition[0]) {
+    for (let i = 0; i < decomposition.length; i++) {
+      mapping[analysis.decomposition[i]] = decomposition[i];
+    }
+  } else {
+    return;
+  }
+  // Pull the actual etymology.
+  stage.etymology = {};
+  for (let key of _.keys(analysis.etymology)) {
+    const value = analysis.etymology[key];
+    stage.etymology[key] = key === 'type' ? value : value.applyMapping(mapping);
+  }
+  stage.forceRefresh();
+}
+
 const updateStatus = () => {
   const components = collectComponents(Session.get('stages.analysis.tree'));
   if (Session.get('stages.analysis.simplified')) {
@@ -298,6 +340,7 @@ const updateStatus = () => {
   const log = [];
   if (missing.length === 0) {
     log.push({cls: 'success', message: 'All components ready.'});
+    Meteor.setTimeout(traditionalEtymologyHack, 0);
   } else {
     const error = `Incomplete components: ${missing.join(' ')}`;
     log.push({cls: 'error', message: error});
