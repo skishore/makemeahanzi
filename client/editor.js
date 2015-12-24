@@ -59,7 +59,20 @@ const incrementStage = (amount) => {
   const new_index = index + amount;
   if (new_index < 0 || new_index >= types.length) return;
   if (amount > 0) {
-    stage.validate();
+    try {
+      stage.validate();
+    } catch (e) {
+      // HACK(skishore): The analysis stage may be failing because some
+      // dependency of the current glyph is incomplete. Switch to it. This code
+      // is a terrible hack because it makes use of the string used to render
+      // the incomplete-component message.
+      const log = Session.get('stage.status');
+      const prefix = 'Incomplete components: ';
+      if (log.length > 0 && log[0].message.startsWith(prefix)) {
+        changeGlyph('getGlyph', log[0].message[prefix.length]);
+      }
+      return;
+    }
     stage.forceRefresh();
   }
   constructStage(types[new_index]);
