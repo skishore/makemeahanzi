@@ -91,6 +91,10 @@ Template.metadata.helpers({
             `?find=${character}`,
       label: 'Arch Chinese',
     }, {
+      href: 'http://www.mdbg.net/chindict/chindict.php?page=worddict' +
+            `&wdrst=0&wdqb=${character}`,
+      label: 'MDBG',
+    }, {
       href: `https://en.wiktionary.org/wiki/${character}`,
       label: 'Wiktionary',
     }, {
