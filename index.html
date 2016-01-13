@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Make Me a Hanzi Demo</title>
+    <link rel="stylesheet" href="demo.css">
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="sketch.min.js"></script>
+    <script>
+      Sketch.create({
+        container: document.getElementById('container'),
+        autoclear: false,
+        setup: function() {
+        },
+        update: function() {
+        },
+        keydown: function() {
+          if (this.keys.C) this.clear();
+        },
+        // When using the sketch library, moving the mouse on a laptop browser
+        // will also generate touchmove events. Additionally, we could make
+        // use of touches[i] for i > 0 here to handle multi-touch events.
+        touchmove: function() {
+          if (this.dragging && this.touches.length > 0) {
+            var touch = this.touches[0];
+            this.lineCap = 'round';
+            this.lineJoin = 'round';
+            this.fillStyle = 'black';
+            this.strokeStyle = 'black';
+            this.lineWidth = 16;
+            this.beginPath();
+            this.moveTo(touch.ox, touch.oy);
+            this.lineTo(touch.x, touch.y);
+            this.stroke();
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
