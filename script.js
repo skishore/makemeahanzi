@@ -1,30 +1,41 @@
 "use strict";
 
-const createSketch = (controller, element) => {
-	let mousedown = false;
-	Sketch.create({
-		container: element,
-		autoclear: false,
-		mousedown() {
-      mousedown = true;
+const createSketch = ($scope, controller, element) => {
+  let mousedown = false;
+  Sketch.create({
+    container: element,
+    autoclear: false,
+    mousedown() {
+      $scope.$apply(() => {
+        mousedown = true;
+      });
     },
-		mouseup() {
-      mousedown = false;
-      controller._end_stroke();
+    mouseup() {
+      $scope.$apply(() => {
+        mousedown = false;
+        controller.end_stroke();
+      });
     },
     touchmove() {
-      if (mousedown) controller._push_point(touch.x, touch.y);
-		}
-	});
+      if (mousedown && this.touches.length > 0) {
+        $scope.$apply(() => {
+          const touch = this.touches[0];
+          controller.push_point([touch.x, touch.y]);
+        });
+      }
+    }
+  });
 }
 
-const MakeMeAHanziController = () => {
+const MakeMeAHanziController = function($scope) {
   this.width = () => window.innerWidth;
   this.height = () => window.innerHeight;
   this.strokes = [];
-  this.stroke = [];
+  this.stroke = () => this._d(this._stroke);
 
-  this.d = (path) => {
+  this._stroke = [];
+
+  this._d = (path) => {
     const result = [];
     path.map((entry, i) => {
       result.push(i === 0 ? 'M' : 'L');
@@ -34,19 +45,18 @@ const MakeMeAHanziController = () => {
     return result.join(' ');
   };
 
-  this._push_point = (point) => {
-    this.stroke.push(point);
-  }
-  this._end_stroke = () => {
-    if (this.stroke.length > 0) {
-      this.strokes.push(this.d(this.stroke));
-      this.stroke.length = 0;
+  this.end_stroke = () => {
+    if (this._stroke.length > 0) {
+      this.strokes.push(this._d(this._stroke));
+      this._stroke = [];
     }
   }
-  return this;
+  this.push_point = (point) => {
+    this._stroke.push(point);
+  }
+
+  createSketch($scope, this, document.getElementById('input'));
 }
 
-window.onload = () => {
-  angular.module('makemeahanzi', [])
-         .controller('MakeMeAHanziController', MakeMeAHanziController);
-}
+angular.module('makemeahanzi', [])
+       .controller('MakeMeAHanziController', MakeMeAHanziController);

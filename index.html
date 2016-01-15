@@ -1,16 +1,23 @@
 <!doctype html>
 <html>
-  <head ng-app="makemeahanzi">
+  <head>
     <title>Make Me a Hanzi Demo</title>
     <link rel="stylesheet" href="demo.css">
-  </head>
-  <body>
-    <div id="container" ng-controller="MakeMeAHanziController as controller">
-      <svg width="{{controller.width()}}" height="{{controller.height()}}">
-      </svg>
-    </div>
     <script src="js/angular.min.js"></script>
     <script src="js/sketch.min.js"></script>
     <script src="script.js"></script>
+  </head>
+  <body ng-app="makemeahanzi">
+    <div id="input"></div>
+    <div id="graphics" ng-controller="MakeMeAHanziController as controller">
+      <svg x-ng-attr-width="{{controller.width()}}"
+           x-ng-attr-height="{{controller.height()}}">
+        <g fill="none" stroke="black" stroke-width="10">
+          <path ng-repeat="stroke in controller.strokes"
+                x-ng-attr-d="{{stroke}}"></path>
+          <path x-ng-attr-d="{{controller.stroke()}}"></path>
+        </g>
+      </svg>
+    </div>
   </body>
 </html>
