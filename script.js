@@ -5,12 +5,13 @@ const createSketch = ($scope, controller, element) => {
   Sketch.create({
     container: element,
     autoclear: false,
-    mousedown() {
+    mousedown(e) {
       $scope.$apply(() => {
         mousedown = true;
+        controller.push_point([e.x, e.y]);
       });
     },
-    mouseup() {
+    mouseup(e) {
       $scope.$apply(() => {
         mousedown = false;
         controller.end_stroke();
@@ -20,6 +21,7 @@ const createSketch = ($scope, controller, element) => {
       if (mousedown && this.touches.length > 0) {
         $scope.$apply(() => {
           const touch = this.touches[0];
+          controller.maybe_push_point([touch.ox, touch.oy]);
           controller.push_point([touch.x, touch.y]);
         });
       }
@@ -36,12 +38,17 @@ const MakeMeAHanziController = function($scope) {
   this._stroke = [];
 
   this._d = (path) => {
+    if (path.length < 2) return '';
     const result = [];
-    path.map((entry, i) => {
-      result.push(i === 0 ? 'M' : 'L');
-      result.push(entry[0]);
-      result.push(entry[1]);
-    });
+    const point = (i) => `${path[i][0]} ${path[i][1]}`;
+    const midpoint = (i) => `${(path[i][0] + path[i + 1][0])/2} ` +
+                            `${(path[i][1] + path[i + 1][1])/2}`;
+    const push = (x) => result.push(x);
+    ['M', point(0), 'L', midpoint(0)].map(push);
+    for (var i = 1; i < path.length - 1; i++) {
+      ['Q', point(i), midpoint(i)].map(push);
+    }
+    ['L', point(path.length - 1)].map(push);
     return result.join(' ');
   };
 
@@ -51,8 +58,15 @@ const MakeMeAHanziController = function($scope) {
       this._stroke = [];
     }
   }
+  this.maybe_push_point = (point) => {
+    if (this._stroke.length === 0) {
+      this.push_point(point);
+    }
+  }
   this.push_point = (point) => {
-    this._stroke.push(point);
+    if (point[0] != null && point[1] != null) {
+      this._stroke.push(point);
+    }
   }
 
   createSketch($scope, this, document.getElementById('input'));

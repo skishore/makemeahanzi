@@ -12,7 +12,7 @@
     <div id="graphics" ng-controller="MakeMeAHanziController as controller">
       <svg x-ng-attr-width="{{controller.width()}}"
            x-ng-attr-height="{{controller.height()}}">
-        <g fill="none" stroke="black" stroke-width="10">
+        <g fill="none" stroke="black" stroke-linecap="round" stroke-width="10">
           <path ng-repeat="stroke in controller.strokes"
                 x-ng-attr-d="{{stroke}}"></path>
           <path x-ng-attr-d="{{controller.stroke()}}"></path>
