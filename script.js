@@ -5,6 +5,14 @@ const createSketch = ($scope, controller, element) => {
   Sketch.create({
     container: element,
     autoclear: false,
+    keydown(e) {
+      if (this.keys.C) {
+        $scope.$apply(() => {
+          mousedown = false;
+          controller.clear();
+        });
+      }
+    },
     mousedown(e) {
       $scope.$apply(() => {
         mousedown = true;
@@ -52,6 +60,10 @@ const MakeMeAHanziController = function($scope) {
     return result.join(' ');
   };
 
+  this.clear = () => {
+    this._stroke = [];
+    this.strokes = [];
+  }
   this.end_stroke = () => {
     if (this._stroke.length > 0) {
       this.strokes.push(this._d(this._stroke));
