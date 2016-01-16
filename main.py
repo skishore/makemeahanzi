@@ -13,9 +13,12 @@ def encode_median(median):
 # Serializes a character and its medians into a binary format.
 def encode(row):
   result = []
-  encoded_character = row['character'].encode('utf16')
-  result.append(chr(len(encoded_character)))
-  result.append(encoded_character)
+  # TODO(skishore): Figure out how to properly decode UTF-8 or -16 in
+  # Javascript  and then use one of those encodings here instead of this hack.
+  codepoint = ord(row['character'])
+  result.append(chr(codepoint & 0xff))
+  result.append(chr(codepoint >> 8))
+  # Push the medians into the binary representations.
   result.append(chr(len(row['medians'])))
   result.extend(map(encode_median, row['medians']))
   return ''.join(result)

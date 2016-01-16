@@ -1,2 +1,2 @@
 #!/bin/bash
-./node_modules/babel-cli/bin/babel.js --presets es2015 script.js > compiled.js
+./node_modules/babel-cli/bin/babel.js --presets es2015 *.js > compiled.js
