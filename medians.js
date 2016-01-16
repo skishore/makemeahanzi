@@ -52,5 +52,5 @@ const decodeMedians = (buffer) => {
 }
 
 // A global Promise that resolves to a list of (character, median) pairs.
-this.mediansPromise =
+window.mediansPromise =
     loadBinaryData('medians.bin').then(decodeMedians).catch(console.err);
