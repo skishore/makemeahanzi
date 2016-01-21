@@ -51,6 +51,7 @@ const decodeMedians = (buffer) => {
   return result;
 }
 
-// A global Promise that resolves to a list of (character, median) pairs.
-window.mediansPromise =
+// Returns a Promise that resolves to a list of (character, median) pairs.
+// NOTE: The extra layer of indirection avoids a massive memory leak!
+window.getMediansPromise = () =>
     loadBinaryData('medians.bin').then(decodeMedians).catch(console.err);

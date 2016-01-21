@@ -117,6 +117,9 @@ const scoreMatch = (source, target, params) => {
   return score;
 }
 
+// A class that can be instantiated with a list of (character, median) pairs
+// and then used to return closest character given a list of input strokes.
+
 window.Matcher = class Matcher {
   constructor(medians, params) {
     params = params || {};
@@ -144,12 +147,3 @@ window.Matcher = class Matcher {
     return best;
   }
 }
-
-window.matcher = {
-  filterMedian: filterMedian,
-  getAffineTransform: getAffineTransform,
-  getBounds: getBounds,
-  normalizeBounds: normalizeBounds,
-  prepareToScore: prepareToScore,
-  scoreMatch: scoreMatch,
-};

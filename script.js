@@ -44,6 +44,12 @@ const MakeMeAHanziController = function($scope) {
   this.stroke = () => this._d(this._stroke);
 
   this._stroke = [];
+  this._strokes = [];
+  this._matcher = null;
+
+  getMediansPromise().then((medians) => {
+    this._matcher = new Matcher(medians);
+  });
 
   this._d = (path) => {
     if (path.length < 2) return '';
@@ -61,13 +67,19 @@ const MakeMeAHanziController = function($scope) {
   };
 
   this.clear = () => {
-    this._stroke = [];
     this.strokes = [];
+    this._stroke = [];
+    this._strokes = [];
   }
   this.end_stroke = () => {
-    if (this._stroke.length > 0) {
+    if (this._stroke.length > 1) {
       this.strokes.push(this._d(this._stroke));
+      this._strokes.push(this._stroke);
       this._stroke = [];
+
+      if (this._matcher) {
+        console.log(this._matcher.match(this._strokes));
+      }
     }
   }
   this.maybe_push_point = (point) => {
