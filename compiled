@@ -1,0 +1,383 @@
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var util = {
+  distance2: function distance2(point1, point2) {
+    return util.norm2(util.subtract(point1, point2));
+  },
+  norm2: function norm2(point) {
+    return point[0] * point[0] + point[1] * point[1];
+  },
+  round: function round(point) {
+    return point.map(Math.round);
+  },
+  subtract: function subtract(point1, point2) {
+    return [point1[0] - point2[0], point1[1] - point2[1]];
+  }
+};
+
+var coerce = function coerce(x, y) {
+  return x == null ? y : x;
+};
+
+var filterMedian = function filterMedian(median, n) {
+  var result = [];
+  var total = 0;
+  for (var i = 0; i < median.length - 1; i++) {
+    total += Math.sqrt(util.distance2(median[i], median[i + 1]));
+  }
+  var index = 0;
+  var position = median[0];
+  var total_so_far = 0;
+  for (var i = 0; i < n - 1; i++) {
+    var target = i * total / (n - 1);
+    while (total_so_far < target) {
+      var step = Math.sqrt(util.distance2(position, median[index + 1]));
+      if (total_so_far + step < target) {
+        index += 1;
+        position = median[index];
+        total_so_far += step;
+      } else {
+        var t = (target - total_so_far) / step;
+        position = [(1 - t) * position[0] + t * median[index + 1][0], (1 - t) * position[1] + t * median[index + 1][1]];
+        total_so_far = target;
+      }
+    }
+    result.push(util.round(position));
+  }
+  result.push(median[median.length - 1]);
+  return result;
+};
+
+var getAffineTransform = function getAffineTransform(source, target) {
+  var sdiff = util.subtract(source[1], source[0]);
+  var tdiff = util.subtract(target[1], target[0]);
+  var ratio = [tdiff[0] / sdiff[0], tdiff[1] / sdiff[1]];
+  return function (point) {
+    return [Math.round(ratio[0] * (point[0] - source[0][0]) + target[0][0]), Math.round(ratio[1] * (point[1] - source[0][1]) + target[0][1])];
+  };
+};
+
+var getBounds = function getBounds(medians) {
+  var min = [Infinity, Infinity];
+  var max = [-Infinity, -Infinity];
+  medians.map(function (median) {
+    return median.map(function (point) {
+      min[0] = Math.min(min[0], point[0]);
+      min[1] = Math.min(min[1], point[1]);
+      max[0] = Math.max(max[0], point[0]);
+      max[1] = Math.max(max[1], point[1]);
+    });
+  });
+  return [min, max];
+};
+
+var normalizeBounds = function normalizeBounds(bounds, max_ratio, min_width) {
+  bounds = bounds.map(util.round);
+  var diff = util.subtract(bounds[1], bounds[0]);
+  if (diff[0] < 0 || diff[1] < 0) throw diff;
+  if (diff[0] < min_width) {
+    var extra = Math.ceil((min_width - diff[0]) / 2);
+    bounds[0][0] -= extra;
+    bounds[1][0] += extra;
+  }
+  if (diff[1] < min_width) {
+    var extra = Math.ceil((min_width - diff[1]) / 2);
+    bounds[0][1] -= extra;
+    bounds[1][1] += extra;
+  }
+  if (max_ratio > 0) {
+    diff = util.subtract(bounds[1], bounds[0]);
+    if (diff[0] < diff[1] / max_ratio) {
+      var extra = Math.ceil((diff[1] / max_ratio - diff[0]) / 2);
+      bounds[0][0] -= extra;
+      bounds[1][0] += extra;
+    } else if (diff[1] < diff[0] / max_ratio) {
+      var extra = Math.ceil((diff[0] / max_ratio - diff[1]) / 2);
+      bounds[0][1] -= extra;
+      bounds[1][1] += extra;
+    }
+  }
+  return bounds;
+};
+
+var prepareToScore = function prepareToScore(medians, params) {
+  if (medians.length === 0 || medians.some(function (median) {
+    return median.length === 0;
+  })) {
+    throw new Error("Invalid medians list: " + JSON.stringify(medians));
+  }
+  medians = medians.map(function (median) {
+    return filterMedian(median, params.points);
+  });
+  var bounds = normalizeBounds(getBounds(medians), params.max_ratio, params.min_width);
+  return [medians, bounds];
+};
+
+var scoreMatch = function scoreMatch(source, target, params) {
+  var transform = getAffineTransform(source[1], target[1]);
+  var min = Math.min(source[0].length, target[0].length);
+  var max = Math.max(source[0].length, target[0].length);
+  var score = 0;
+  for (var i = 0; i < min; i++) {
+    var median1 = source[0][i];
+    var median2 = target[0][i];
+    for (var j = 0; j < params.points; j++) {
+      score -= util.distance2(transform(median1[j]), median2[j]);
+    }
+  }
+  score /= params.side_length * params.side_length;
+  score -= (max - min) * params.points * params.unmatched_penalty;
+  return score;
+};
+
+// A class that can be instantiated with a list of (character, median) pairs
+// and then used to return closest character given a list of input strokes.
+
+exports.Matcher = function () {
+  function Matcher(medians, params) {
+    _classCallCheck(this, Matcher);
+
+    params = params || {};
+    params.points = coerce(params.points, 4);
+    params.max_ratio = coerce(params.max_ratio, 2);
+    params.min_width = coerce(params.max_width, 8);
+    params.side_length = coerce(params.side_length, 256);
+    params.unmatched_penalty = coerce(params.unmatched_penalty, 0.5);
+
+    this._medians = medians;
+    this._params = params;
+  }
+
+  _createClass(Matcher, [{
+    key: "match",
+    value: function match(medians) {
+      var best = null;
+      var best_score = -Infinity;
+      medians = this.prepare(medians);
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this._medians[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var entry = _step.value;
+
+          var score = scoreMatch(medians, entry[1], this._params);
+          if (score > best_score) {
+            best_score = score;
+            best = entry[0];
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return best;
+    }
+  }, {
+    key: "prepare",
+    value: function prepare(medians) {
+      return prepareToScore(medians, this._params);
+    }
+  }]);
+
+  return Matcher;
+}();
+"use strict";
+
+// Helper methods used to decode data and build data structures follow.
+
+// Given binary median data and an offset, returns a pair:
+//   [character, [medians, bounds]]: the Matcher entry at that offset
+//   index: the index starting the next entry.
+
+var decodeMedian = function decodeMedian(buffer, i) {
+  var character = String.fromCodePoint(buffer[i] + (buffer[i + 1] << 8));
+  var medians = [];
+  var num_medians = buffer[i + 2];
+  i += 3;
+  for (var j = 0; j < num_medians; j++) {
+    var median = [];
+    var length = buffer[i];
+    i += 1;
+    for (var k = 0; k < length; k++) {
+      median.push([buffer[i], buffer[i + 1]]);
+      i += 2;
+    }
+    medians.push(median);
+  }
+  var bounds = [[buffer[i], buffer[i + 1]], [buffer[i + 2], buffer[i + 3]]];
+  i += 4;
+  return [[character, [medians, bounds]], i];
+};
+
+// Methods that return promises follow.
+
+// Returns a Promise which resolves to an ArrayBuffer containing the data.
+var loadBinaryData = function loadBinaryData(url) {
+  return new Promise(function (resolve, reject) {
+    var request = new XMLHttpRequest();
+    request.open('GET', url, true);
+    request.responseType = 'arraybuffer';
+    request.onload = function (event) {
+      if (request.status != 200) throw req;
+      resolve(new Uint8Array(request.response));
+    };
+    request.send(null);
+  });
+};
+
+// Returns a Promise that resolves to a list of (character, medians) pairs.
+var decodeMedians = function decodeMedians(buffer) {
+  var result = [];
+  var decoded = null;
+  for (var i = 0; i < buffer.length;) {
+    var decoded = decodeMedian(buffer, i);
+    result.push(decoded[0]);
+    i = decoded[1];
+  }
+  return result;
+};
+
+// Returns a Promise that resolves to a list of [character, [medians, bounds]]
+// entries, where each [medians, bounds] pair is ready for matching by the
+// Matcher module.
+//
+// NOTE: The extra callback layer of indirection avoids a massive memory leak!
+exports.getMediansPromise = function () {
+  return loadBinaryData('medians.bin').then(decodeMedians).catch(console.err);
+};
+"use strict";
+
+var createSketch = function createSketch($scope, controller, element) {
+  var _mousedown = false;
+  Sketch.create({
+    container: element,
+    autoclear: false,
+    keydown: function keydown(e) {
+      if (this.keys.C) {
+        $scope.$apply(function () {
+          _mousedown = false;
+          controller.clear();
+        });
+      }
+    },
+    mousedown: function mousedown(e) {
+      $scope.$apply(function () {
+        _mousedown = true;
+        controller.push_point([e.x, e.y]);
+      });
+    },
+    mouseup: function mouseup(e) {
+      $scope.$apply(function () {
+        _mousedown = false;
+        controller.end_stroke();
+      });
+    },
+    touchmove: function touchmove() {
+      var _this = this;
+
+      if (_mousedown && this.touches.length > 0) {
+        $scope.$apply(function () {
+          var touch = _this.touches[0];
+          controller.maybe_push_point([touch.ox, touch.oy]);
+          controller.push_point([touch.x, touch.y]);
+        });
+      }
+    }
+  });
+};
+
+var MakeMeAHanziController = function MakeMeAHanziController($scope) {
+  var _this2 = this;
+
+  this.width = function () {
+    return window.innerWidth;
+  };
+  this.height = function () {
+    return window.innerHeight;
+  };
+  this.strokes = [];
+  this.stroke = function () {
+    return _this2._d(_this2._stroke);
+  };
+  this.output = 'Loading...';
+
+  this._stroke = [];
+  this._strokes = [];
+  this._matcher = null;
+
+  getMediansPromise().then(function (medians) {
+    _this2._matcher = new Matcher(medians);
+    $scope.$apply(function () {
+      _this2.output = 'Ready!';
+    });
+  });
+
+  this._d = function (path) {
+    if (path.length < 2) return '';
+    var result = [];
+    var point = function point(i) {
+      return path[i][0] + ' ' + path[i][1];
+    };
+    var midpoint = function midpoint(i) {
+      return (path[i][0] + path[i + 1][0]) / 2 + ' ' + ('' + (path[i][1] + path[i + 1][1]) / 2);
+    };
+    var push = function push(x) {
+      return result.push(x);
+    };
+    ['M', point(0), 'L', midpoint(0)].map(push);
+    for (var i = 1; i < path.length - 1; i++) {
+      ['Q', point(i), midpoint(i)].map(push);
+    }
+    ['L', point(path.length - 1)].map(push);
+    return result.join(' ');
+  };
+
+  this.clear = function () {
+    _this2.strokes = [];
+    _this2._stroke = [];
+    _this2._strokes = [];
+  };
+  this.end_stroke = function () {
+    if (_this2._stroke.length > 1) {
+      _this2.strokes.push(_this2._d(_this2._stroke));
+      _this2._strokes.push(_this2._stroke);
+      _this2._stroke = [];
+
+      if (_this2._matcher) {
+        _this2.output = _this2._matcher.match(_this2._strokes);
+      }
+    }
+  };
+  this.maybe_push_point = function (point) {
+    if (_this2._stroke.length === 0) {
+      _this2.push_point(point);
+    }
+  };
+  this.push_point = function (point) {
+    if (point[0] != null && point[1] != null) {
+      _this2._stroke.push(point);
+    }
+  };
+
+  createSketch($scope, this, document.getElementById('input'));
+};
+
+angular.module('makemeahanzi', []).controller('MakeMeAHanziController', MakeMeAHanziController);
+
