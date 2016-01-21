@@ -13,16 +13,20 @@
     <script src="script.js"></script>
   </head>
   <body ng-app="makemeahanzi">
-    <div id="input"></div>
-    <div id="graphics" ng-controller="MakeMeAHanziController as controller">
-      <svg x-ng-attr-width="{{controller.width()}}"
-           x-ng-attr-height="{{controller.height()}}">
-        <g fill="none" stroke="black" stroke-linecap="round" stroke-width="10">
-          <path ng-repeat="stroke in controller.strokes"
-                x-ng-attr-d="{{stroke}}"></path>
-          <path x-ng-attr-d="{{controller.stroke()}}"></path>
-        </g>
-      </svg>
+    <div id="container" ng-controller="MakeMeAHanziController as controller">
+      <div id="output">{{controller.output}}</div>
+      <div id="input"></div>
+      <div id="graphics">
+        <svg x-ng-attr-width="{{controller.width()}}"
+             x-ng-attr-height="{{controller.height()}}">
+          <g fill="none" stroke="black"
+             stroke-linecap="round" stroke-width="10">
+            <path ng-repeat="stroke in controller.strokes"
+                  x-ng-attr-d="{{stroke}}"></path>
+            <path x-ng-attr-d="{{controller.stroke()}}"></path>
+          </g>
+        </svg>
+      </div>
     </div>
   </body>
 </html>

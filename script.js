@@ -42,6 +42,7 @@ const MakeMeAHanziController = function($scope) {
   this.height = () => window.innerHeight;
   this.strokes = [];
   this.stroke = () => this._d(this._stroke);
+  this.output = 'Loading...';
 
   this._stroke = [];
   this._strokes = [];
@@ -49,6 +50,9 @@ const MakeMeAHanziController = function($scope) {
 
   getMediansPromise().then((medians) => {
     this._matcher = new Matcher(medians);
+    $scope.$apply(() => {
+      this.output = 'Ready!';
+    });
   });
 
   this._d = (path) => {
@@ -78,7 +82,7 @@ const MakeMeAHanziController = function($scope) {
       this._stroke = [];
 
       if (this._matcher) {
-        console.log(this._matcher.match(this._strokes));
+        this.output = this._matcher.match(this._strokes);
       }
     }
   }
