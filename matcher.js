@@ -97,26 +97,17 @@ const prepareToScore = (medians, params) => {
   medians = medians.map((median) => filterMedian(median, params.points));
   const bounds = normalizeBounds(
       getBounds(medians, params.max_ratio, params.min_width));
-  return {medians: medians, bounds: bounds};
+  return [medians, bounds];
 }
 
 const scoreMatch = (source, target, params) => {
-  params = params || {};
-  params.points = coerce(params.points, 4);
-  params.max_ratio = coerce(params.max_ratio, 2);
-  params.min_width = coerce(params.max_width, 8);
-  params.side_length = coerce(params.side_length, 256);
-  params.unmatched_penalty = coerce(params.unmatched_penalty, 0.5);
-
-  source = prepareToScore(source, params);
-  target = prepareToScore(target, params);
-  const transform = getAffineTransform(source.bounds, target.bounds);
-  const min = Math.min(source.medians.length, target.medians.length);
-  const max = Math.max(source.medians.length, target.medians.length);
+  const transform = getAffineTransform(source[1], target[1]);
+  const min = Math.min(source[0].length, target[0].length);
+  const max = Math.max(source[0].length, target[0].length);
   let score = 0;
   for (let i = 0; i < min; i++) {
-    const median1 = source.medians[i];
-    const median2 = target.medians[i];
+    const median1 = source[0][i];
+    const median2 = target[0][i];
     for (let j = 0; j < params.points; j++) {
       score -= util.distance2(transform(median1[j]), median2[j]);
     }
@@ -127,14 +118,24 @@ const scoreMatch = (source, target, params) => {
 }
 
 window.Matcher = class Matcher {
-  constructor(medians) {
-    this._medians = medians;
+  constructor(medians, params) {
+    params = params || {};
+    params.points = coerce(params.points, 4);
+    params.max_ratio = coerce(params.max_ratio, 2);
+    params.min_width = coerce(params.max_width, 8);
+    params.side_length = coerce(params.side_length, 256);
+    params.unmatched_penalty = coerce(params.unmatched_penalty, 0.5);
+
+    this._params = params;
+    this._medians = medians.map(
+        (x) => [x[0], prepareToScore(x[1], this._params)]);
   }
-  match(medians, params) {
+  match(medians) {
     let best = 0;
     let best_score = -Infinity;
+    medians = prepareToScore(medians, this._params);
     for (let entry of this._medians) {
-      const score = scoreMatch(medians, entry[1], params);
+      const score = scoreMatch(medians, entry[1], this._params);
       if (score > best_score) {
         best_score = score;
         best = entry[0];
