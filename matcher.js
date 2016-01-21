@@ -40,9 +40,9 @@ const filterMedian = (median, n) => {
 }
 
 const getAffineTransform = (source, target) => {
-  const sdiff = util.subtract(source[1], source[0]);
-  const tdiff = util.subtract(target[1], target[0]);
-  const ratio = [tdiff[0]/sdiff[0], tdiff[1]/sdiff[1]];
+  var sdiff = util.subtract(source[1], source[0]);
+  var tdiff = util.subtract(target[1], target[0]);
+  var ratio = [tdiff[0]/sdiff[0], tdiff[1]/sdiff[1]];
   return (point) => [
     Math.round(ratio[0]*(point[0] - source[0][0]) + target[0][0]),
     Math.round(ratio[1]*(point[1] - source[0][1]) + target[0][1]),
@@ -101,14 +101,14 @@ const prepareToScore = (medians, params) => {
 }
 
 const scoreMatch = (source, target, params) => {
-  const transform = getAffineTransform(source[1], target[1]);
-  const min = Math.min(source[0].length, target[0].length);
-  const max = Math.max(source[0].length, target[0].length);
-  let score = 0;
-  for (let i = 0; i < min; i++) {
-    const median1 = source[0][i];
-    const median2 = target[0][i];
-    for (let j = 0; j < params.points; j++) {
+  var transform = getAffineTransform(source[1], target[1]);
+  var min = Math.min(source[0].length, target[0].length);
+  var max = Math.max(source[0].length, target[0].length);
+  var score = 0;
+  for (var i = 0; i < min; i++) {
+    var median1 = source[0][i];
+    var median2 = target[0][i];
+    for (var j = 0; j < params.points; j++) {
       score -= util.distance2(transform(median1[j]), median2[j]);
     }
   }
@@ -133,11 +133,11 @@ exports.Matcher = class Matcher {
     this._params = params;
   }
   match(medians) {
-    let best = null;
-    let best_score = -Infinity;
+    var best = null;
+    var best_score = -Infinity;
     medians = this.prepare(medians);
-    for (let entry of this._medians) {
-      const score = scoreMatch(medians, entry[1], this._params);
+    for (var entry of this._medians) {
+      var score = scoreMatch(medians, entry[1], this._params);
       if (score > best_score) {
         best_score = score;
         best = entry[0];
