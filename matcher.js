@@ -96,7 +96,7 @@ const prepareToScore = (medians, params) => {
   }
   medians = medians.map((median) => filterMedian(median, params.points));
   const bounds = normalizeBounds(
-      getBounds(medians, params.max_ratio, params.min_width));
+      getBounds(medians), params.max_ratio, params.min_width);
   return [medians, bounds];
 }
 
@@ -134,7 +134,7 @@ window.Matcher = class Matcher {
         (x) => [x[0], prepareToScore(x[1], this._params)]);
   }
   match(medians) {
-    let best = 0;
+    let best = null;
     let best_score = -Infinity;
     medians = prepareToScore(medians, this._params);
     for (let entry of this._medians) {
