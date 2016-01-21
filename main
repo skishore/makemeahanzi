@@ -1,0 +1,68 @@
+#!/usr/local/bin/node
+"use strict";
+
+const fs = require('fs');
+const readline = require('readline');
+
+const match = require('./matcher');
+
+const util = {
+  add: (point1, point2) => [point1[0] + point2[0], point1[1] + point2[1]],
+  subtract: (point1, point2) => [point1[0] - point2[0], point1[1] - point2[1]],
+};
+
+const center = (prepared) => {
+  const diff = util.subtract(prepared[1][1], prepared[1][0]);
+  if (!(0 <= diff[0] & diff[0] < 256 &&
+        0 <= diff[1] && diff[1] < 256)) throw diff;
+  const start = [Math.floor((256 - diff[0])/2), Math.floor((256 - diff[1])/2)];
+  const offset = util.subtract(start, prepared[1][0]);
+  const shift = (point) => util.add(point, offset);
+  const medians = prepared[0].map((median) => median.map(shift));
+  return [medians, prepared[1].map(shift)];
+}
+
+const mapToOneByteSquare = (median) => {
+  return median.map((x) => [Math.floor(x[0]/4), Math.floor((900 - x[1])/4)]);
+}
+
+const encode = (matcher, row) => {
+  const result = [];
+  // TODO(skishore): Figure out how to properly decode UTF-8 or -16 in
+  // Javascript and then use one of those encodings here instead of this hack.
+  const codepoint = row.character.charCodeAt(0);
+  result.push(codepoint & 0xff);
+  result.push(codepoint >> 8);
+  // Push the medians into the binary representation.
+  const medians = row.medians.map(mapToOneByteSquare);
+  const prepared = center(matcher.prepare(medians));
+  result.push(prepared[0].length);
+  prepared[0].map((median) => {
+    result.push(median.length);
+    median.map((point) => {
+      result.push(point[0]);
+      result.push(point[1]);
+    });
+  });
+  // Push the bounds into the binary representation.
+  result.push(prepared[1][0][0]);
+  result.push(prepared[1][0][1]);
+  result.push(prepared[1][1][0]);
+  result.push(prepared[1][1][1]);
+  result.map((x) => { if (!(0 <= x && x < 256)) throw prepared; });
+  return new Buffer(result);
+}
+
+const main = () => {
+  const input = fs.createReadStream('makemeahanzi.txt');
+  const reader = readline.createInterface({input: input});
+  const writer = fs.createWriteStream('medians.bin');
+  const matcher = new match.Matcher([]);
+  reader.on('line', (line) => {
+    const row = JSON.parse(line.trim());
+    writer.write(encode(matcher, row));
+  });
+  reader.on('end', () => writer.end());
+}
+
+main();

@@ -120,7 +120,7 @@ const scoreMatch = (source, target, params) => {
 // A class that can be instantiated with a list of (character, median) pairs
 // and then used to return closest character given a list of input strokes.
 
-window.Matcher = class Matcher {
+exports.Matcher = class Matcher {
   constructor(medians, params) {
     params = params || {};
     params.points = coerce(params.points, 4);
@@ -129,14 +129,13 @@ window.Matcher = class Matcher {
     params.side_length = coerce(params.side_length, 256);
     params.unmatched_penalty = coerce(params.unmatched_penalty, 0.5);
 
+    this._medians = medians;
     this._params = params;
-    this._medians = medians.map(
-        (x) => [x[0], prepareToScore(x[1], this._params)]);
   }
   match(medians) {
     let best = null;
     let best_score = -Infinity;
-    medians = prepareToScore(medians, this._params);
+    medians = this.prepare(medians);
     for (let entry of this._medians) {
       const score = scoreMatch(medians, entry[1], this._params);
       if (score > best_score) {
@@ -145,5 +144,8 @@ window.Matcher = class Matcher {
       }
     }
     return best;
+  }
+  prepare(medians) {
+    return prepareToScore(medians, this._params);
   }
 }
