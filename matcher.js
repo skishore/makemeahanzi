@@ -110,11 +110,12 @@ const scoreMatch = (source, target, params) => {
     var median1 = source[i];
     var median2 = target[i];
     for (var j = 0; j < params.points; j++) {
-      score -= util.distance2(median1[j], median2[j]);
+      score -= Math.abs(median1[j][0] - median2[j][0]);
+      score -= Math.abs(median1[j][1] - median2[j][1]);
     }
   }
-  score /= (params.side_length*params.side_length);
-  score -= (max - min)*params.points*params.unmatched_penalty;
+  score /= 2*params.points*params.side_length;
+  score -= (max - min)*params.unmatched_penalty;
   return score;
 }
 
