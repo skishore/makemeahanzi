@@ -106,11 +106,11 @@ const scoreMatch = (source, target, params) => {
   if (source.length !== target.length) {
     return -Infinity;
   }
-  var score = 0;
-  for (var i = 0; i < source.length; i++) {
-    var median1 = source[i];
-    var median2 = target[i];
-    for (var j = 0; j < params.points; j++) {
+  let score = 0;
+  for (let i = 0; i < source.length; i++) {
+    const median1 = source[i];
+    const median2 = target[i];
+    for (let j = 0; j < params.points; j++) {
       score -= Math.abs(median1[j][0] - median2[j][0]);
       score -= Math.abs(median1[j][1] - median2[j][1]);
     }
@@ -133,11 +133,11 @@ exports.Matcher = class Matcher {
     this._params = params;
   }
   match(medians) {
-    var best = null;
-    var best_score = -Infinity;
+    let best = null;
+    let best_score = -Infinity;
     medians = this.preprocess(medians);
-    for (var entry of this._medians) {
-      var score = scoreMatch(medians, entry[1], this._params);
+    for (let entry of this._medians) {
+      const score = scoreMatch(medians, entry[1], this._params);
       if (score > best_score) {
         best_score = score;
         best = entry[0];

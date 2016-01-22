@@ -6,13 +6,13 @@
 //   [character, medians]: the Matcher entry at that offset
 //   index: the index starting the next entry.
 const decodeMedian = (buffer, i) => {
-  var character = String.fromCodePoint(buffer[i] + (buffer[i + 1] << 8));
-  var medians = [];
-  var num_medians = buffer[i + 2];
+  const character = String.fromCodePoint(buffer[i] + (buffer[i + 1] << 8));
+  const medians = [];
+  const num_medians = buffer[i + 2];
   i += 3;
-  for (var j = 0; j < num_medians; j++) {
-    var median = [];
-    var length = buffer[i];
+  for (let j = 0; j < num_medians; j++) {
+    const median = [];
+    const length = buffer[i];
     i += 1;
     for (let k = 0; k < length; k++) {
       median.push([buffer[i], buffer[i + 1]]);
