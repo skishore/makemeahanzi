@@ -103,6 +103,9 @@ const preprocessMedians = (medians, params) => {
 }
 
 const scoreMatch = (source, target, params) => {
+  if (Math.abs(source.length - target.length) > params.stroke_difference) {
+    return -Infinity;
+  }
   var min = Math.min(source.length, target.length);
   var max = Math.max(source.length, target.length);
   var score = 0;
@@ -129,6 +132,7 @@ exports.Matcher = class Matcher {
     params.max_ratio = coerce(params.max_ratio, 2);
     params.min_width = coerce(params.max_width, 8);
     params.side_length = coerce(params.side_length, 256);
+    params.stroke_difference = coerce(params.stroke_difference, 1);
     params.unmatched_penalty = coerce(params.unmatched_penalty, 0.5);
 
     this._medians = medians;

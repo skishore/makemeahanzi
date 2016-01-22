@@ -48,6 +48,8 @@ const MakeMeAHanziController = function($scope) {
   this._strokes = [];
   this._matcher = null;
 
+  window.controller = this;
+
   getMediansPromise().then((medians) => {
     this._matcher = new Matcher(medians);
     $scope.$apply(() => {
