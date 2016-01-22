@@ -40,9 +40,9 @@ const filterMedian = (median, n) => {
 }
 
 const getAffineTransform = (source, target) => {
-  var sdiff = util.subtract(source[1], source[0]);
-  var tdiff = util.subtract(target[1], target[0]);
-  var ratio = [tdiff[0]/sdiff[0], tdiff[1]/sdiff[1]];
+  const sdiff = util.subtract(source[1], source[0]);
+  const tdiff = util.subtract(target[1], target[0]);
+  const ratio = [tdiff[0]/sdiff[0], tdiff[1]/sdiff[1]];
   return (point) => [
     Math.round(ratio[0]*(point[0] - source[0][0]) + target[0][0]),
     Math.round(ratio[1]*(point[1] - source[0][1]) + target[0][1]),
@@ -90,26 +90,27 @@ const normalizeBounds = (bounds, max_ratio, min_width) => {
   return bounds;
 }
 
-const prepareToScore = (medians, params) => {
+const preprocessMedians = (medians, params) => {
   if (medians.length === 0 || medians.some((median) => median.length === 0)) {
     throw new Error(`Invalid medians list: ${JSON.stringify(medians)}`);
   }
   medians = medians.map((median) => filterMedian(median, params.points));
-  const bounds = normalizeBounds(
+  const source = normalizeBounds(
       getBounds(medians), params.max_ratio, params.min_width);
-  return [medians, bounds];
+  const target = [[0, 0], [params.side_length - 1, params.side_length - 1]];
+  const transform = getAffineTransform(source, target);
+  return medians.map((median) => median.map(transform));
 }
 
 const scoreMatch = (source, target, params) => {
-  var transform = getAffineTransform(source[1], target[1]);
-  var min = Math.min(source[0].length, target[0].length);
-  var max = Math.max(source[0].length, target[0].length);
+  var min = Math.min(source.length, target.length);
+  var max = Math.max(source.length, target.length);
   var score = 0;
   for (var i = 0; i < min; i++) {
-    var median1 = source[0][i];
-    var median2 = target[0][i];
+    var median1 = source[i];
+    var median2 = target[i];
     for (var j = 0; j < params.points; j++) {
-      score -= util.distance2(transform(median1[j]), median2[j]);
+      score -= util.distance2(median1[j], median2[j]);
     }
   }
   score /= (params.side_length*params.side_length);
@@ -135,7 +136,7 @@ exports.Matcher = class Matcher {
   match(medians) {
     var best = null;
     var best_score = -Infinity;
-    medians = this.prepare(medians);
+    medians = this.preprocess(medians);
     for (var entry of this._medians) {
       var score = scoreMatch(medians, entry[1], this._params);
       if (score > best_score) {
@@ -145,7 +146,7 @@ exports.Matcher = class Matcher {
     }
     return best;
   }
-  prepare(medians) {
-    return prepareToScore(medians, this._params);
+  preprocess(medians) {
+    return preprocessMedians(medians, this._params);
   }
 }

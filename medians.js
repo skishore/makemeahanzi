@@ -3,7 +3,7 @@
 // Helper methods used to decode data and build data structures follow.
 
 // Given binary median data and an offset, returns a pair:
-//   [character, [medians, bounds]]: the Matcher entry at that offset
+//   [character, medians]: the Matcher entry at that offset
 //   index: the index starting the next entry.
 const decodeMedian = (buffer, i) => {
   var character = String.fromCodePoint(buffer[i] + (buffer[i + 1] << 8));
@@ -20,9 +20,7 @@ const decodeMedian = (buffer, i) => {
     }
     medians.push(median);
   }
-  var bounds = [[buffer[i], buffer[i + 1]], [buffer[i + 2], buffer[i + 3]]];
-  i += 4;
-  return [[character, [medians, bounds]], i];
+  return [[character, medians], i];
 }
 
 // Methods that return promises follow.
@@ -53,9 +51,8 @@ const decodeMedians = (buffer) => {
   return result;
 }
 
-// Returns a Promise that resolves to a list of [character, [medians, bounds]]
-// entries, where each [medians, bounds] pair is ready for matching by the
-// Matcher module.
+// Returns a Promise that resolves to a list of [character, medians] pairs,
+// where [medians] is a preprocessed Matcher entry for that character.
 //
 // NOTE: The extra callback layer of indirection avoids a massive memory leak!
 exports.getMediansPromise = () =>

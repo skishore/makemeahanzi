@@ -104,7 +104,7 @@ var normalizeBounds = function normalizeBounds(bounds, max_ratio, min_width) {
   return bounds;
 };
 
-var prepareToScore = function prepareToScore(medians, params) {
+var preprocessMedians = function preprocessMedians(medians, params) {
   if (medians.length === 0 || medians.some(function (median) {
     return median.length === 0;
   })) {
@@ -113,20 +113,23 @@ var prepareToScore = function prepareToScore(medians, params) {
   medians = medians.map(function (median) {
     return filterMedian(median, params.points);
   });
-  var bounds = normalizeBounds(getBounds(medians), params.max_ratio, params.min_width);
-  return [medians, bounds];
+  var source = normalizeBounds(getBounds(medians), params.max_ratio, params.min_width);
+  var target = [[0, 0], [params.side_length - 1, params.side_length - 1]];
+  var transform = getAffineTransform(source, target);
+  return medians.map(function (median) {
+    return median.map(transform);
+  });
 };
 
 var scoreMatch = function scoreMatch(source, target, params) {
-  var transform = getAffineTransform(source[1], target[1]);
-  var min = Math.min(source[0].length, target[0].length);
-  var max = Math.max(source[0].length, target[0].length);
+  var min = Math.min(source.length, target.length);
+  var max = Math.max(source.length, target.length);
   var score = 0;
   for (var i = 0; i < min; i++) {
-    var median1 = source[0][i];
-    var median2 = target[0][i];
+    var median1 = source[i];
+    var median2 = target[i];
     for (var j = 0; j < params.points; j++) {
-      score -= util.distance2(transform(median1[j]), median2[j]);
+      score -= util.distance2(median1[j], median2[j]);
     }
   }
   score /= params.side_length * params.side_length;
@@ -157,7 +160,7 @@ exports.Matcher = function () {
     value: function match(medians) {
       var best = null;
       var best_score = -Infinity;
-      medians = this.prepare(medians);
+      medians = this.preprocess(medians);
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
@@ -190,9 +193,9 @@ exports.Matcher = function () {
       return best;
     }
   }, {
-    key: "prepare",
-    value: function prepare(medians) {
-      return prepareToScore(medians, this._params);
+    key: "preprocess",
+    value: function preprocess(medians) {
+      return preprocessMedians(medians, this._params);
     }
   }]);
 
@@ -203,7 +206,7 @@ exports.Matcher = function () {
 // Helper methods used to decode data and build data structures follow.
 
 // Given binary median data and an offset, returns a pair:
-//   [character, [medians, bounds]]: the Matcher entry at that offset
+//   [character, medians]: the Matcher entry at that offset
 //   index: the index starting the next entry.
 
 var decodeMedian = function decodeMedian(buffer, i) {
@@ -221,9 +224,7 @@ var decodeMedian = function decodeMedian(buffer, i) {
     }
     medians.push(median);
   }
-  var bounds = [[buffer[i], buffer[i + 1]], [buffer[i + 2], buffer[i + 3]]];
-  i += 4;
-  return [[character, [medians, bounds]], i];
+  return [[character, medians], i];
 };
 
 // Methods that return promises follow.
@@ -254,9 +255,8 @@ var decodeMedians = function decodeMedians(buffer) {
   return result;
 };
 
-// Returns a Promise that resolves to a list of [character, [medians, bounds]]
-// entries, where each [medians, bounds] pair is ready for matching by the
-// Matcher module.
+// Returns a Promise that resolves to a list of [character, medians] pairs,
+// where [medians] is a preprocessed Matcher entry for that character.
 //
 // NOTE: The extra callback layer of indirection avoids a massive memory leak!
 exports.getMediansPromise = function () {
