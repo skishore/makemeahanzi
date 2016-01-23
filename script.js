@@ -55,7 +55,7 @@ const MakeMeAHanziController = function($scope) {
     $scope.$apply(() => {
       this.output = 'Ready!';
     });
-  });
+  }).catch(console.error.bind(console));
 
   this._d = (path) => {
     if (path.length < 2) return '';

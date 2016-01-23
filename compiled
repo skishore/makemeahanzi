@@ -233,7 +233,15 @@ var decodeMedian = function decodeMedian(buffer, i) {
   i += 3;
   for (var j = 0; j < num_medians; j++) {
     var length = buffer[i];
-    medians.push(buffer.slice(i + 1, i + length + 1));
+    if (buffer.slice) {
+      medians.push(buffer.slice(i + 1, i + length + 1));
+    } else {
+      var median = [];
+      for (var k = 0; k < length; k++) {
+        median.push(buffer[i + k + 1]);
+      }
+      medians.push(median);
+    }
     i += length + 1;
   }
   return [[character, medians], i];
@@ -341,7 +349,7 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
     $scope.$apply(function () {
       _this2.output = 'Ready!';
     });
-  });
+  }).catch(console.error.bind(console));
 
   this._d = function (path) {
     if (path.length < 2) return '';
