@@ -122,9 +122,6 @@ var preprocessMedians = function preprocessMedians(medians, params) {
 };
 
 var scoreMatch = function scoreMatch(source, target, params) {
-  if (source.length !== target.length) {
-    return -Infinity;
-  }
   var score = 0;
   for (var i = 0; i < source.length; i++) {
     var median1 = source[i];
@@ -156,9 +153,10 @@ exports.Matcher = function () {
 
   _createClass(Matcher, [{
     key: "match",
-    value: function match(medians) {
-      var best = null;
-      var best_score = -Infinity;
+    value: function match(medians, n) {
+      n = n || 10;
+      var candidates = [];
+      var scores = [];
       medians = this.preprocess(medians);
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
@@ -168,10 +166,21 @@ exports.Matcher = function () {
         for (var _iterator = this._medians[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var entry = _step.value;
 
+          if (entry[1].length !== medians.length) {
+            continue;
+          }
           var score = scoreMatch(medians, entry[1], this._params);
-          if (score > best_score) {
-            best_score = score;
-            best = entry[0];
+          var i = scores.length;
+          while (i > 0 && score > scores[i - 1]) {
+            i -= 1;
+          }
+          if (i < n) {
+            candidates.splice(i, 0, entry[0]);
+            scores.splice(i, 0, score);
+            if (candidates.length > n) {
+              candidates.pop();
+              scores.pop();
+            }
           }
         }
       } catch (err) {
@@ -189,7 +198,7 @@ exports.Matcher = function () {
         }
       }
 
-      return best;
+      return candidates;
     }
   }, {
     key: "preprocess",

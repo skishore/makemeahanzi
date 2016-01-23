@@ -103,9 +103,6 @@ const preprocessMedians = (medians, params) => {
 }
 
 const scoreMatch = (source, target, params) => {
-  if (source.length !== target.length) {
-    return -Infinity;
-  }
   let score = 0;
   for (let i = 0; i < source.length; i++) {
     const median1 = source[i];
@@ -132,18 +129,30 @@ exports.Matcher = class Matcher {
     this._medians = medians;
     this._params = params;
   }
-  match(medians) {
-    let best = null;
-    let best_score = -Infinity;
+  match(medians, n) {
+    n = n || 10;
+    let candidates = [];
+    let scores = [];
     medians = this.preprocess(medians);
     for (let entry of this._medians) {
+      if (entry[1].length !== medians.length) {
+        continue;
+      }
       const score = scoreMatch(medians, entry[1], this._params);
-      if (score > best_score) {
-        best_score = score;
-        best = entry[0];
+      let i = scores.length;
+      while (i > 0 && score > scores[i - 1]) {
+        i -= 1;
+      }
+      if (i < n) {
+        candidates.splice(i, 0, entry[0]);
+        scores.splice(i, 0, score);
+        if (candidates.length > n) {
+          candidates.pop();
+          scores.pop();
+        }
       }
     }
-    return best;
+    return candidates;
   }
   preprocess(medians) {
     return preprocessMedians(medians, this._params);
