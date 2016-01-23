@@ -117,7 +117,7 @@ var preprocessMedians = function preprocessMedians(medians, params) {
   var target = [[0, 0], [params.side_length - 1, params.side_length - 1]];
   var transform = getAffineTransform(source, target);
   return medians.map(function (median) {
-    return median.map(transform);
+    return [].concat.apply([], median.map(transform));
   });
 };
 
@@ -127,8 +127,8 @@ var scoreMatch = function scoreMatch(source, target, params) {
     var median1 = source[i];
     var median2 = target[i];
     for (var j = 0; j < params.points; j++) {
-      score -= Math.abs(median1[j][0] - median2[j][0]);
-      score -= Math.abs(median1[j][1] - median2[j][1]);
+      score -= Math.abs(median1[2 * j] - median2[2 * j]);
+      score -= Math.abs(median1[2 * j + 1] - median2[2 * j + 1]);
     }
   }
   return score;
@@ -223,14 +223,9 @@ var decodeMedian = function decodeMedian(buffer, i) {
   var num_medians = buffer[i + 2];
   i += 3;
   for (var j = 0; j < num_medians; j++) {
-    var median = [];
     var length = buffer[i];
-    i += 1;
-    for (var k = 0; k < length; k++) {
-      median.push([buffer[i], buffer[i + 1]]);
-      i += 2;
-    }
-    medians.push(median);
+    medians.push(buffer.slice(i + 1, i + length + 1));
+    i += length + 1;
   }
   return [[character, medians], i];
 };

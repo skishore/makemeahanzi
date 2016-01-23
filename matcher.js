@@ -99,7 +99,7 @@ const preprocessMedians = (medians, params) => {
       getBounds(medians), params.max_ratio, params.min_width);
   const target = [[0, 0], [params.side_length - 1, params.side_length - 1]];
   const transform = getAffineTransform(source, target);
-  return medians.map((median) => median.map(transform));
+  return medians.map((median) => [].concat.apply([], median.map(transform)));
 }
 
 const scoreMatch = (source, target, params) => {
@@ -108,8 +108,8 @@ const scoreMatch = (source, target, params) => {
     const median1 = source[i];
     const median2 = target[i];
     for (let j = 0; j < params.points; j++) {
-      score -= Math.abs(median1[j][0] - median2[j][0]);
-      score -= Math.abs(median1[j][1] - median2[j][1]);
+      score -= Math.abs(median1[2*j] - median2[2*j]);
+      score -= Math.abs(median1[2*j + 1] - median2[2*j + 1]);
     }
   }
   return score;

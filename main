@@ -28,10 +28,7 @@ const encode = (matcher, row) => {
   result.push(preprocessed.length);
   preprocessed.map((median) => {
     result.push(median.length);
-    median.map((point) => {
-      result.push(point[0]);
-      result.push(point[1]);
-    });
+    median.map((x) => result.push(x));
   });
   result.map((x) => { if (!(0 <= x && x < 256)) throw preprocessed; });
   return new Buffer(result);

@@ -11,14 +11,9 @@ const decodeMedian = (buffer, i) => {
   const num_medians = buffer[i + 2];
   i += 3;
   for (let j = 0; j < num_medians; j++) {
-    const median = [];
     const length = buffer[i];
-    i += 1;
-    for (let k = 0; k < length; k++) {
-      median.push([buffer[i], buffer[i + 1]]);
-      i += 2;
-    }
-    medians.push(median);
+    medians.push(buffer.slice(i + 1, i + length + 1));
+    i += length + 1;
   }
   return [[character, medians], i];
 }
