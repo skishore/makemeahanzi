@@ -110,26 +110,35 @@ var preprocessMedians = function preprocessMedians(medians, params) {
   })) {
     throw new Error("Invalid medians list: " + JSON.stringify(medians));
   }
-  medians = medians.map(function (median) {
-    return filterMedian(median, params.points);
-  });
+
+  var n = params.side_length;
   var source = normalizeBounds(getBounds(medians), params.max_ratio, params.min_width);
   var target = [[0, 0], [params.side_length - 1, params.side_length - 1]];
   var transform = getAffineTransform(source, target);
+
   return medians.map(function (median) {
-    return [].concat.apply([], median.map(transform));
+    var result = filterMedian(median.map(transform), params.points);
+    var diff = util.subtract(result[result.length - 1], result[0]);
+    var angle = Math.atan2(diff[1], diff[0]);
+    var normalized = Math.round((angle + Math.PI) * n / (2 * Math.PI)) % n;
+    var length = Math.round(Math.sqrt(util.norm2(diff) / 2));
+    return [].concat.apply([], result).concat([normalized, length]);
   });
 };
 
-var scoreMatch = function scoreMatch(source, target, params) {
+var scoreMatch = function scoreMatch(source, target, params, verbose) {
   var score = 0;
+  var n = params.points;
   for (var i = 0; i < source.length; i++) {
     var median1 = source[i];
     var median2 = target[i];
-    for (var j = 0; j < params.points; j++) {
+    for (var j = 0; j < n; j++) {
       score -= Math.abs(median1[2 * j] - median2[2 * j]);
       score -= Math.abs(median1[2 * j + 1] - median2[2 * j + 1]);
     }
+    var angle = Math.abs(median1[2 * n] - median2[2 * n]);
+    var ratio = (median1[2 * n + 1] + median2[2 * n + 1]) / params.side_length;
+    score -= 4 * n * ratio * Math.min(angle, params.side_length - angle);
   }
   return score;
 };
@@ -143,7 +152,7 @@ exports.Matcher = function () {
 
     params = params || {};
     params.points = coerce(params.points, 4);
-    params.max_ratio = coerce(params.max_ratio, 2);
+    params.max_ratio = coerce(params.max_ratio, 1);
     params.min_width = coerce(params.max_width, 8);
     params.side_length = coerce(params.side_length, 256);
 

@@ -94,23 +94,36 @@ const preprocessMedians = (medians, params) => {
   if (medians.length === 0 || medians.some((median) => median.length === 0)) {
     throw new Error(`Invalid medians list: ${JSON.stringify(medians)}`);
   }
-  medians = medians.map((median) => filterMedian(median, params.points));
+
+  const n = params.side_length;
   const source = normalizeBounds(
       getBounds(medians), params.max_ratio, params.min_width);
   const target = [[0, 0], [params.side_length - 1, params.side_length - 1]];
   const transform = getAffineTransform(source, target);
-  return medians.map((median) => [].concat.apply([], median.map(transform)));
+
+  return medians.map((median) => {
+    const result = filterMedian(median.map(transform), params.points);
+    const diff = util.subtract(result[result.length - 1], result[0]);
+    const angle = Math.atan2(diff[1], diff[0]);
+    const normalized = Math.round((angle + Math.PI) * n / (2 * Math.PI)) % n;
+    const length = Math.round(Math.sqrt(util.norm2(diff) / 2));
+    return [].concat.apply([], result).concat([normalized, length]);
+  });
 }
 
-const scoreMatch = (source, target, params) => {
+const scoreMatch = (source, target, params, verbose) => {
   let score = 0;
+  const n = params.points;
   for (let i = 0; i < source.length; i++) {
     const median1 = source[i];
     const median2 = target[i];
-    for (let j = 0; j < params.points; j++) {
+    for (let j = 0; j < n; j++) {
       score -= Math.abs(median1[2*j] - median2[2*j]);
       score -= Math.abs(median1[2*j + 1] - median2[2*j + 1]);
     }
+    const angle = Math.abs(median1[2*n] - median2[2*n]);
+    const ratio = (median1[2*n + 1] + median2[2*n + 1]) / params.side_length;
+    score -= 4 * n * ratio * Math.min(angle, params.side_length - angle);
   }
   return score;
 }
@@ -122,7 +135,7 @@ exports.Matcher = class Matcher {
   constructor(medians, params) {
     params = params || {};
     params.points = coerce(params.points, 4);
-    params.max_ratio = coerce(params.max_ratio, 2);
+    params.max_ratio = coerce(params.max_ratio, 1);
     params.min_width = coerce(params.max_width, 8);
     params.side_length = coerce(params.side_length, 256);
 
