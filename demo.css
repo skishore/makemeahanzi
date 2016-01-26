@@ -1,10 +1,30 @@
 html, body {
-  background: #f2f2f2;
   overflow: hidden;
   margin: 0;
+  text-align: center;
+
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
 }
 
-#input, #output {
-  font-size: 24px;
+#container {
+  display: inline-block;
+  margin: 16px;
+  overflow: hidden;
+  text-align: left;
+  transform-origin: 50% -16px 0;
+}
+
+#container .handwriting {
+  border: 1px dotted black;
+  display: inline-block;
+  position: relative;
+}
+
+#container .handwriting .input {
+  margin-bottom: -4px;
   position: absolute;
 }

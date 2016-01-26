@@ -8,23 +8,27 @@
     <script src="js/sketch.min.js"></script>
     <!-- Get NodeJS modules to also run in the browser. -->
     <script> var exports = window; </script>
-    <script src="compiled"></script>
+    <script src="matcher.js"></script>
+    <script src="medians.js"></script>
+    <script src="script.js"></script>
   </head>
   <body ng-app="makemeahanzi">
-    <div id="container" ng-controller="MakeMeAHanziController as controller">
-      <div id="output">{{controller.output}}</div>
-      <div id="input"></div>
-      <div id="graphics">
-        <svg x-ng-attr-width="{{controller.width()}}"
-             x-ng-attr-height="{{controller.height()}}">
+    <div id="container" ng-controller="MakeMeAHanziController as controller"
+         x-ng-attr-style="transform: scale({{controller.zoom}});">
+      <div class="handwriting">
+        <div class="input"></div>
+        <svg x-ng-attr-width="{{controller.width}}"
+             x-ng-attr-height="{{controller.height}}">
           <g fill="none" stroke="black"
-             stroke-linecap="round" stroke-width="10">
+             stroke-linecap="round"
+             x-ng-attr-stroke-width="{{controller.stroke_width}}">
             <path ng-repeat="stroke in controller.strokes"
                   x-ng-attr-d="{{stroke}}"></path>
             <path x-ng-attr-d="{{controller.stroke()}}"></path>
           </g>
         </svg>
       </div>
+      <div id="output">{{controller.output}}</div>
     </div>
   </body>
 </html>

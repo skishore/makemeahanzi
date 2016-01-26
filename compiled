@@ -289,6 +289,9 @@ var createSketch = function createSketch($scope, controller, element) {
   Sketch.create({
     container: element,
     autoclear: false,
+    fullscreen: false,
+    width: controller.width,
+    height: controller.height,
     keydown: function keydown(e) {
       if (this.keys.C) {
         $scope.$apply(function () {
@@ -326,17 +329,21 @@ var createSketch = function createSketch($scope, controller, element) {
 var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   var _this2 = this;
 
-  this.width = function () {
-    return window.innerWidth;
-  };
-  this.height = function () {
-    return window.innerHeight;
-  };
+  this.width = 256;
+  this.height = 256;
+  this.stroke_width = 4;
   this.strokes = [];
   this.stroke = function () {
     return _this2._d(_this2._stroke);
   };
   this.output = 'Loading...';
+
+  this._zoom = function () {
+    var x_zoom = window.innerWidth / (_this2.width + 34);
+    var y_zoom = window.innerHeight / (_this2.height + 56);
+    return Math.min(x_zoom, y_zoom);
+  };
+  this.zoom = this._zoom();
 
   this._stroke = [];
   this._strokes = [];
@@ -394,11 +401,14 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   };
   this.push_point = function (point) {
     if (point[0] != null && point[1] != null) {
-      _this2._stroke.push(point);
+      _this2._stroke.push(point.map(function (x) {
+        return x / _this2.zoom;
+      }));
     }
   };
 
-  createSketch($scope, this, document.getElementById('input'));
+  var selector = '#container .handwriting .input';
+  createSketch($scope, this, document.querySelector(selector));
 };
 
 angular.module('makemeahanzi', []).controller('MakeMeAHanziController', MakeMeAHanziController);

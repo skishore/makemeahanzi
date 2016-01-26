@@ -5,6 +5,9 @@ const createSketch = ($scope, controller, element) => {
   Sketch.create({
     container: element,
     autoclear: false,
+    fullscreen: false,
+    width: controller.width,
+    height: controller.height,
     keydown(e) {
       if (this.keys.C) {
         $scope.$apply(() => {
@@ -38,11 +41,19 @@ const createSketch = ($scope, controller, element) => {
 }
 
 const MakeMeAHanziController = function($scope) {
-  this.width = () => window.innerWidth;
-  this.height = () => window.innerHeight;
+  this.width = 256;
+  this.height = 256;
+  this.stroke_width = 4;
   this.strokes = [];
   this.stroke = () => this._d(this._stroke);
   this.output = 'Loading...';
+
+  this._zoom = () => {
+    const x_zoom = window.innerWidth / (this.width + 34);
+    const y_zoom = window.innerHeight / (this.height + 56);
+    return Math.min(x_zoom, y_zoom);
+  }
+  this.zoom = this._zoom();
 
   this._stroke = [];
   this._strokes = [];
@@ -95,11 +106,12 @@ const MakeMeAHanziController = function($scope) {
   }
   this.push_point = (point) => {
     if (point[0] != null && point[1] != null) {
-      this._stroke.push(point);
+      this._stroke.push(point.map((x) => x / this.zoom));
     }
   }
 
-  createSketch($scope, this, document.getElementById('input'));
+  const selector = '#container .handwriting .input';
+  createSketch($scope, this, document.querySelector(selector));
 }
 
 angular.module('makemeahanzi', [])
