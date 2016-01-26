@@ -25,6 +25,9 @@ html, body {
 }
 
 #container .handwriting .input {
-  margin-bottom: -4px;
   position: absolute;
+}
+
+#container .handwriting svg {
+  margin-bottom: -4px;
 }
