@@ -338,6 +338,12 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   };
   this.candidates = [];
 
+  // TODO(skishore): Replace this link with a link to our own data.
+  this.url = 'https://en.wiktionary.org/wiki/';
+  this.getURL = function (character) {
+    return _this2.url + encodeURIComponent(character);
+  };
+
   this._zoom = function () {
     var x_zoom = window.innerWidth / (_this2.width + 16);
     var y_zoom = window.innerHeight / (_this2.height + 80);

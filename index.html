@@ -42,7 +42,8 @@
         <a class="undo button" ng-click="controller.undo();">Undo</a>
       </div>
       <div class="output">
-        <a class="candidate" ng-repeat="candidate in controller.candidates">
+        <a class="candidate" ng-repeat="candidate in controller.candidates"
+           target="_blank" x-ng-attr-href="{{controller.getURL(candidate)}}">
           {{candidate}}
         </a>
       </div>

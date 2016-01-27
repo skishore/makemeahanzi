@@ -48,6 +48,10 @@ const MakeMeAHanziController = function($scope) {
   this.stroke = () => this._d(this._stroke);
   this.candidates = [];
 
+  // TODO(skishore): Replace this link with a link to our own data.
+  this.url = 'https://en.wiktionary.org/wiki/';
+  this.getURL = (character) => this.url + encodeURIComponent(character);
+
   this._zoom = () => {
     const x_zoom = window.innerWidth / (this.width + 16);
     const y_zoom = window.innerHeight / (this.height + 80);
