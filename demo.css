@@ -50,13 +50,15 @@ html, body {
   background-color: white;
   clear: both;
   height: 32px;
-  line-height: 32px;
+  margin-top: 32px;
 }
 
 #container .output .candidate {
+  border: 1px dotted lightgray;
+  font-size: 20px;
+  line-height: 30px;
   width: 32px;
 }
-
 
 #container .controls .button,
 #container .output .candidate {
