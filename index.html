@@ -19,6 +19,12 @@
         <div class="input"></div>
         <svg x-ng-attr-width="{{controller.width}}"
              x-ng-attr-height="{{controller.height}}">
+          <g stroke="gray" stroke-dasharray="1,1" stroke-width="1">
+            <line x1="0" y1="0" x2="256" y2="256"></line>
+            <line x1="256" y1="0" x2="0" y2="256"></line>
+            <line x1="128" y1="0" x2="128" y2="256"></line>
+            <line x1="0" y1="128" x2="256" y2="128"></line>
+          </g>
           <g fill="none" stroke="black"
              stroke-linecap="round"
              x-ng-attr-stroke-width="{{controller.stroke_width}}">
@@ -27,6 +33,10 @@
             <path x-ng-attr-d="{{controller.stroke()}}"></path>
           </g>
         </svg>
+      </div>
+      <div class="controls">
+        <a class="clear button">Clear</a>
+        <a class="undo button">Undo</a>
       </div>
       <div id="output">{{controller.output}}</div>
     </div>

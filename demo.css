@@ -1,4 +1,6 @@
 html, body {
+  background-color: #68a;
+  font-size: 14px;
   overflow: hidden;
   margin: 0;
   text-align: center;
@@ -19,7 +21,6 @@ html, body {
 }
 
 #container .handwriting {
-  border: 1px dotted black;
   display: inline-block;
   position: relative;
 }
@@ -29,5 +30,27 @@ html, body {
 }
 
 #container .handwriting svg {
+  background-color: white;
   margin-bottom: -4px;
+}
+
+#container .controls .button {
+  background-color: white;
+  border: 1px solid #2c3e50;
+  box-sizing: border-box;
+  color: #2c3e50;
+  cursor: pointer;
+  float: left;
+  margin: 0;
+  padding: 0.2em;
+  text-align: center;
+  width: 50%;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
+#container .controls .button:hover {
+  background-color: #bdf;
 }
