@@ -143,7 +143,7 @@ exports.Matcher = class Matcher {
     this._params = params;
   }
   match(medians, n) {
-    n = n || 10;
+    n = n || 1;
     let candidates = [];
     let scores = [];
     medians = this.preprocess(medians);

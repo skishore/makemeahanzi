@@ -1,6 +1,6 @@
 html, body {
   background-color: #68a;
-  font-size: 14px;
+  font-size: 16px;
   overflow: hidden;
   margin: 0;
   text-align: center;
@@ -14,45 +14,65 @@ html, body {
 
 #container {
   display: inline-block;
-  margin: 16px;
   overflow: hidden;
   text-align: left;
 
-  transform-origin: 50% -16px 0;
-  -webkit-transform-origin: 50% -16px 0;
-}
+  position: absolute;
+  left: 50%;
+  top: 50%;
 
-#container .handwriting {
-  display: inline-block;
-  position: relative;
+  transform-origin: 0 0 0;
+  -webkit-transform-origin: 0 0 0;
 }
 
 #container .handwriting .input {
   position: absolute;
 }
 
+#container .handwriting .input canvas,
+#container .handwriting svg {
+  vertical-align: top;
+}
+
 #container .handwriting svg {
   background-color: white;
-  margin-bottom: -4px;
 }
 
 #container .controls .button {
   background-color: white;
   border: 1px solid #2c3e50;
+  height: 24px;
+  line-height: 22px;
+  width: 50%;
+}
+
+#container .output {
+  background-color: white;
+  clear: both;
+  height: 32px;
+  line-height: 32px;
+}
+
+#container .output .candidate {
+  width: 32px;
+}
+
+
+#container .controls .button,
+#container .output .candidate {
   box-sizing: border-box;
   color: #2c3e50;
   cursor: pointer;
   float: left;
   margin: 0;
-  padding: 0.2em;
   text-align: center;
-  width: 50%;
 
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
 }
 
-#container .controls .button:hover {
+#container .controls .button:hover,
+#container .output .candidate:hover {
   background-color: #bdf;
 }

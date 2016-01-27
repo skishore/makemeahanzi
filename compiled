@@ -163,7 +163,7 @@ exports.Matcher = function () {
   _createClass(Matcher, [{
     key: "match",
     value: function match(medians, n) {
-      n = n || 10;
+      n = n || 1;
       var candidates = [];
       var scores = [];
       medians = this.preprocess(medians);
@@ -336,11 +336,11 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   this.stroke = function () {
     return _this2._d(_this2._stroke);
   };
-  this.output = 'Loading...';
+  this.candidates = [];
 
   this._zoom = function () {
-    var x_zoom = window.innerWidth / (_this2.width + 32);
-    var y_zoom = window.innerHeight / (_this2.height + 96);
+    var x_zoom = window.innerWidth / (_this2.width + 8);
+    var y_zoom = window.innerHeight / (_this2.height + 64);
     return Math.min(x_zoom, y_zoom);
   };
   this.zoom = this._zoom();
@@ -353,9 +353,6 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
 
   getMediansPromise().then(function (medians) {
     _this2._matcher = new Matcher(medians);
-    $scope.$apply(function () {
-      _this2.output = 'Ready!';
-    });
   }).catch(console.error.bind(console));
 
   this._d = function (path) {
@@ -382,6 +379,7 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
     _this2.strokes = [];
     _this2._stroke = [];
     _this2._strokes = [];
+    _this2.candidates = [];
   };
   this.end_stroke = function () {
     if (_this2._stroke.length > 1) {
@@ -390,7 +388,7 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
       _this2._stroke = [];
 
       if (_this2._matcher) {
-        _this2.output = _this2._matcher.match(_this2._strokes);
+        _this2.candidates = _this2._matcher.match(_this2._strokes, 8);
       }
     }
   };

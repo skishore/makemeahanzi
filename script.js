@@ -46,11 +46,11 @@ const MakeMeAHanziController = function($scope) {
   this.stroke_width = 4;
   this.strokes = [];
   this.stroke = () => this._d(this._stroke);
-  this.output = 'Loading...';
+  this.candidates = [];
 
   this._zoom = () => {
-    const x_zoom = window.innerWidth / (this.width + 32);
-    const y_zoom = window.innerHeight / (this.height + 96);
+    const x_zoom = window.innerWidth / (this.width + 8);
+    const y_zoom = window.innerHeight / (this.height + 64);
     return Math.min(x_zoom, y_zoom);
   }
   this.zoom = this._zoom();
@@ -63,9 +63,6 @@ const MakeMeAHanziController = function($scope) {
 
   getMediansPromise().then((medians) => {
     this._matcher = new Matcher(medians);
-    $scope.$apply(() => {
-      this.output = 'Ready!';
-    });
   }).catch(console.error.bind(console));
 
   this._d = (path) => {
@@ -87,6 +84,7 @@ const MakeMeAHanziController = function($scope) {
     this.strokes = [];
     this._stroke = [];
     this._strokes = [];
+    this.candidates = [];
   }
   this.end_stroke = () => {
     if (this._stroke.length > 1) {
@@ -95,7 +93,7 @@ const MakeMeAHanziController = function($scope) {
       this._stroke = [];
 
       if (this._matcher) {
-        this.output = this._matcher.match(this._strokes);
+        this.candidates = this._matcher.match(this._strokes, 8);
       }
     }
   }

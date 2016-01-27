@@ -12,8 +12,11 @@
   </head>
   <body ng-app="makemeahanzi">
     <div id="container" ng-controller="MakeMeAHanziController as controller"
-         x-ng-attr-style="transform: scale({{controller.zoom}});
-                          -webkit-transform: scale({{controller.zoom}});">
+         x-ng-attr-style="
+            transform: scale({{controller.zoom}})
+                       translate(-50%, -50%);
+            -webkit-transform: scale({{controller.zoom}})
+                               translate(-50%, -50%);">
       <div class="handwriting">
         <div class="input"></div>
         <svg x-ng-attr-width="{{controller.width}}"
@@ -37,7 +40,11 @@
         <a class="clear button">Clear</a>
         <a class="undo button">Undo</a>
       </div>
-      <div id="output">{{controller.output}}</div>
+      <div class="output">
+        <a class="candidate" ng-repeat="candidate in controller.candidates">
+          {{candidate}}
+        </a>
+      </div>
     </div>
   </body>
 </html>
