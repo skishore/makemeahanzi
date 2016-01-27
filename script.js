@@ -78,12 +78,20 @@ const MakeMeAHanziController = function($scope) {
     }
     ['L', point(path.length - 1)].map(push);
     return result.join(' ');
-  };
+  }
+  this._refresh_candidates = () => {
+    if (this._strokes.length > 0 && this._matcher) {
+      this.candidates = this._matcher.match(this._strokes, 8);
+    } else {
+      this.candidates = [];
+    }
+  }
 
   this.clear = () => {
     this.strokes = [];
     this._stroke = [];
     this._strokes = [];
+    this._refresh_candidates();
     this.candidates = [];
   }
   this.end_stroke = () => {
@@ -91,10 +99,7 @@ const MakeMeAHanziController = function($scope) {
       this.strokes.push(this._d(this._stroke));
       this._strokes.push(this._stroke);
       this._stroke = [];
-
-      if (this._matcher) {
-        this.candidates = this._matcher.match(this._strokes, 8);
-      }
+      this._refresh_candidates();
     }
   }
   this.maybe_push_point = (point) => {
@@ -106,6 +111,12 @@ const MakeMeAHanziController = function($scope) {
     if (point[0] != null && point[1] != null) {
       this._stroke.push(point.map((x) => x / this.zoom));
     }
+  }
+  this.undo = () => {
+    this.strokes.pop();
+    this._strokes.pop();
+    this._stroke = [];
+    this._refresh_candidates();
   }
 
   const selector = '#container .handwriting .input';

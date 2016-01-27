@@ -37,8 +37,8 @@
         </svg>
       </div>
       <div class="controls">
-        <a class="clear button">Clear</a>
-        <a class="undo button">Undo</a>
+        <a class="clear button" ng-click="controller.clear();">Clear</a>
+        <a class="undo button" ng-click="controller.undo();">Undo</a>
       </div>
       <div class="output">
         <a class="candidate" ng-repeat="candidate in controller.candidates">

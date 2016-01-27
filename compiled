@@ -374,11 +374,19 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
     ['L', point(path.length - 1)].map(push);
     return result.join(' ');
   };
+  this._refresh_candidates = function () {
+    if (_this2._strokes.length > 0 && _this2._matcher) {
+      _this2.candidates = _this2._matcher.match(_this2._strokes, 8);
+    } else {
+      _this2.candidates = [];
+    }
+  };
 
   this.clear = function () {
     _this2.strokes = [];
     _this2._stroke = [];
     _this2._strokes = [];
+    _this2._refresh_candidates();
     _this2.candidates = [];
   };
   this.end_stroke = function () {
@@ -386,10 +394,7 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
       _this2.strokes.push(_this2._d(_this2._stroke));
       _this2._strokes.push(_this2._stroke);
       _this2._stroke = [];
-
-      if (_this2._matcher) {
-        _this2.candidates = _this2._matcher.match(_this2._strokes, 8);
-      }
+      _this2._refresh_candidates();
     }
   };
   this.maybe_push_point = function (point) {
@@ -403,6 +408,12 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
         return x / _this2.zoom;
       }));
     }
+  };
+  this.undo = function () {
+    _this2.strokes.pop();
+    _this2._strokes.pop();
+    _this2._stroke = [];
+    _this2._refresh_candidates();
   };
 
   var selector = '#container .handwriting .input';
