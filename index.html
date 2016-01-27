@@ -8,13 +8,12 @@
     <script src="js/sketch.min.js"></script>
     <!-- Get NodeJS modules to also run in the browser. -->
     <script> var exports = window; </script>
-    <script src="matcher.js"></script>
-    <script src="medians.js"></script>
-    <script src="script.js"></script>
+    <script src="compiled"></script>
   </head>
   <body ng-app="makemeahanzi">
     <div id="container" ng-controller="MakeMeAHanziController as controller"
-         x-ng-attr-style="transform: scale({{controller.zoom}});">
+         x-ng-attr-style="transform: scale({{controller.zoom}});
+                          -webkit-transform: scale({{controller.zoom}});">
       <div class="handwriting">
         <div class="input"></div>
         <svg x-ng-attr-width="{{controller.width}}"

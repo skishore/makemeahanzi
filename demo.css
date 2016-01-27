@@ -17,7 +17,9 @@ html, body {
   margin: 16px;
   overflow: hidden;
   text-align: left;
+
   transform-origin: 50% -16px 0;
+  -webkit-transform-origin: 50% -16px 0;
 }
 
 #container .handwriting {

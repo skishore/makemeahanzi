@@ -339,8 +339,8 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   this.output = 'Loading...';
 
   this._zoom = function () {
-    var x_zoom = window.innerWidth / (_this2.width + 34);
-    var y_zoom = window.innerHeight / (_this2.height + 56);
+    var x_zoom = window.innerWidth / (_this2.width + 32);
+    var y_zoom = window.innerHeight / (_this2.height + 96);
     return Math.min(x_zoom, y_zoom);
   };
   this.zoom = this._zoom();
