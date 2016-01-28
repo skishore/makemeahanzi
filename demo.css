@@ -15,6 +15,7 @@ html, body {
 #container {
   display: inline-block;
   overflow: hidden;
+  padding: 16px;
   text-align: left;
 
   position: absolute;
@@ -41,22 +42,19 @@ html, body {
 #container .controls .button {
   background-color: white;
   border: 1px solid #2c3e50;
-  height: 24px;
-  line-height: 22px;
   width: 50%;
 }
 
 #container .output {
   background-color: white;
   clear: both;
+  margin-top: 48px;
   height: 32px;
-  margin-top: 32px;
 }
 
 #container .output .candidate {
   border: 1px dotted lightgray;
   font-size: 20px;
-  line-height: 30px;
   width: 32px;
 }
 
@@ -66,6 +64,8 @@ html, body {
   color: #2c3e50;
   cursor: pointer;
   float: left;
+  height : 32px;
+  line-height: 30px;
   margin: 0;
   text-align: center;
   text-decoration: none;

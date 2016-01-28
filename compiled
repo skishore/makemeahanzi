@@ -284,14 +284,14 @@ exports.getMediansPromise = function () {
 };
 "use strict";
 
-var createSketch = function createSketch($scope, controller, element) {
+var createSketch = function createSketch($scope, controller, canvas, svg) {
   var _mousedown = false;
   Sketch.create({
-    container: element,
+    container: canvas,
     autoclear: false,
     fullscreen: false,
-    width: controller.width,
-    height: controller.height,
+    width: svg.clientWidth,
+    height: svg.clientHeight,
     keydown: function keydown(e) {
       if (this.keys.C) {
         $scope.$apply(function () {
@@ -329,9 +329,6 @@ var createSketch = function createSketch($scope, controller, element) {
 var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   var _this2 = this;
 
-  this.width = 256;
-  this.height = 256;
-  this.stroke_width = 4;
   this.strokes = [];
   this.stroke = function () {
     return _this2._d(_this2._stroke);
@@ -345,8 +342,9 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   };
 
   this._zoom = function () {
-    var x_zoom = window.innerWidth / (_this2.width + 16);
-    var y_zoom = window.innerHeight / (_this2.height + 80);
+    var container = document.querySelector('#container');
+    var x_zoom = window.innerWidth / container.clientWidth;
+    var y_zoom = window.innerHeight / container.clientHeight;
     return Math.min(x_zoom, y_zoom);
   };
   this.zoom = this._zoom();
@@ -422,8 +420,9 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
     _this2._refresh_candidates();
   };
 
-  var selector = '#container .handwriting .input';
-  createSketch($scope, this, document.querySelector(selector));
+  var canvas = document.querySelector('#container .handwriting .input');
+  var svg = document.querySelector('#container .handwriting svg');
+  createSketch($scope, this, canvas, svg);
 };
 
 angular.module('makemeahanzi', []).controller('MakeMeAHanziController', MakeMeAHanziController);

@@ -1,13 +1,13 @@
 "use strict";
 
-const createSketch = ($scope, controller, element) => {
+const createSketch = ($scope, controller, canvas, svg) => {
   let mousedown = false;
   Sketch.create({
-    container: element,
+    container: canvas,
     autoclear: false,
     fullscreen: false,
-    width: controller.width,
-    height: controller.height,
+    width: svg.clientWidth,
+    height: svg.clientHeight,
     keydown(e) {
       if (this.keys.C) {
         $scope.$apply(() => {
@@ -41,9 +41,6 @@ const createSketch = ($scope, controller, element) => {
 }
 
 const MakeMeAHanziController = function($scope) {
-  this.width = 256;
-  this.height = 256;
-  this.stroke_width = 4;
   this.strokes = [];
   this.stroke = () => this._d(this._stroke);
   this.candidates = [];
@@ -53,8 +50,9 @@ const MakeMeAHanziController = function($scope) {
   this.getURL = (character) => this.url + encodeURIComponent(character);
 
   this._zoom = () => {
-    const x_zoom = window.innerWidth / (this.width + 16);
-    const y_zoom = window.innerHeight / (this.height + 80);
+    const container = document.querySelector('#container');
+    const x_zoom = window.innerWidth / container.clientWidth;
+    const y_zoom = window.innerHeight / container.clientHeight;
     return Math.min(x_zoom, y_zoom);
   }
   this.zoom = this._zoom();
@@ -123,8 +121,9 @@ const MakeMeAHanziController = function($scope) {
     this._refresh_candidates();
   }
 
-  const selector = '#container .handwriting .input';
-  createSketch($scope, this, document.querySelector(selector));
+  const canvas = document.querySelector('#container .handwriting .input');
+  const svg = document.querySelector('#container .handwriting svg');
+  createSketch($scope, this, canvas, svg);
 }
 
 angular.module('makemeahanzi', [])
