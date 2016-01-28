@@ -2,86 +2,59 @@ html, body {
   background-color: #68a;
   overflow: hidden;
   margin: 0;
-  text-align: center;
-}
+  text-align: center; }
 
 .navbar-brand:hover {
-  color: white !important;
-}
+  color: white !important; }
 
 #content {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  top: 60px;
-}
-
-#container {
-  display: inline-block;
-  overflow: hidden;
-  padding: 16px;
-  text-align: left;
-
-  position: absolute;
-  left: 50%;
-  top: 50%;
-
-  transform-origin: 0 0 0;
-  -webkit-transform-origin: 0 0 0;
-}
-
-#container .handwriting .input {
-  position: absolute;
-}
-
-#container .handwriting .input canvas,
-#container .handwriting svg {
-  vertical-align: top;
-}
-
-#container .handwriting svg {
-  background-color: white;
-}
-
-#container .controls .button {
-  background-color: white;
-  border: 1px solid #2c3e50;
-  font-size: 16px;
-  width: 50%;
-}
-
-#container .output {
-  background-color: white;
-  clear: both;
-  margin-top: 48px;
-  height: 32px;
-}
-
-#container .output .candidate {
-  border: 1px dotted lightgray;
-  font-size: 20px;
-  width: 32px;
-}
-
-#container .controls .button,
-#container .output .candidate {
-  box-sizing: border-box;
-  color: #2c3e50;
-  cursor: pointer;
-  float: left;
-  height : 32px;
-  line-height: 30px;
-  margin: 0;
-  text-align: center;
-  text-decoration: none;
-
-  user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none;
-}
-
-#container .controls .button:hover,
-#container .output .candidate:hover {
-  background-color: #bdf;
-}
+  top: 60px; }
+  #content #container {
+    display: inline-block;
+    overflow: hidden;
+    padding: 16px;
+    text-align: left;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform-origin: 0 0 0;
+    -webkit-transform-origin: 0 0 0; }
+    #content #container .handwriting {
+      background-color: white; }
+      #content #container .handwriting .input {
+        position: absolute; }
+      #content #container .handwriting .input canvas, #content #container .handwriting svg {
+        vertical-align: top; }
+    #content #container .controls .button {
+      background-color: white;
+      border: 1px solid #2c3e50;
+      font-size: 16px;
+      width: 50%; }
+    #content #container .output {
+      background-color: white;
+      clear: both;
+      margin-top: 48px;
+      height: 32px; }
+      #content #container .output .candidate {
+        border: 1px dotted lightgray;
+        font-size: 20px;
+        width: 32px; }
+    #content #container .controls .button, #content #container .output .candidate {
+      box-sizing: border-box;
+      color: #2c3e50;
+      cursor: pointer;
+      float: left;
+      height: 32px;
+      line-height: 30px;
+      margin: 0;
+      text-align: center;
+      text-decoration: none;
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none; }
+      #content #container .controls .button:hover, #content #container .output .candidate:hover {
+        background-color: #bdf; }

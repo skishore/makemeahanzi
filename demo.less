@@ -1,0 +1,84 @@
+html, body {
+  background-color: #68a;
+  overflow: hidden;
+  margin: 0;
+  text-align: center;
+}
+
+.navbar-brand:hover {
+  color: white !important;
+}
+
+#content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 60px;
+
+  #container {
+    display: inline-block;
+    overflow: hidden;
+    padding: 16px;
+    text-align: left;
+
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    transform-origin: 0 0 0;
+    -webkit-transform-origin: 0 0 0;
+
+    .handwriting {
+      background-color: white;
+
+      .input {
+        position: absolute;
+      }
+
+      .input canvas, svg {
+        vertical-align: top;
+      }
+    }
+
+    .controls .button {
+      background-color: white;
+      border: 1px solid #2c3e50;
+      font-size: 16px;
+      width: 50%;
+    }
+
+    .output {
+      background-color: white;
+      clear: both;
+      margin-top: 48px;
+      height: 32px;
+
+      .candidate {
+        border: 1px dotted lightgray;
+        font-size: 20px;
+        width: 32px;
+      }
+    }
+
+    .controls .button, .output .candidate {
+      box-sizing: border-box;
+      color: #2c3e50;
+      cursor: pointer;
+      float: left;
+      height : 32px;
+      line-height: 30px;
+      margin: 0;
+      text-align: center;
+      text-decoration: none;
+
+      user-select: none;
+      -moz-user-select: none;
+      -webkit-user-select: none;
+
+      &:hover {
+        background-color: #bdf;
+      }
+    }
+  }
+}
