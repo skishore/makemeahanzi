@@ -342,9 +342,10 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   };
 
   this._zoom = function () {
+    var content = document.querySelector('#content');
     var container = document.querySelector('#container');
-    var x_zoom = window.innerWidth / container.clientWidth;
-    var y_zoom = window.innerHeight / container.clientHeight;
+    var x_zoom = content.clientWidth / container.clientWidth;
+    var y_zoom = content.clientHeight / container.clientHeight;
     return Math.min(x_zoom, y_zoom);
   };
   this.zoom = this._zoom();

@@ -1,15 +1,20 @@
 html, body {
   background-color: #68a;
-  font-size: 16px;
   overflow: hidden;
   margin: 0;
   text-align: center;
+}
 
+.navbar-brand:hover {
+  color: white !important;
+}
+
+#content {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
-  top: 0;
+  top: 60px;
 }
 
 #container {
@@ -42,6 +47,7 @@ html, body {
 #container .controls .button {
   background-color: white;
   border: 1px solid #2c3e50;
+  font-size: 16px;
   width: 50%;
 }
 
