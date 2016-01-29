@@ -7,23 +7,36 @@ html, body {
 .navbar {
   position: fixed;
   width: 100%; }
-  .navbar .navbar-brand:hover {
+  .navbar .navbar-brand {
     color: white !important; }
 
-#content {
+#data {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   top: 60px; }
-  #content #data svg {
-    background-color: green;
-    vertical-align: top;
-    transform: scale(1, 4);
-    transform-origin: 50% 0 0;
-    -webkit-transform: scale(1, 4);
-    -webkit-transform-origin: 50% 0 0; }
-  #content #search {
+  #data .left-pane {
+    float: left;
+    height: 100%;
+    width: 680px; }
+    #data .left-pane .metadata {
+      margin: 16px;
+      text-align: left; }
+      #data .left-pane .metadata .panel-body {
+        padding: 8px 16px; }
+  #data svg {
+    float: left;
+    height: 100%;
+    vertical-align: top; }
+
+#search {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 60px; }
+  #search #wrapper {
     display: inline-block;
     overflow: hidden;
     padding: 16px;
@@ -33,27 +46,27 @@ html, body {
     top: 50%;
     transform-origin: 0 0 0;
     -webkit-transform-origin: 0 0 0; }
-    #content #search .handwriting {
+    #search #wrapper .handwriting {
       background-color: white; }
-      #content #search .handwriting .input {
+      #search #wrapper .handwriting .input {
         position: absolute; }
-      #content #search .handwriting .input canvas, #content #search .handwriting svg {
+      #search #wrapper .handwriting .input canvas, #search #wrapper .handwriting svg {
         vertical-align: top; }
-    #content #search .controls .button {
+    #search #wrapper .controls .button {
       background-color: white;
       border: 1px solid #2c3e50;
       font-size: 16px;
       width: 50%; }
-    #content #search .output {
+    #search #wrapper .output {
       background-color: white;
       clear: both;
       margin-top: 48px;
       height: 32px; }
-      #content #search .output .candidate {
+      #search #wrapper .output .candidate {
         border: 1px dotted lightgray;
         font-size: 20px;
         width: 32px; }
-    #content #search .controls .button, #content #search .output .candidate {
+    #search #wrapper .controls .button, #search #wrapper .output .candidate {
       box-sizing: border-box;
       color: #2c3e50;
       cursor: pointer;
@@ -66,5 +79,5 @@ html, body {
       user-select: none;
       -moz-user-select: none;
       -webkit-user-select: none; }
-      #content #search .controls .button:hover, #content #search .output .candidate:hover {
+      #search #wrapper .controls .button:hover, #search #wrapper .output .candidate:hover {
         background-color: #bdf; }

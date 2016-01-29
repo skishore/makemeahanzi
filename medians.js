@@ -56,7 +56,5 @@ const decodeMedians = (buffer) => {
 
 // Returns a Promise that resolves to a list of [character, medians] pairs,
 // where [medians] is a preprocessed Matcher entry for that character.
-//
-// NOTE: The extra callback layer of indirection avoids a massive memory leak!
-exports.getMediansPromise = () =>
+exports.mediansPromise =
     loadBinaryData('medians.bin').then(decodeMedians).catch(console.err);

@@ -9,31 +9,48 @@ html, body {
   position: fixed;
   width: 100%;
 
-  .navbar-brand:hover {
+  .navbar-brand {
     color: white !important;
   }
 }
 
-#content {
+#data {
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   top: 60px;
 
-  #data {
-    svg {
-      background-color: green;
-      vertical-align: top;
+  .left-pane {
+    float: left;
+    height: 100%;
+    width: 680px;
 
-      transform: scale(1, 4);
-      transform-origin: 50% 0 0;
-      -webkit-transform: scale(1, 4);
-      -webkit-transform-origin: 50% 0 0;
+    .metadata {
+      margin: 16px;
+      text-align: left;
+
+      .panel-body {
+        padding: 8px 16px;
+      }
     }
   }
 
-  #search {
+  svg {
+    float: left;
+    height: 100%;
+    vertical-align: top;
+  }
+}
+
+#search {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 60px;
+
+  #wrapper {
     display: inline-block;
     overflow: hidden;
     padding: 16px;

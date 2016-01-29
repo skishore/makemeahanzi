@@ -1,12 +1,20 @@
 "use strict";
 
 angular.module('makemeahanzi', ['ngRoute']).config(function ($routeProvider, $locationProvider) {
-  $routeProvider.when('/character/:character', { templateUrl: 'data.html' }).otherwise({ templateUrl: 'search.html' });
+  $routeProvider.when('/character/:character', { templateUrl: 'character.html' }).otherwise({ templateUrl: 'search.html' });
 });
 "use strict";
 
+var coerceToUnicode = function coerceToUnicode(character) {
+  if (character.startsWith('&#') && character.endsWith(';')) {
+    var char_code = parseInt(character.slice(2, character.length - 1), 10);
+    return String.fromCharCode(char_code);
+  }
+  return character;
+};
+
 var DataController = function DataController($scope, $routeParams) {
-  this.character = $routeParams.character;
+  this.character = coerceToUnicode($routeParams.character);
 };
 
 angular.module('makemeahanzi').controller('DataController', DataController);
@@ -289,11 +297,7 @@ var decodeMedians = function decodeMedians(buffer) {
 
 // Returns a Promise that resolves to a list of [character, medians] pairs,
 // where [medians] is a preprocessed Matcher entry for that character.
-//
-// NOTE: The extra callback layer of indirection avoids a massive memory leak!
-exports.getMediansPromise = function () {
-  return loadBinaryData('medians.bin').then(decodeMedians).catch(console.err);
-};
+exports.mediansPromise = loadBinaryData('medians.bin').then(decodeMedians).catch(console.err);
 "use strict";
 
 var createSketch = function createSketch($scope, controller, canvas, svg) {
@@ -341,7 +345,7 @@ var createSketch = function createSketch($scope, controller, canvas, svg) {
 var SearchController = function SearchController($scope) {
   var _this2 = this;
 
-  var container = content.querySelector('#content #search');
+  var container = document.querySelector('#search #wrapper');
 
   this.strokes = [];
   this.stroke = function () {
@@ -355,8 +359,8 @@ var SearchController = function SearchController($scope) {
 
   this._zoom = function () {
     var wrapper = container.parentElement;
-    var x_zoom = content.clientWidth / container.clientWidth;
-    var y_zoom = content.clientHeight / container.clientHeight;
+    var x_zoom = wrapper.clientWidth / container.clientWidth;
+    var y_zoom = wrapper.clientHeight / container.clientHeight;
     return Math.min(x_zoom, y_zoom);
   };
   this.zoom = this._zoom();
@@ -365,9 +369,7 @@ var SearchController = function SearchController($scope) {
   this._strokes = [];
   this._matcher = null;
 
-  window.controller = this;
-
-  getMediansPromise().then(function (medians) {
+  window.mediansPromise.then(function (medians) {
     _this2._matcher = new Matcher(medians);
   }).catch(console.error.bind(console));
 
@@ -433,7 +435,7 @@ var SearchController = function SearchController($scope) {
   };
 
   var canvas = container.querySelector('.handwriting .input');
-  var svg = content.querySelector('.handwriting svg');
+  var svg = container.querySelector('.handwriting svg');
   createSketch($scope, this, canvas, svg);
 };
 

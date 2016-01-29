@@ -41,7 +41,7 @@ const createSketch = ($scope, controller, canvas, svg) => {
 }
 
 const SearchController = function($scope) {
-  const container = content.querySelector('#content #search');
+  const container = document.querySelector('#search #wrapper');
 
   this.strokes = [];
   this.stroke = () => this._d(this._stroke);
@@ -51,8 +51,8 @@ const SearchController = function($scope) {
 
   this._zoom = () => {
     const wrapper = container.parentElement;
-    const x_zoom = content.clientWidth / container.clientWidth;
-    const y_zoom = content.clientHeight / container.clientHeight;
+    const x_zoom = wrapper.clientWidth / container.clientWidth;
+    const y_zoom = wrapper.clientHeight / container.clientHeight;
     return Math.min(x_zoom, y_zoom);
   }
   this.zoom = this._zoom();
@@ -61,9 +61,7 @@ const SearchController = function($scope) {
   this._strokes = [];
   this._matcher = null;
 
-  window.controller = this;
-
-  getMediansPromise().then((medians) => {
+  window.mediansPromise.then((medians) => {
     this._matcher = new Matcher(medians);
   }).catch(console.error.bind(console));
 
@@ -122,7 +120,7 @@ const SearchController = function($scope) {
   }
 
   const canvas = container.querySelector('.handwriting .input');
-  const svg = content.querySelector('.handwriting svg');
+  const svg = container.querySelector('.handwriting svg');
   createSketch($scope, this, canvas, svg);
 }
 
