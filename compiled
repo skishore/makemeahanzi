@@ -13,8 +13,48 @@ var coerceToUnicode = function coerceToUnicode(character) {
   return character;
 };
 
-var DataController = function DataController($scope, $routeParams) {
+var DataController = function DataController($scope, $routeParams, $http) {
+  var _this = this;
+
   this.character = coerceToUnicode($routeParams.character);
+  this.metadata = [];
+
+  this._refresh = function (row) {
+    _this.metadata = [{ label: 'Definition:', value: row.definition }, { label: 'Pinyin:', value: row.pinyin.join(', ') }, { label: 'Radical:', value: row.radical }];
+    _this.strokes = row.strokes;
+  };
+
+  var part = Math.floor(this.character.charCodeAt(0) / 256);
+  $http.get('data/part-' + part + '.txt').then(function (response) {
+    var data = response.data;
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = response.data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var row = _step.value;
+
+        if (row.character === _this.character) {
+          _this._refresh(row);
+          break;
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+  });
 };
 
 angular.module('makemeahanzi').controller('DataController', DataController);

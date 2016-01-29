@@ -15,30 +15,40 @@ html, body {
 }
 
 #data {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  top: 60px;
+  margin-top: 60px;
 
   .left-pane {
-    float: left;
-    height: 100%;
-    width: 680px;
+    display: inline-block;
+    text-align: left;
 
     .metadata {
-      margin: 16px;
-      text-align: left;
+      margin: 24px 22px;
+      width: 512px;
 
       .panel-body {
-        padding: 8px 16px;
+        padding: 0;
+
+        .field {
+          margin: 12px 0 4px;
+
+          .control-label {
+            margin-right: 4px;
+            text-align: right;
+            width: 96px;
+          }
+
+          .value {
+            display: inline-block;
+          }
+        }
       }
     }
   }
 
   svg {
-    float: left;
-    height: 100%;
+    background-color: white;
+    margin-top: 24px;
+    width: 512px;
     vertical-align: top;
   }
 }
