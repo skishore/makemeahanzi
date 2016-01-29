@@ -1,5 +1,17 @@
 "use strict";
 
+angular.module('makemeahanzi', ['ngRoute']).config(function ($routeProvider, $locationProvider) {
+  $routeProvider.when('/character/:character', { templateUrl: 'data.html' }).otherwise({ templateUrl: 'search.html' });
+});
+"use strict";
+
+var DataController = function DataController($scope, $routeParams) {
+  this.character = $routeParams.character;
+};
+
+angular.module('makemeahanzi').controller('DataController', DataController);
+"use strict";
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -326,10 +338,10 @@ var createSketch = function createSketch($scope, controller, canvas, svg) {
   });
 };
 
-var MakeMeAHanziController = function MakeMeAHanziController($scope) {
+var SearchController = function SearchController($scope) {
   var _this2 = this;
 
-  var container = content.querySelector('#content #container');
+  var container = content.querySelector('#content #search');
 
   this.strokes = [];
   this.stroke = function () {
@@ -337,10 +349,8 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   };
   this.candidates = [];
 
-  // TODO(skishore): Replace this link with a link to our own data.
-  this.url = 'https://en.wiktionary.org/wiki/';
   this.getURL = function (character) {
-    return _this2.url + encodeURIComponent(character);
+    return '#/character/' + character;
   };
 
   this._zoom = function () {
@@ -427,5 +437,5 @@ var MakeMeAHanziController = function MakeMeAHanziController($scope) {
   createSketch($scope, this, canvas, svg);
 };
 
-angular.module('makemeahanzi', []).controller('MakeMeAHanziController', MakeMeAHanziController);
+angular.module('makemeahanzi').controller('SearchController', SearchController);
 

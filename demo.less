@@ -5,8 +5,13 @@ html, body {
   text-align: center;
 }
 
-.navbar-brand:hover {
-  color: white !important;
+.navbar {
+  position: fixed;
+  width: 100%;
+
+  .navbar-brand:hover {
+    color: white !important;
+  }
 }
 
 #content {
@@ -16,7 +21,19 @@ html, body {
   right: 0;
   top: 60px;
 
-  #container {
+  #data {
+    svg {
+      background-color: green;
+      vertical-align: top;
+
+      transform: scale(1, 4);
+      transform-origin: 50% 0 0;
+      -webkit-transform: scale(1, 4);
+      -webkit-transform-origin: 50% 0 0;
+    }
+  }
+
+  #search {
     display: inline-block;
     overflow: hidden;
     padding: 16px;

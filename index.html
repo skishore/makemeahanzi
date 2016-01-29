@@ -5,7 +5,8 @@
     <title>Make Me a Hanzi Demo</title>
     <link rel="stylesheet" href="bootswatch.css">
     <link rel="stylesheet" href="demo.css">
-    <script src="js/angular.min.js"></script>
+    <script src="js/angular.js"></script>
+    <script src="js/angular-route.js"></script>
     <script src="js/polyfill.js"></script>
     <script src="js/sketch.min.js"></script>
     <!-- Get NodeJS modules to also run in the browser. -->
@@ -16,45 +17,12 @@
     <div id="navbar" class="navbar navbar-default navbar-static-top">
       <div class="container-fluid">
         <div class="navbar-header">
-          <div class="navbar-brand">Make Me a Hanzi</div>
+          <div class="navbar-brand">Make Me a Hanzi Demo</div>
         </div>
       </div>
     </div>
-    <div id="content" ng-controller="MakeMeAHanziController as controller">
-      <div id="container"
-           x-ng-attr-style="
-              transform: scale({{controller.zoom}})
-                         translate(-50%, -50%);
-              -webkit-transform: scale({{controller.zoom}})
-                                 translate(-50%, -50%);">
-        <div class="handwriting">
-          <div class="input"></div>
-          <svg width="256" height="256">
-            <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1">
-              <line x1="0" y1="0" x2="256" y2="256"></line>
-              <line x1="256" y1="0" x2="0" y2="256"></line>
-              <line x1="128" y1="0" x2="128" y2="256"></line>
-              <line x1="0" y1="128" x2="256" y2="128"></line>
-            </g>
-            <g fill="none" stroke="black"
-               stroke-linecap="round" stroke-width="4">
-              <path ng-repeat="stroke in controller.strokes"
-                    x-ng-attr-d="{{stroke}}"></path>
-              <path x-ng-attr-d="{{controller.stroke()}}"></path>
-            </g>
-          </svg>
-        </div>
-        <div class="controls">
-          <a class="clear button" ng-click="controller.clear();">Clear</a>
-          <a class="undo button" ng-click="controller.undo();">Undo</a>
-        </div>
-        <div class="output">
-          <a class="candidate" ng-repeat="candidate in controller.candidates"
-             target="_blank" x-ng-attr-href="{{controller.getURL(candidate)}}">
-            {{candidate}}
-          </a>
-        </div>
-      </div>
+    <div id="content">
+      <ng-view></ng-view>
     </div>
   </body>
 </html>

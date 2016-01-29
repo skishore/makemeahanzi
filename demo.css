@@ -4,8 +4,11 @@ html, body {
   margin: 0;
   text-align: center; }
 
-.navbar-brand:hover {
-  color: white !important; }
+.navbar {
+  position: fixed;
+  width: 100%; }
+  .navbar .navbar-brand:hover {
+    color: white !important; }
 
 #content {
   position: absolute;
@@ -13,7 +16,14 @@ html, body {
   left: 0;
   right: 0;
   top: 60px; }
-  #content #container {
+  #content #data svg {
+    background-color: green;
+    vertical-align: top;
+    transform: scale(1, 4);
+    transform-origin: 50% 0 0;
+    -webkit-transform: scale(1, 4);
+    -webkit-transform-origin: 50% 0 0; }
+  #content #search {
     display: inline-block;
     overflow: hidden;
     padding: 16px;
@@ -23,27 +33,27 @@ html, body {
     top: 50%;
     transform-origin: 0 0 0;
     -webkit-transform-origin: 0 0 0; }
-    #content #container .handwriting {
+    #content #search .handwriting {
       background-color: white; }
-      #content #container .handwriting .input {
+      #content #search .handwriting .input {
         position: absolute; }
-      #content #container .handwriting .input canvas, #content #container .handwriting svg {
+      #content #search .handwriting .input canvas, #content #search .handwriting svg {
         vertical-align: top; }
-    #content #container .controls .button {
+    #content #search .controls .button {
       background-color: white;
       border: 1px solid #2c3e50;
       font-size: 16px;
       width: 50%; }
-    #content #container .output {
+    #content #search .output {
       background-color: white;
       clear: both;
       margin-top: 48px;
       height: 32px; }
-      #content #container .output .candidate {
+      #content #search .output .candidate {
         border: 1px dotted lightgray;
         font-size: 20px;
         width: 32px; }
-    #content #container .controls .button, #content #container .output .candidate {
+    #content #search .controls .button, #content #search .output .candidate {
       box-sizing: border-box;
       color: #2c3e50;
       cursor: pointer;
@@ -56,5 +66,5 @@ html, body {
       user-select: none;
       -moz-user-select: none;
       -webkit-user-select: none; }
-      #content #container .controls .button:hover, #content #container .output .candidate:hover {
+      #content #search .controls .button:hover, #content #search .output .candidate:hover {
         background-color: #bdf; }

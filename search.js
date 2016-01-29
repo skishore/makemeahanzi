@@ -40,16 +40,14 @@ const createSketch = ($scope, controller, canvas, svg) => {
   });
 }
 
-const MakeMeAHanziController = function($scope) {
-  const container = content.querySelector('#content #container');
+const SearchController = function($scope) {
+  const container = content.querySelector('#content #search');
 
   this.strokes = [];
   this.stroke = () => this._d(this._stroke);
   this.candidates = [];
 
-  // TODO(skishore): Replace this link with a link to our own data.
-  this.url = 'https://en.wiktionary.org/wiki/';
-  this.getURL = (character) => this.url + encodeURIComponent(character);
+  this.getURL = (character) => `#/character/${character}`;
 
   this._zoom = () => {
     const wrapper = container.parentElement;
@@ -128,5 +126,5 @@ const MakeMeAHanziController = function($scope) {
   createSketch($scope, this, canvas, svg);
 }
 
-angular.module('makemeahanzi', [])
-       .controller('MakeMeAHanziController', MakeMeAHanziController);
+angular.module('makemeahanzi')
+       .controller('SearchController', SearchController);
