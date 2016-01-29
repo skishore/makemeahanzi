@@ -34,16 +34,31 @@ const encode = (matcher, row) => {
   return new Buffer(result);
 }
 
+const dumpParts = (parts) => {
+  for (const part in parts) {
+    const writer = fs.createWriteStream(`data/part-${part}.txt`);
+    writer.write(JSON.stringify(parts[part]));
+    writer.end();
+  }
+}
+
 const main = () => {
   const input = fs.createReadStream('makemeahanzi.txt');
   const reader = readline.createInterface({input: input});
   const writer = fs.createWriteStream('medians.bin');
   const matcher = new match.Matcher([]);
+  const parts = {};
   reader.on('line', (line) => {
     const row = JSON.parse(line.trim());
     writer.write(encode(matcher, row));
+    const part = Math.floor(row.character.charCodeAt(0) / 256);
+    parts[part] = parts[part] || [];
+    parts[part].push(row);
   });
-  reader.on('end', () => writer.end());
+  reader.on('close', () => {
+    writer.end();
+    dumpParts(parts);
+  });
 }
 
 main();
