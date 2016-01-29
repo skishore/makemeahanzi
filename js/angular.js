@@ -11389,6 +11389,10 @@ var $locationMinErr = minErr('$location');
  * @returns {string}
  */
 function encodePath(path) {
+  // TODO(skishore): HACK HACK HACK: Figure out a way to support Unicode paths
+  // without disabling path encoding completely.
+  return path;
+
   var segments = path.split('/'),
       i = segments.length;
 
