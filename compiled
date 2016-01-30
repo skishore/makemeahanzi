@@ -5,6 +5,18 @@ angular.module('makemeahanzi', ['ngRoute']).config(function ($routeProvider, $lo
 });
 "use strict";
 
+var augmentTreeWithLabels = function augmentTreeWithLabels(node) {
+  var value = node.value;
+  if (node.type === 'compound') {
+    node.label = value + ' - ' + decomposition_util.ids_data[value].label;
+    node.children.map(function (child) {
+      return augmentTreeWithLabels(child);
+    });
+  } else {
+    node.label = value + ' - another character';
+  }
+};
+
 var coerceToUnicode = function coerceToUnicode(character) {
   if (character.startsWith('&#') && character.endsWith(';')) {
     var char_code = parseInt(character.slice(2, character.length - 1), 10);
@@ -13,24 +25,14 @@ var coerceToUnicode = function coerceToUnicode(character) {
   return character;
 };
 
-var DataController = function DataController($scope, $routeParams, $http) {
-  var _this = this;
+var constructTree = function constructTree(decomposition) {
+  var tree = decomposition_util.convertDecompositionToTree(decomposition);
+  augmentTreeWithLabels(tree);
+  return tree;
+};
 
-  this.character = coerceToUnicode($routeParams.character);
-  this.metadata = [];
-  this.strokes = [];
-
-  this._class = function () {
-    return window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
-  };
-  this.class = this._class();
-
-  this._refresh = function (row) {
-    _this.metadata = [{ label: 'Definition:', value: row.definition }, { label: 'Pinyin:', value: row.pinyin.join(', ') }, { label: 'Radical:', value: row.radical }];
-    _this.strokes = row.strokes;
-  };
-
-  var part = Math.floor(this.character.charCodeAt(0) / 256);
+var getCharacterData = function getCharacterData($http, character, callback) {
+  var part = Math.floor(character.charCodeAt(0) / 256);
   $http.get('data/part-' + part + '.txt').then(function (response) {
     var data = response.data;
     var _iteratorNormalCompletion = true;
@@ -41,9 +43,8 @@ var DataController = function DataController($scope, $routeParams, $http) {
       for (var _iterator = response.data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
         var row = _step.value;
 
-        if (row.character === _this.character) {
-          _this._refresh(row);
-          break;
+        if (row.character === character) {
+          return callback(row);
         }
       }
     } catch (err) {
@@ -63,7 +64,174 @@ var DataController = function DataController($scope, $routeParams, $http) {
   });
 };
 
+var DataController = function DataController($scope, $routeParams, $http) {
+  var _this = this;
+
+  this.character = coerceToUnicode($routeParams.character);
+  this.decomposition = [];
+  this.metadata = [];
+  this.strokes = [];
+
+  this._class = function () {
+    return window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
+  };
+  this.class = this._class();
+
+  this._refresh = function (row) {
+    _this.decomposition.push(constructTree(row.decomposition));
+    _this.metadata = [{ label: 'Definition:', value: row.definition }, { label: 'Pinyin:', value: row.pinyin.join(', ') }, { label: 'Radical:', value: row.radical }];
+    _this.strokes = row.strokes;
+  };
+  getCharacterData($http, this.character, this._refresh.bind(this));
+};
+
 angular.module('makemeahanzi').controller('DataController', DataController);
+"use strict";
+
+if (exports.decomposition_util !== undefined) {
+  throw new Error('Redefining decomposition_util global!');
+}
+exports.decomposition_util = {};
+
+decomposition_util.ids_data = {
+  '⿰': { label: 'Left-to-right', arity: 2 },
+  '⿱': { label: 'Top-to-bottom', arity: 2 },
+  '⿴': { label: 'Surround', arity: 2 },
+  '⿵': { label: 'Surround-from-above', arity: 2 },
+  '⿶': { label: 'Surround-from-below', arity: 2 },
+  '⿷': { label: 'Surround-from-left', arity: 2 },
+  '⿸': { label: 'Surround-from-upper-left', arity: 2 },
+  '⿹': { label: 'Surround-from-upper-right', arity: 2 },
+  '⿺': { label: 'Surround-from-lower-left', arity: 2 },
+  '⿻': { label: 'Overlaid', arity: 2 },
+  '⿳': { label: 'Top-to-middle-to-bottom', arity: 3 },
+  '⿲': { label: 'Left-to-middle-to-right', arity: 3 }
+};
+decomposition_util.ideograph_description_characters = Object.keys(decomposition_util.ids_data);
+
+var UNKNOWN_COMPONENT = '？';
+
+var assert = function assert(condition, message) {
+  return condition || console.error(message);
+};
+
+var augmentTreeWithPathData = function augmentTreeWithPathData(tree, path) {
+  tree.path = path;
+  var children = (tree.children || []).length;
+  for (var i = 0; i < children; i++) {
+    augmentTreeWithPathData(tree.children[i], path.concat([i]));
+  }
+  return tree;
+};
+
+var parseSubtree = function parseSubtree(decomposition, index) {
+  assert(index[0] < decomposition.length, 'Not enough characters in ' + decomposition + '.');
+  var current = decomposition[index[0]];
+  index[0] += 1;
+  if (decomposition_util.ids_data.hasOwnProperty(current)) {
+    var result = { type: 'compound', value: current, children: [] };
+    for (var i = 0; i < decomposition_util.ids_data[current].arity; i++) {
+      result.children.push(parseSubtree(decomposition, index));
+    }
+    return result;
+  } else if (current === UNKNOWN_COMPONENT) {
+    return { type: 'character', value: '?' };
+  }
+  // Characters may be followed by a [x] annotation that records which variant
+  // of the character to use at that position. We ignore these annotations.
+  if (decomposition[index[0]] === '[') {
+    assert('0123456789'.indexOf(decomposition[index[0] + 1]) >= 0);
+    assert(decomposition[index[0] + 2] === ']');
+    index[0] += 3;
+  }
+  return { type: 'character', value: current };
+};
+
+var serializeSubtree = function serializeSubtree(subtree, result) {
+  result[0] += subtree.value === '?' ? UNKNOWN_COMPONENT : subtree.value;
+  var children = subtree.children ? subtree.children.length : 0;
+  for (var i = 0; i < children; i++) {
+    serializeSubtree(subtree.children[i], result);
+  }
+};
+
+decomposition_util.collectComponents = function (tree, result) {
+  result = result || [];
+  if (tree.type === 'character' && tree.value !== '?') {
+    result.push(tree.value);
+  }
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = (tree.children || [])[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var child = _step.value;
+
+      decomposition_util.collectComponents(child, result);
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return result;
+};
+
+decomposition_util.convertDecompositionToTree = function (decomposition) {
+  var index = [0];
+  decomposition = decomposition || UNKNOWN_COMPONENT;
+  var result = parseSubtree(decomposition, index);
+  assert(index[0] === decomposition.length, 'Too many characters in ' + decomposition + '.');
+  return augmentTreeWithPathData(result, []);
+};
+
+decomposition_util.convertTreeToDecomposition = function (tree) {
+  var result = [''];
+  serializeSubtree(tree, result);
+  return result[0];
+};
+
+decomposition_util.getSubtree = function (tree, path) {
+  var subtree = tree;
+  var _iteratorNormalCompletion2 = true;
+  var _didIteratorError2 = false;
+  var _iteratorError2 = undefined;
+
+  try {
+    for (var _iterator2 = path[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+      var index = _step2.value;
+
+      assert(0 <= index && index < subtree.children.length);
+      subtree = subtree.children[index];
+    }
+  } catch (err) {
+    _didIteratorError2 = true;
+    _iteratorError2 = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion2 && _iterator2.return) {
+        _iterator2.return();
+      }
+    } finally {
+      if (_didIteratorError2) {
+        throw _iteratorError2;
+      }
+    }
+  }
+
+  return subtree;
+};
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();

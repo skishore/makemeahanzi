@@ -1,3 +1,11 @@
+<script type="text/ng-template" id="decomposition.html">
+  <div class="decomposition">
+    {{node.label}}
+    <div class="child" ng-include="'decomposition.html'"
+         ng-repeat="node in node.children"></div>
+  </div>
+</script>
+
 <div id="data" ng-controller="DataController as controller"
      class="{{controller.class}}">
   <div class="pane">
@@ -12,6 +20,8 @@
           <label class="control-label">{{metadata.label}}</label>
           <div class="value">{{metadata.value}}</div>
         </div>
+        <div ng-include="'decomposition.html'"
+             ng-repeat="node in controller.decomposition"></div>
       </div>
     </div>
   </div>
