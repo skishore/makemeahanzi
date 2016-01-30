@@ -11,6 +11,12 @@ const coerceToUnicode = (character) => {
 const DataController = function($scope, $routeParams, $http) {
   this.character = coerceToUnicode($routeParams.character);
   this.metadata = [];
+  this.strokes = [];
+
+  this._class= () => {
+    return window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
+  }
+  this.class = this._class();
 
   this._refresh = (row) => {
     this.metadata = [

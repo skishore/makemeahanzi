@@ -17,24 +17,24 @@ html, body {
 #data {
   margin-top: 60px;
 
-  .left-pane {
+  .pane {
     display: inline-block;
-    text-align: left;
+    vertical-align: top;
 
     .metadata {
-      margin: 24px 22px;
-      width: 512px;
+      margin: 0;
+      text-align: left;
 
       .panel-body {
-        padding: 0;
+        padding: 0 4px;
 
         .field {
-          margin: 12px 0 4px;
+          margin: 12px 0;
 
           .control-label {
-            margin-right: 4px;
+            margin: 0 0 0 4px;
             text-align: right;
-            width: 96px;
+            width: 80px;
           }
 
           .value {
@@ -43,13 +43,37 @@ html, body {
         }
       }
     }
+
+    svg {
+      background-color: white;
+      vertical-align: top;
+    }
   }
 
-  svg {
-    background-color: white;
-    margin-top: 24px;
-    width: 512px;
-    vertical-align: top;
+  &.horizontal {
+    .pane {
+      margin: 24px 11px;
+      height: 100%;
+      width: 512px;
+    }
+  }
+
+  &.vertical {
+    .pane {
+      padding: 20px;
+      padding-bottom: 0;
+      width: 100%;
+
+      &:last-child {
+        padding-bottom: 20px;
+      }
+
+      .metadata, svg {
+        margin: 0 auto;
+        max-height: 100%;
+        max-width: 512px;
+      }
+    }
   }
 }
 

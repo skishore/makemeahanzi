@@ -12,27 +12,39 @@ html, body {
 
 #data {
   margin-top: 60px; }
-  #data .left-pane {
+  #data .pane {
     display: inline-block;
-    text-align: left; }
-    #data .left-pane .metadata {
-      margin: 24px 22px;
-      width: 512px; }
-      #data .left-pane .metadata .panel-body {
-        padding: 0; }
-        #data .left-pane .metadata .panel-body .field {
-          margin: 12px 0 4px; }
-          #data .left-pane .metadata .panel-body .field .control-label {
-            margin-right: 4px;
-            text-align: right;
-            width: 96px; }
-          #data .left-pane .metadata .panel-body .field .value {
-            display: inline-block; }
-  #data svg {
-    background-color: white;
-    margin-top: 24px;
-    width: 512px;
     vertical-align: top; }
+    #data .pane .metadata {
+      margin: 0;
+      text-align: left; }
+      #data .pane .metadata .panel-body {
+        padding: 0 4px; }
+        #data .pane .metadata .panel-body .field {
+          margin: 12px 0; }
+          #data .pane .metadata .panel-body .field .control-label {
+            margin: 0 0 0 4px;
+            text-align: right;
+            width: 80px; }
+          #data .pane .metadata .panel-body .field .value {
+            display: inline-block; }
+    #data .pane svg {
+      background-color: white;
+      vertical-align: top; }
+  #data.horizontal .pane {
+    margin: 24px 11px;
+    height: 100%;
+    width: 512px; }
+  #data.vertical .pane {
+    padding: 20px;
+    padding-bottom: 0;
+    width: 100%; }
+    #data.vertical .pane:last-child {
+      padding-bottom: 20px; }
+    #data.vertical .pane .metadata, #data.vertical .pane svg {
+      margin: 0 auto;
+      max-height: 100%;
+      max-width: 512px; }
 
 #search {
   position: absolute;

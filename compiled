@@ -18,6 +18,12 @@ var DataController = function DataController($scope, $routeParams, $http) {
 
   this.character = coerceToUnicode($routeParams.character);
   this.metadata = [];
+  this.strokes = [];
+
+  this._class = function () {
+    return window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
+  };
+  this.class = this._class();
 
   this._refresh = function (row) {
     _this.metadata = [{ label: 'Definition:', value: row.definition }, { label: 'Pinyin:', value: row.pinyin.join(', ') }, { label: 'Radical:', value: row.radical }];
