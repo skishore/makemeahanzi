@@ -23,11 +23,13 @@ html, body {
         #data .pane .metadata .panel-body .field {
           margin: 12px 0; }
           #data .pane .metadata .panel-body .field .control-label {
-            margin: 0 0 0 4px;
+            float: left;
+            margin: 0;
             text-align: right;
             width: 80px; }
           #data .pane .metadata .panel-body .field .value {
-            display: inline-block; }
+            margin-left: 86px;
+            margin-right: 8px; }
     #data .pane svg {
       background-color: white;
       vertical-align: top; }
