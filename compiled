@@ -8,12 +8,13 @@ angular.module('makemeahanzi', ['ngRoute']).config(function ($routeProvider, $lo
 var augmentTreeWithLabels = function augmentTreeWithLabels(node) {
   var value = node.value;
   if (node.type === 'compound') {
-    node.label = value + ' - ' + decomposition_util.ids_data[value].label;
+    var label = decomposition_util.ids_data[value].label;
+    node.label = value + ' - ' + lower(label);
     node.children.map(function (child) {
       return augmentTreeWithLabels(child);
     });
   } else {
-    node.label = value + ' - another character';
+    node.label = (value === '?' ? '？' : value) + ' - another character';
   }
 };
 
@@ -29,6 +30,25 @@ var constructTree = function constructTree(decomposition) {
   var tree = decomposition_util.convertDecompositionToTree(decomposition);
   augmentTreeWithLabels(tree);
   return tree;
+};
+
+var formatEtymology = function formatEtymology(etymology) {
+  var result = [etymology.type];
+  if (etymology.type === 'ideographic' || etymology.type === 'pictographic') {
+    if (etymology.hint) {
+      result.push('- ' + lower(etymology.hint));
+    }
+  } else {
+    result.push('-');
+    result.push(etymology.semantic || '?');
+    if (etymology.hint) {
+      result.push('(' + lower(etymology.hint) + ')');
+    }
+    result.push('provides the meaning while');
+    result.push(etymology.phonetic || '?');
+    result.push('provides the pronunciation.');
+  }
+  return result.join(' ');
 };
 
 var getCharacterData = function getCharacterData($http, character, callback) {
@@ -64,6 +84,11 @@ var getCharacterData = function getCharacterData($http, character, callback) {
   });
 };
 
+var lower = function lower(string) {
+  if (string.length === 0) return string;
+  return string[0].toLowerCase() + string.substr(1);
+};
+
 var DataController = function DataController($scope, $routeParams, $http) {
   var _this = this;
 
@@ -80,6 +105,9 @@ var DataController = function DataController($scope, $routeParams, $http) {
   this._refresh = function (row) {
     _this.decomposition.push(constructTree(row.decomposition));
     _this.metadata = [{ label: 'Definition:', value: row.definition }, { label: 'Pinyin:', value: row.pinyin.join(', ') }, { label: 'Radical:', value: row.radical }];
+    if (row.etymology) {
+      _this.metadata.push({ label: 'Formation:', value: formatEtymology(row.etymology) });
+    }
     _this.strokes = row.strokes;
   };
   getCharacterData($http, this.character, this._refresh.bind(this));

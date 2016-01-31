@@ -20,6 +20,15 @@
           <label class="control-label">{{metadata.label}}</label>
           <div class="value">{{metadata.value}}</div>
         </div>
+      </div>
+    </div>
+    <div class="panel panel-primary metadata">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          Decomposition for {{controller.character}}
+        </h3>
+      </div>
+      <div class="panel-body">
         <div ng-include="'decomposition.html'"
              ng-repeat="node in controller.decomposition"></div>
       </div>

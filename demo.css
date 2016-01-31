@@ -26,27 +26,33 @@ html, body {
             float: left;
             margin: 0;
             text-align: right;
-            width: 80px; }
+            width: 84px; }
           #data .pane .panel .panel-body .field .value {
-            margin-left: 84px;
+            margin-left: 88px;
             margin-right: 8px; }
-        #data .pane .panel .panel-body .decomposition .child {
-          margin-left: 8px; }
+        #data .pane .panel .panel-body > div > .decomposition {
+          margin-left: 11px; }
+        #data .pane .panel .panel-body .decomposition {
+          margin: 8px;
+          margin-left: 24px; }
     #data .pane svg {
       background-color: white;
       vertical-align: top; }
+    #data .pane > :last-child {
+      margin-bottom: 0 !important; }
   #data.horizontal .pane {
     margin: 24px 11px;
     height: 100%;
     width: 512px; }
+    #data.horizontal .pane .panel {
+      margin-bottom: 24px; }
   #data.vertical .pane {
     padding: 20px;
-    padding-bottom: 0;
     width: 100%; }
     #data.vertical .pane:last-child {
-      padding-bottom: 20px; }
+      padding-top: 0; }
     #data.vertical .pane .panel, #data.vertical .pane svg {
-      margin: 0 auto;
+      margin: 0 auto 20px;
       max-height: 100%;
       max-width: 512px; }
 
