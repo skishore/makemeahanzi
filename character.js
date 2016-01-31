@@ -1,13 +1,12 @@
 "use strict";
 
-const augmentTreeWithLabels = (node) => {
+const augmentTreeWithLabels = (node, dependencies) => {
   const value = node.value;
   if (node.type === 'compound') {
-    const label = decomposition_util.ids_data[value].label;
-    node.label = `${value} - ${lower(label)}`;
-    node.children.map((child) => augmentTreeWithLabels(child));
+    node.label = lower(decomposition_util.ids_data[value].label);
+    node.children.map((child) => augmentTreeWithLabels(child, dependencies));
   } else {
-    node.label = `${value} - another character`;
+    node.label = dependencies[node.value] || '(unknown)';
   }
 }
 
@@ -19,9 +18,10 @@ const coerceToUnicode = (character) => {
   return character;
 }
 
-const constructTree = (decomposition) => {
+const constructTree = (row) => {
+  const decomposition = row.decomposition;
   const tree = decomposition_util.convertDecompositionToTree(decomposition);
-  augmentTreeWithLabels(tree);
+  augmentTreeWithLabels(tree, row.dependencies);
   return tree;
 }
 
@@ -69,20 +69,26 @@ const DataController = function($scope, $routeParams, $http) {
   this.strokes = [];
 
   this._class= () => {
-    return window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
+    const short = window.innerWidth <= 480 ? 'short ' : '';
+    const orientation = window.innerWidth < window.innerHeight ?
+                        'vertical' : 'horizontal';
+    return short + orientation;
   }
   this.class = this._class();
 
   this._refresh = (row) => {
-    this.decomposition.push(constructTree(row.decomposition));
+    const short = window.innerWidth <= 480;
+    this.decomposition.push(constructTree(row));
     this.metadata = [
-      {label: 'Definition:', value: row.definition},
-      {label: 'Pinyin:', value: row.pinyin.join(', ')},
-      {label: 'Radical:', value: row.radical},
+      {label: (short ? 'Def.' : 'Definition:'), value: row.definition},
+      {label: (short ? 'Pin.' : 'Pinyin:'), value: row.pinyin.join(', ')},
+      {label: (short ? 'Rad.' : 'Radical:'), value: row.radical},
     ];
     if (row.etymology) {
-      this.metadata.push(
-          {label: 'Formation:', value: formatEtymology(row.etymology)});
+      this.metadata.push({
+        label: (short ? 'For.' : 'Formation:'),
+        value: formatEtymology(row.etymology),
+      });
     }
     this.strokes = row.strokes;
   }

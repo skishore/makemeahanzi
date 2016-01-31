@@ -34,12 +34,24 @@ html, body {
           margin-left: 11px; }
         #data .pane .panel .panel-body .decomposition {
           margin: 8px;
-          margin-left: 24px; }
+          margin-left: 19px; }
+          #data .pane .panel .panel-body .decomposition .header {
+            float: left; }
+            #data .pane .panel .panel-body .decomposition .header .value {
+              display: inline-block;
+              text-align: center;
+              width: 16px; }
+          #data .pane .panel .panel-body .decomposition .text {
+            margin-left: 31px; }
     #data .pane svg {
       background-color: white;
       vertical-align: top; }
     #data .pane > :last-child {
       margin-bottom: 0 !important; }
+  #data.short .pane .panel .field .control-label {
+    width: 44px; }
+  #data.short .pane .panel .field .value {
+    margin-left: 48px; }
   #data.horizontal .pane {
     margin: 24px 11px;
     height: 100%;

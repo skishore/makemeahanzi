@@ -1,6 +1,7 @@
 <script type="text/ng-template" id="decomposition.html">
   <div class="decomposition">
-    {{node.label}}
+    <div class="header"><div class="value">{{node.value}}</div> -</div>
+    <div class="text">{{node.label}}</div>
     <div class="child" ng-include="'decomposition.html'"
          ng-repeat="node in node.children"></div>
   </div>

@@ -34,8 +34,18 @@ const encode = (matcher, row) => {
   return new Buffer(result);
 }
 
-const dumpParts = (parts) => {
+const dumpParts = (parts, rows) => {
   for (const part in parts) {
+    parts[part].map((row) => {
+      row.dependencies = {};
+      Array.from(row.decomposition).map((character) => {
+        const data = rows[character];
+        if (data) {
+          row.dependencies[character] =
+              `${data.pinyin.join(', ')} - ${data.definition}`;
+        }
+      });
+    });
     const writer = fs.createWriteStream(`data/part-${part}.txt`);
     writer.write(JSON.stringify(parts[part]));
     writer.end();
@@ -48,16 +58,18 @@ const main = () => {
   const writer = fs.createWriteStream('medians.bin');
   const matcher = new match.Matcher([]);
   const parts = {};
+  const rows = {};
   reader.on('line', (line) => {
     const row = JSON.parse(line.trim());
     writer.write(encode(matcher, row));
     const part = Math.floor(row.character.charCodeAt(0) / 256);
     parts[part] = parts[part] || [];
     parts[part].push(row);
+    rows[row.character] = row;
   });
   reader.on('close', () => {
     writer.end();
-    dumpParts(parts);
+    dumpParts(parts, rows);
   });
 }
 

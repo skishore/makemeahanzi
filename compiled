@@ -5,16 +5,15 @@ angular.module('makemeahanzi', ['ngRoute']).config(function ($routeProvider, $lo
 });
 "use strict";
 
-var augmentTreeWithLabels = function augmentTreeWithLabels(node) {
+var augmentTreeWithLabels = function augmentTreeWithLabels(node, dependencies) {
   var value = node.value;
   if (node.type === 'compound') {
-    var label = decomposition_util.ids_data[value].label;
-    node.label = value + ' - ' + lower(label);
+    node.label = lower(decomposition_util.ids_data[value].label);
     node.children.map(function (child) {
-      return augmentTreeWithLabels(child);
+      return augmentTreeWithLabels(child, dependencies);
     });
   } else {
-    node.label = (value === '?' ? '？' : value) + ' - another character';
+    node.label = dependencies[node.value] || '(unknown)';
   }
 };
 
@@ -26,9 +25,10 @@ var coerceToUnicode = function coerceToUnicode(character) {
   return character;
 };
 
-var constructTree = function constructTree(decomposition) {
+var constructTree = function constructTree(row) {
+  var decomposition = row.decomposition;
   var tree = decomposition_util.convertDecompositionToTree(decomposition);
-  augmentTreeWithLabels(tree);
+  augmentTreeWithLabels(tree, row.dependencies);
   return tree;
 };
 
@@ -98,15 +98,21 @@ var DataController = function DataController($scope, $routeParams, $http) {
   this.strokes = [];
 
   this._class = function () {
-    return window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
+    var short = window.innerWidth <= 480 ? 'short ' : '';
+    var orientation = window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
+    return short + orientation;
   };
   this.class = this._class();
 
   this._refresh = function (row) {
-    _this.decomposition.push(constructTree(row.decomposition));
-    _this.metadata = [{ label: 'Definition:', value: row.definition }, { label: 'Pinyin:', value: row.pinyin.join(', ') }, { label: 'Radical:', value: row.radical }];
+    var short = window.innerWidth <= 480;
+    _this.decomposition.push(constructTree(row));
+    _this.metadata = [{ label: short ? 'Def.' : 'Definition:', value: row.definition }, { label: short ? 'Pin.' : 'Pinyin:', value: row.pinyin.join(', ') }, { label: short ? 'Rad.' : 'Radical:', value: row.radical }];
     if (row.etymology) {
-      _this.metadata.push({ label: 'Formation:', value: formatEtymology(row.etymology) });
+      _this.metadata.push({
+        label: short ? 'For.' : 'Formation:',
+        value: formatEtymology(row.etymology)
+      });
     }
     _this.strokes = row.strokes;
   };
