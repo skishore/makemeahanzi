@@ -46,7 +46,7 @@ html, body {
     #data .pane svg {
       background-color: white;
       vertical-align: top; }
-    #data .pane > :last-child {
+    #data .pane .panel:last-child, #data .pane svg:last-child {
       margin-bottom: 0 !important; }
   #data.short .pane .panel .field .control-label {
     width: 44px; }
@@ -65,8 +65,10 @@ html, body {
       padding-top: 0; }
     #data.vertical .pane .panel, #data.vertical .pane svg {
       margin: 0 auto 20px;
-      max-height: 100%;
       max-width: 512px; }
+    #data.vertical .pane svg {
+      max-height: 60%;
+      max-width: 60%; }
 
 #search {
   position: absolute;

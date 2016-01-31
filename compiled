@@ -97,12 +97,11 @@ var DataController = function DataController($scope, $routeParams, $http) {
   this.metadata = [];
   this.strokes = [];
 
-  this._class = function () {
-    var short = window.innerWidth <= 480 ? 'short ' : '';
-    var orientation = window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
-    return short + orientation;
+  this._resize = function () {
+    _this.short = window.innerWidth <= 480 ? 'short ' : '';
+    _this.orientation = window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
   };
-  this.class = this._class();
+  this._resize();
 
   this._refresh = function (row) {
     var short = window.innerWidth <= 480;

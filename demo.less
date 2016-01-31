@@ -74,7 +74,7 @@ html, body {
       vertical-align: top;
     }
 
-    >:last-child {
+    .panel:last-child, svg:last-child {
       margin-bottom: 0 !important;
     }
   }
@@ -114,8 +114,12 @@ html, body {
 
       .panel, svg {
         margin: 0 auto 20px;
-        max-height: 100%;
         max-width: 512px;
+      }
+
+      svg {
+        max-height: 60%;
+        max-width: 60%;
       }
     }
   }

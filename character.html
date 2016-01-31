@@ -1,14 +1,33 @@
-<script type="text/ng-template" id="decomposition.html">
+<script type="text/ng-template" id="decomposition.template">
   <div class="decomposition">
     <div class="header"><div class="value">{{node.value}}</div> -</div>
     <div class="text">{{node.label}}</div>
-    <div class="child" ng-include="'decomposition.html'"
-         ng-repeat="node in node.children"></div>
+    <ng-include src="'decomposition.template'"
+                ng-repeat="node in node.children"></ng-include>
   </div>
 </script>
 
+<script type="text/ng-template" id="order.template">
+  <svg viewBox="0 0 1024 1024">
+    <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1"
+       transform="scale(4, 4)">
+      <line x1="0" y1="0" x2="256" y2="256"></line>
+      <line x1="256" y1="0" x2="0" y2="256"></line>
+      <line x1="128" y1="0" x2="128" y2="256"></line>
+      <line x1="0" y1="128" x2="256" y2="128"></line>
+    </g>
+    <g transform="scale(1, -1) translate(0, -900)">
+      <path ng-repeat="stroke in controller.strokes"
+            x-ng-attr-d="{{stroke}}"></path>
+    </g>
+  </svg>
+</script>
+
 <div id="data" ng-controller="DataController as controller"
-     class="{{controller.class}}">
+     class="{{controller.short}} {{controller.orientation}}">
+  <div class="pane" ng-if="controller.orientation === 'vertical'">
+    <ng-include src="'order.template'"></ng-include>
+  </div>
   <div class="pane">
     <div class="panel panel-primary metadata">
       <div class="panel-heading">
@@ -30,24 +49,12 @@
         </h3>
       </div>
       <div class="panel-body">
-        <div ng-include="'decomposition.html'"
-             ng-repeat="node in controller.decomposition"></div>
+        <ng-include src="'decomposition.template'"
+                    ng-repeat="node in controller.decomposition"></ng-include>
       </div>
     </div>
   </div>
-  <div class="pane">
-    <svg viewBox="0 0 1024 1024">
-      <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1"
-         transform="scale(4, 4)">
-        <line x1="0" y1="0" x2="256" y2="256"></line>
-        <line x1="256" y1="0" x2="0" y2="256"></line>
-        <line x1="128" y1="0" x2="128" y2="256"></line>
-        <line x1="0" y1="128" x2="256" y2="128"></line>
-      </g>
-      <g transform="scale(1, -1) translate(0, -900)">
-        <path ng-repeat="stroke in controller.strokes"
-              x-ng-attr-d="{{stroke}}"></path>
-      </g>
-    </svg>
+  <div class="pane" ng-if="controller.orientation === 'horizontal'">
+    <ng-include src="'order.template'"></ng-include>
   </div>
 </div>

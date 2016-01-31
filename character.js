@@ -68,13 +68,12 @@ const DataController = function($scope, $routeParams, $http) {
   this.metadata = [];
   this.strokes = [];
 
-  this._class= () => {
-    const short = window.innerWidth <= 480 ? 'short ' : '';
-    const orientation = window.innerWidth < window.innerHeight ?
-                        'vertical' : 'horizontal';
-    return short + orientation;
+  this._resize = () => {
+    this.short = window.innerWidth <= 480 ? 'short ' : '';
+    this.orientation = window.innerWidth < window.innerHeight ?
+                       'vertical' : 'horizontal';
   }
-  this.class = this._class();
+  this._resize();
 
   this._refresh = (row) => {
     const short = window.innerWidth <= 480;
