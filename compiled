@@ -103,7 +103,7 @@ exports.Animation = function () {
 "use strict";
 
 angular.module('makemeahanzi', ['ngRoute']).config(function ($routeProvider, $locationProvider) {
-  $routeProvider.when('/character/:character', { templateUrl: 'character.html' }).otherwise({ templateUrl: 'search.html' });
+  $routeProvider.when('/codepoint/:codepoint', { templateUrl: 'character.html' }).otherwise({ templateUrl: 'search.html' });
 });
 "use strict";
 
@@ -121,14 +121,6 @@ var augmentTreeWithLabels = function augmentTreeWithLabels(node, dependencies) {
   } else {
     node.label = dependencies[node.value] || '(unknown)';
   }
-};
-
-var coerceToUnicode = function coerceToUnicode(character) {
-  if (character.startsWith('&#') && character.endsWith(';')) {
-    var char_code = parseInt(character.slice(2, character.length - 1), 10);
-    return String.fromCharCode(char_code);
-  }
-  return character;
 };
 
 var constructTree = function constructTree(row) {
@@ -165,7 +157,7 @@ var lower = function lower(string) {
 var DataController = function DataController($scope, $routeParams, $http) {
   var _this = this;
 
-  this.character = coerceToUnicode($routeParams.character);
+  this.character = String.fromCharCode(parseInt($routeParams.codepoint, 10));
   this.animations = [];
   this.decomposition = [];
   this.metadata = [];
@@ -731,7 +723,7 @@ var SearchController = function SearchController($scope) {
   this.candidates = [];
 
   this.getURL = function (character) {
-    return '#/character/' + character;
+    return '#/codepoint/' + character.charCodeAt(0);
   };
 
   this._zoom = function () {

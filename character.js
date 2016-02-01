@@ -13,14 +13,6 @@ const augmentTreeWithLabels = (node, dependencies) => {
   }
 }
 
-const coerceToUnicode = (character) => {
-  if (character.startsWith('&#') && character.endsWith(';')) {
-    const char_code = parseInt(character.slice(2, character.length - 1), 10);
-    return String.fromCharCode(char_code);
-  }
-  return character;
-}
-
 const constructTree = (row) => {
   const decomposition = row.decomposition;
   const tree = decomposition_util.convertDecompositionToTree(decomposition);
@@ -54,7 +46,7 @@ const lower = (string) => {
 }
 
 const DataController = function($scope, $routeParams, $http) {
-  this.character = coerceToUnicode($routeParams.character);
+  this.character = String.fromCharCode(parseInt($routeParams.codepoint, 10));
   this.animations = [];
   this.decomposition = [];
   this.metadata = [];

@@ -2,7 +2,7 @@
 
 angular.module('makemeahanzi', ['ngRoute'])
        .config(($routeProvider, $locationProvider) => {
-         $routeProvider.when('/character/:character',
+         $routeProvider.when('/codepoint/:codepoint',
                              {templateUrl: 'character.html'})
                        .otherwise({templateUrl: 'search.html'});
        });

@@ -47,7 +47,7 @@ const SearchController = function($scope) {
   this.stroke = () => this._d(this._stroke);
   this.candidates = [];
 
-  this.getURL = (character) => `#/character/${character}`;
+  this.getURL = (character) => `#/codepoint/${character.charCodeAt(0)}`;
 
   this._zoom = () => {
     const wrapper = container.parentElement;
