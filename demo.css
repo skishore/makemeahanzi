@@ -7,8 +7,24 @@ html, body {
   position: fixed;
   top: 0;
   width: 100%; }
-  .navbar .navbar-brand {
-    color: white !important; }
+  .navbar .navbar-header {
+    display: inline-block;
+    float: left; }
+    .navbar .navbar-header.navbar-right {
+      float: right; }
+      .navbar .navbar-header.navbar-right .navbar-brand {
+        cursor: pointer;
+        font-size: 28px;
+        padding: 16px;
+        text-align: center;
+        width: 60px;
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none; }
+        .navbar .navbar-header.navbar-right .navbar-brand:hover {
+          background-color: #357; }
+    .navbar .navbar-header .navbar-brand {
+      color: white !important; }
 
 #data {
   margin-top: 60px; }

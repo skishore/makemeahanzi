@@ -9,8 +9,33 @@ html, body {
   top: 0;
   width: 100%;
 
-  .navbar-brand {
-    color: white !important;
+  .navbar-header {
+    display: inline-block;
+    float: left;
+
+    &.navbar-right {
+      float: right;
+
+      .navbar-brand {
+        cursor: pointer;
+        font-size: 28px;
+        padding: 16px;
+        text-align: center;
+        width: 60px;
+
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+
+        &:hover {
+          background-color: #357;
+        }
+      }
+    }
+
+    .navbar-brand {
+      color: white !important;
+    }
   }
 }
 
