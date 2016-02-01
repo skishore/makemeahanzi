@@ -46,6 +46,11 @@ html, body {
     #data .pane svg {
       background-color: white;
       vertical-align: top; }
+      #data .pane svg path.animation {
+        fill: none;
+        stroke: black;
+        stroke-linecap: round;
+        stroke-width: 128; }
     #data .pane .panel:last-child, #data .pane svg:last-child {
       margin-bottom: 0 !important; }
   #data.short .pane .panel .field .control-label {

@@ -1,5 +1,8 @@
 "use strict";
 
+const animate = window.requestAnimationFrame ||
+                ((callback) => setTimeout(callback, 1000 / 60));
+
 const augmentTreeWithLabels = (node, dependencies) => {
   const value = node.value;
   if (node.type === 'compound') {
@@ -45,18 +48,6 @@ const formatEtymology = (etymology) => {
   return result.join(' ');
 }
 
-const getCharacterData = ($http, character, callback) => {
-  const part = Math.floor(character.charCodeAt(0) / 256);
-  $http.get(`data/part-${part}.txt`).then((response) => {
-    const data = response.data;
-    for (let row of response.data) {
-      if (row.character === character) {
-        return callback(row);
-      }
-    }
-  });
-}
-
 const lower = (string) => {
   if (string.length === 0) return string;
   return string[0].toLowerCase() + string.substr(1);
@@ -64,16 +55,35 @@ const lower = (string) => {
 
 const DataController = function($scope, $routeParams, $http) {
   this.character = coerceToUnicode($routeParams.character);
+  this.animations = [];
   this.decomposition = [];
   this.metadata = [];
   this.strokes = [];
 
-  this._resize = () => {
-    this.short = window.innerWidth <= 480 ? 'short ' : '';
-    this.orientation = window.innerWidth < window.innerHeight ?
-                       'vertical' : 'horizontal';
+  this._completion = 0;
+  this._animation = null;
+
+  this._advanceAnimation = () => {
+    if (!this._animation || this._completion >= this.strokes.length) {
+      return;
+    }
+    this._completion = Math.min(this._completion + 0.03, this.strokes.length);
+    $scope.$apply(() =>
+        this.animations = this._animation.get(this._completion));
+    animate(this._advanceAnimation);
   }
-  this._resize();
+
+  this._getCharacterData  = (character, callback) => {
+    const part = Math.floor(character.charCodeAt(0) / 256);
+    $http.get(`data/part-${part}.txt`).then((response) => {
+      const data = response.data;
+      for (let row of response.data) {
+        if (row.character === character) {
+          return callback(row);
+        }
+      }
+    });
+  }
 
   this._refresh = (row) => {
     const short = window.innerWidth <= 480;
@@ -90,8 +100,23 @@ const DataController = function($scope, $routeParams, $http) {
       });
     }
     this.strokes = row.strokes;
+
+    this._animation = new Animation(row.strokes, row.medians);
+    animate(this._advanceAnimation);
   }
-  getCharacterData($http, this.character, this._refresh.bind(this));
+
+  this._resize = () => {
+    this.short = window.innerWidth <= 480 ? 'short ' : '';
+    this.orientation = window.innerWidth < window.innerHeight ?
+                       'vertical' : 'horizontal';
+  }
+
+  this._getCharacterData(this.character, this._refresh);
+  this._resize();
+
+  $scope.$on('$destroy', (event) => {
+    this._animation = null;
+  });
 }
 
 angular.module('makemeahanzi')

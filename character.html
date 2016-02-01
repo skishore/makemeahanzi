@@ -17,8 +17,20 @@
       <line x1="0" y1="128" x2="256" y2="128"></line>
     </g>
     <g transform="scale(1, -1) translate(0, -900)">
-      <path ng-repeat="stroke in controller.strokes"
+      <path fill="lightgray"
+            ng-repeat="stroke in controller.strokes"
             x-ng-attr-d="{{stroke}}"></path>
+      <g ng-repeat="animation in controller.animations">
+        <clipPath id="{{animation.clip}}">
+          <path x-ng-attr-d="{{animation.stroke}}"></path>
+        </clipPath>
+        <path class="animation"
+              x-ng-attr-clip-path="url(#{{animation.clip}})"
+              x-ng-attr-d="{{animation.median}}"
+              x-ng-attr-stroke-dasharray="
+                  {{animation.length}} {{animation.spacing}}"
+              x-ng-attr-stroke-dashoffset="{{animation.advance}}"/>
+      </g>
     </g>
   </svg>
 </script>

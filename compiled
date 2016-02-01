@@ -1,9 +1,102 @@
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var delay = 0.2;
+var width = 128;
+
+var distance2 = function distance2(point1, point2) {
+  var diff = [point1[0] - point2[0], point1[1] - point2[1]];
+  return diff[0] * diff[0] + diff[1] * diff[1];
+};
+
+var getMedianLength = function getMedianLength(median) {
+  var result = 0;
+  for (var i = 0; i < median.length - 1; i++) {
+    result += Math.sqrt(distance2(median[i], median[i + 1]));
+  }
+  return result;
+};
+
+var getMedianPath = function getMedianPath(median) {
+  var result = [];
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = median[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var point = _step.value;
+
+      result.push(result.length === 0 ? 'M' : 'L');
+      result.push('' + point[0]);
+      result.push('' + point[1]);
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return result.join(' ');
+};
+
+exports.Animation = function () {
+  function Animation(strokes, medians) {
+    _classCallCheck(this, Animation);
+
+    this._strokes = strokes;
+    this._lengths = medians.map(function (x) {
+      return getMedianLength(x) + width;
+    });
+    this._paths = medians.map(getMedianPath);
+  }
+
+  _createClass(Animation, [{
+    key: 'get',
+    value: function get(completion) {
+      var index = Math.floor(completion);
+      var max = Math.min(index, this._strokes.length - 1);
+      var partial = Math.max((completion - index - delay) / (1 - delay), 0);
+      var result = [];
+      for (var i = 0; i <= max; i++) {
+        var fraction = i < index ? 1 : partial;
+        result.push({
+          clip: 'animation' + i,
+          stroke: this._strokes[i],
+          median: this._paths[i],
+          length: this._lengths[i],
+          spacing: 2 * this._lengths[i],
+          advance: (1 - fraction) * this._lengths[i] + width
+        });
+      }
+      return result;
+    }
+  }]);
+
+  return Animation;
+}();
 "use strict";
 
 angular.module('makemeahanzi', ['ngRoute']).config(function ($routeProvider, $locationProvider) {
   $routeProvider.when('/character/:character', { templateUrl: 'character.html' }).otherwise({ templateUrl: 'search.html' });
 });
 "use strict";
+
+var animate = window.requestAnimationFrame || function (callback) {
+  return setTimeout(callback, 1000 / 60);
+};
 
 var augmentTreeWithLabels = function augmentTreeWithLabels(node, dependencies) {
   var value = node.value;
@@ -51,39 +144,6 @@ var formatEtymology = function formatEtymology(etymology) {
   return result.join(' ');
 };
 
-var getCharacterData = function getCharacterData($http, character, callback) {
-  var part = Math.floor(character.charCodeAt(0) / 256);
-  $http.get('data/part-' + part + '.txt').then(function (response) {
-    var data = response.data;
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-      for (var _iterator = response.data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-        var row = _step.value;
-
-        if (row.character === character) {
-          return callback(row);
-        }
-      }
-    } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator.return) {
-          _iterator.return();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
-      }
-    }
-  });
-};
-
 var lower = function lower(string) {
   if (string.length === 0) return string;
   return string[0].toLowerCase() + string.substr(1);
@@ -93,15 +153,57 @@ var DataController = function DataController($scope, $routeParams, $http) {
   var _this = this;
 
   this.character = coerceToUnicode($routeParams.character);
+  this.animations = [];
   this.decomposition = [];
   this.metadata = [];
   this.strokes = [];
 
-  this._resize = function () {
-    _this.short = window.innerWidth <= 480 ? 'short ' : '';
-    _this.orientation = window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
+  this._completion = 0;
+  this._animation = null;
+
+  this._advanceAnimation = function () {
+    if (!_this._animation || _this._completion >= _this.strokes.length) {
+      return;
+    }
+    _this._completion = Math.min(_this._completion + 0.03, _this.strokes.length);
+    $scope.$apply(function () {
+      return _this.animations = _this._animation.get(_this._completion);
+    });
+    animate(_this._advanceAnimation);
   };
-  this._resize();
+
+  this._getCharacterData = function (character, callback) {
+    var part = Math.floor(character.charCodeAt(0) / 256);
+    $http.get('data/part-' + part + '.txt').then(function (response) {
+      var data = response.data;
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = response.data[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var row = _step.value;
+
+          if (row.character === character) {
+            return callback(row);
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    });
+  };
 
   this._refresh = function (row) {
     var short = window.innerWidth <= 480;
@@ -114,8 +216,22 @@ var DataController = function DataController($scope, $routeParams, $http) {
       });
     }
     _this.strokes = row.strokes;
+
+    _this._animation = new Animation(row.strokes, row.medians);
+    animate(_this._advanceAnimation);
   };
-  getCharacterData($http, this.character, this._refresh.bind(this));
+
+  this._resize = function () {
+    _this.short = window.innerWidth <= 480 ? 'short ' : '';
+    _this.orientation = window.innerWidth < window.innerHeight ? 'vertical' : 'horizontal';
+  };
+
+  this._getCharacterData(this.character, this._refresh);
+  this._resize();
+
+  $scope.$on('$destroy', function (event) {
+    _this._animation = null;
+  });
 };
 
 angular.module('makemeahanzi').controller('DataController', DataController);
