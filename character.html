@@ -24,7 +24,7 @@
         <clipPath id="{{animation.clip}}">
           <path x-ng-attr-d="{{animation.stroke}}"></path>
         </clipPath>
-        <path class="animation"
+        <path class="animation {{animation.class}}"
               x-ng-attr-clip-path="url(#{{animation.clip}})"
               x-ng-attr-d="{{animation.median}}"
               x-ng-attr-stroke-dasharray="

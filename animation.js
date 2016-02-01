@@ -1,4 +1,3 @@
-const delay = 0.2;
 const width = 128;
 
 const distance2 = (point1, point2) => {
@@ -25,18 +24,30 @@ const getMedianPath = (median) => {
 }
 
 exports.Animation = class Animation {
-  constructor(strokes, medians) {
+  constructor(options, strokes, medians) {
+    this._delay = 1024*(options.delay || 0.5);
+    this._speed = 1024*(options.speed || 0.05);
+    this._completion = 0;
     this._strokes = strokes;
     this._lengths = medians.map((x) => getMedianLength(x) + width);
     this._paths = medians.map(getMedianPath);
   }
-  step(completion) {
+  step() {
+    this._completion += this._speed;
+    let completion = this._completion;
     let i = 0;
-    completion *= 1024;
     const animations = [];
     for (i = 0; i < this._strokes.length; i++) {
       const partial = Math.max(this._lengths[i] - completion, 0);
+      completion -= this._lengths[i] + this._delay;
+      let cls = '';
+      if (completion <= -this._delay) {
+        cls = 'partial';
+      } else if (completion <= 0) {
+        cls = 'complete';
+      }
       animations.push({
+        class: cls,
         clip: `animation${i}`,
         stroke: this._strokes[i],
         median: this._paths[i],
@@ -44,7 +55,6 @@ exports.Animation = class Animation {
         spacing: 2*this._lengths[i],
         advance: partial + width,
       });
-      completion -= this._lengths[i];
       if (completion <= 0) {
         break;
       }

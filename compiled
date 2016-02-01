@@ -4,7 +4,6 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var delay = 0.2;
 var width = 128;
 
 var distance2 = function distance2(point1, point2) {
@@ -53,9 +52,12 @@ var getMedianPath = function getMedianPath(median) {
 };
 
 exports.Animation = function () {
-  function Animation(strokes, medians) {
+  function Animation(options, strokes, medians) {
     _classCallCheck(this, Animation);
 
+    this._delay = 1024 * (options.delay || 0.5);
+    this._speed = 1024 * (options.speed || 0.05);
+    this._completion = 0;
     this._strokes = strokes;
     this._lengths = medians.map(function (x) {
       return getMedianLength(x) + width;
@@ -65,13 +67,22 @@ exports.Animation = function () {
 
   _createClass(Animation, [{
     key: 'step',
-    value: function step(completion) {
+    value: function step() {
+      this._completion += this._speed;
+      var completion = this._completion;
       var i = 0;
-      completion *= 1024;
       var animations = [];
       for (i = 0; i < this._strokes.length; i++) {
         var partial = Math.max(this._lengths[i] - completion, 0);
+        completion -= this._lengths[i] + this._delay;
+        var cls = '';
+        if (completion <= -this._delay) {
+          cls = 'partial';
+        } else if (completion <= 0) {
+          cls = 'complete';
+        }
         animations.push({
+          class: cls,
           clip: 'animation' + i,
           stroke: this._strokes[i],
           median: this._paths[i],
@@ -79,7 +90,6 @@ exports.Animation = function () {
           spacing: 2 * this._lengths[i],
           advance: partial + width
         });
-        completion -= this._lengths[i];
         if (completion <= 0) {
           break;
         }
@@ -160,16 +170,13 @@ var DataController = function DataController($scope, $routeParams, $http) {
   this.decomposition = [];
   this.metadata = [];
   this.strokes = [];
-
-  this._completion = 0;
   this._animation = null;
 
   this._advanceAnimation = function () {
     if (!_this._animation) {
       return;
     }
-    _this._completion += 0.02;
-    var step = _this._animation.step(_this._completion);
+    var step = _this._animation.step();
     $scope.$apply(function () {
       return _this.animations = step.animations;
     });
@@ -223,7 +230,8 @@ var DataController = function DataController($scope, $routeParams, $http) {
     }
     _this.strokes = row.strokes;
 
-    _this._animation = new Animation(row.strokes, row.medians);
+    var options = { delay: 0.3, speed: 0.02 };
+    _this._animation = new Animation(options, row.strokes, row.medians);
     animate(_this._advanceAnimation);
   };
 

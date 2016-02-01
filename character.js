@@ -59,16 +59,13 @@ const DataController = function($scope, $routeParams, $http) {
   this.decomposition = [];
   this.metadata = [];
   this.strokes = [];
-
-  this._completion = 0;
   this._animation = null;
 
   this._advanceAnimation = () => {
     if (!this._animation) {
       return;
     }
-    this._completion += 0.02;
-    const step = this._animation.step(this._completion);
+    const step = this._animation.step();
     $scope.$apply(() => this.animations = step.animations);
     if (!step.complete) {
       animate(this._advanceAnimation);
@@ -103,7 +100,8 @@ const DataController = function($scope, $routeParams, $http) {
     }
     this.strokes = row.strokes;
 
-    this._animation = new Animation(row.strokes, row.medians);
+    const options = {delay: 0.3, speed: 0.02};
+    this._animation = new Animation(options, row.strokes, row.medians);
     animate(this._advanceAnimation);
   }
 

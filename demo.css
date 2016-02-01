@@ -51,6 +51,10 @@ html, body {
         stroke: black;
         stroke-linecap: round;
         stroke-width: 128; }
+        #data .pane svg path.animation.complete {
+          stroke: blue; }
+        #data .pane svg path.animation.partial {
+          stroke: blue; }
     #data .pane .panel:last-child, #data .pane svg:last-child {
       margin-bottom: 0 !important; }
   #data.short .pane .panel .field .control-label {
