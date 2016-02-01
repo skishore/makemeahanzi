@@ -64,13 +64,15 @@ const DataController = function($scope, $routeParams, $http) {
   this._animation = null;
 
   this._advanceAnimation = () => {
-    if (!this._animation || this._completion >= this.strokes.length) {
+    if (!this._animation) {
       return;
     }
-    this._completion = Math.min(this._completion + 0.03, this.strokes.length);
-    $scope.$apply(() =>
-        this.animations = this._animation.get(this._completion));
-    animate(this._advanceAnimation);
+    this._completion += 0.02;
+    const step = this._animation.step(this._completion);
+    $scope.$apply(() => this.animations = step.animations);
+    if (!step.complete) {
+      animate(this._advanceAnimation);
+    }
   }
 
   this._getCharacterData  = (character, callback) => {

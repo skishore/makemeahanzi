@@ -64,24 +64,27 @@ exports.Animation = function () {
   }
 
   _createClass(Animation, [{
-    key: 'get',
-    value: function get(completion) {
-      var index = Math.floor(completion);
-      var max = Math.min(index, this._strokes.length - 1);
-      var partial = Math.max((completion - index - delay) / (1 - delay), 0);
-      var result = [];
-      for (var i = 0; i <= max; i++) {
-        var fraction = i < index ? 1 : partial;
-        result.push({
+    key: 'step',
+    value: function step(completion) {
+      var i = 0;
+      completion *= 1024;
+      var animations = [];
+      for (i = 0; i < this._strokes.length; i++) {
+        var partial = Math.max(this._lengths[i] - completion, 0);
+        animations.push({
           clip: 'animation' + i,
           stroke: this._strokes[i],
           median: this._paths[i],
           length: this._lengths[i],
           spacing: 2 * this._lengths[i],
-          advance: (1 - fraction) * this._lengths[i] + width
+          advance: partial + width
         });
+        completion -= this._lengths[i];
+        if (completion <= 0) {
+          break;
+        }
       }
-      return result;
+      return { complete: i === this._strokes.length, animations: animations };
     }
   }]);
 
@@ -162,14 +165,17 @@ var DataController = function DataController($scope, $routeParams, $http) {
   this._animation = null;
 
   this._advanceAnimation = function () {
-    if (!_this._animation || _this._completion >= _this.strokes.length) {
+    if (!_this._animation) {
       return;
     }
-    _this._completion = Math.min(_this._completion + 0.03, _this.strokes.length);
+    _this._completion += 0.02;
+    var step = _this._animation.step(_this._completion);
     $scope.$apply(function () {
-      return _this.animations = _this._animation.get(_this._completion);
+      return _this.animations = step.animations;
     });
-    animate(_this._advanceAnimation);
+    if (!step.complete) {
+      animate(_this._advanceAnimation);
+    }
   };
 
   this._getCharacterData = function (character, callback) {

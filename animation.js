@@ -30,22 +30,25 @@ exports.Animation = class Animation {
     this._lengths = medians.map((x) => getMedianLength(x) + width);
     this._paths = medians.map(getMedianPath);
   }
-  get(completion) {
-    const index = Math.floor(completion);
-    const max = Math.min(index, this._strokes.length - 1);
-    const partial = Math.max((completion - index - delay)/(1 - delay), 0);
-    const result = [];
-    for (let i = 0; i <= max; i++) {
-      const fraction = i < index ? 1 : partial;
-      result.push({
+  step(completion) {
+    let i = 0;
+    completion *= 1024;
+    const animations = [];
+    for (i = 0; i < this._strokes.length; i++) {
+      const partial = Math.max(this._lengths[i] - completion, 0);
+      animations.push({
         clip: `animation${i}`,
         stroke: this._strokes[i],
         median: this._paths[i],
         length: this._lengths[i],
         spacing: 2*this._lengths[i],
-        advance: (1 - fraction)*this._lengths[i] + width,
+        advance: partial + width,
       });
+      completion -= this._lengths[i];
+      if (completion <= 0) {
+        break;
+      }
     }
-    return result;
+    return {complete: i === this._strokes.length, animations: animations};
   }
 }
