@@ -170,7 +170,11 @@ var DataController = function DataController($scope, $routeParams, $http) {
     }
     var step = _this._animation.step();
     $scope.$apply(function () {
-      return _this.animations = step.animations;
+      var num_complete = step.animations.length - (step.complete ? 0 : 1);
+      for (var i = 0; i < num_complete; i++) {
+        _this.strokes[i].class = 'complete';
+      }
+      _this.animations = step.animations.slice(num_complete);
     });
     if (!step.complete) {
       animate(_this._advanceAnimation);
@@ -220,7 +224,9 @@ var DataController = function DataController($scope, $routeParams, $http) {
         value: formatEtymology(row.etymology)
       });
     }
-    _this.strokes = row.strokes;
+    _this.strokes = row.strokes.map(function (d) {
+      return { d: d, class: 'incomplete' };
+    });;
 
     var options = { delay: 0.3, speed: 0.02 };
     _this._animation = new Animation(options, row.strokes, row.medians);

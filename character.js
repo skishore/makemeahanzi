@@ -58,7 +58,13 @@ const DataController = function($scope, $routeParams, $http) {
       return;
     }
     const step = this._animation.step();
-    $scope.$apply(() => this.animations = step.animations);
+    $scope.$apply(() => {
+      const num_complete = step.animations.length - (step.complete ? 0 : 1);
+      for (let i = 0; i < num_complete; i++) {
+        this.strokes[i].class = 'complete';
+      }
+      this.animations = step.animations.slice(num_complete);
+    });
     if (!step.complete) {
       animate(this._advanceAnimation);
     }
@@ -90,7 +96,7 @@ const DataController = function($scope, $routeParams, $http) {
         value: formatEtymology(row.etymology),
       });
     }
-    this.strokes = row.strokes;
+    this.strokes = row.strokes.map((d) => ({d: d, class: 'incomplete'}));;
 
     const options = {delay: 0.3, speed: 0.02};
     this._animation = new Animation(options, row.strokes, row.medians);

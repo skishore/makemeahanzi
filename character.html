@@ -17,14 +17,14 @@
       <line x1="0" y1="128" x2="256" y2="128"></line>
     </g>
     <g transform="scale(1, -1) translate(0, -900)">
-      <path fill="lightgray"
-            ng-repeat="stroke in controller.strokes"
-            x-ng-attr-d="{{stroke}}"></path>
+      <path ng-repeat="stroke in controller.strokes"
+            x-ng-attr-class="{{stroke.class}}"
+            x-ng-attr-d="{{stroke.d}}"></path>
       <g ng-repeat="animation in controller.animations">
         <clipPath id="{{animation.clip}}">
           <path x-ng-attr-d="{{animation.stroke}}"></path>
         </clipPath>
-        <path class="animation {{animation.class}}"
+        <path x-ng-attr-class="animation {{animation.class}}"
               x-ng-attr-clip-path="url(#{{animation.clip}})"
               x-ng-attr-d="{{animation.median}}"
               x-ng-attr-stroke-dasharray="

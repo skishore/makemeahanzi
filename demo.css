@@ -62,6 +62,10 @@ html, body {
     #data .pane svg {
       background-color: white;
       vertical-align: top; }
+      #data .pane svg path.incomplete {
+        fill: lightgray; }
+      #data .pane svg path.complete {
+        fill: black; }
       #data .pane svg path.animation {
         fill: none;
         stroke: black;
