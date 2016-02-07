@@ -73,8 +73,6 @@ const refreshMetadata = (row) => {
 }
 
 const updateCharacter = () => {
-  animation = null;
-  [animations, metadata, strokes, tree].map((x) => x.set(null));
   const value = character.get();
   if (value == null) {
     return;
@@ -147,3 +145,16 @@ Meteor.startup(() => {
   Deps.autorun(updateCharacter)
   resize();
 });
+
+window.addEventListener('hashchange', () => {
+  const hash = window.location.hash;
+  [animations, character, metadata, strokes, tree].map((x) => x.set(null));
+  animation = null;
+  if (hash.startsWith('#/codepoint/')) {
+    const codepoint = parseInt(hash.slice('#/codepoint/'.length), 10);
+    character.set(String.fromCharCode(codepoint));
+    Session.set('route', 'character')
+  } else {
+    Session.set('route', 'search')
+  }
+}, false);

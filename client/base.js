@@ -11,3 +11,9 @@ ReactiveVar.prototype.push = function(element) {
   value.push(element);
   this.set(value);
 }
+
+// Our hacky implementation of a routing table. Iron Router is too slow...
+
+Session.setDefault('route', 'search');
+
+Handlebars.registerHelper('route', () => Session.get('route'));

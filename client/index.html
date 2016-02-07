@@ -4,6 +4,11 @@
       width=device-width, user-scalable=no, initial-scale=1">
 </head>
 <body>
+  {{> navbar}}
+  {{> Template.dynamic template=route}}
+</body>
+
+<template name="navbar">
   <div id="navbar" class="navbar navbar-default navbar-static-top">
     <div class="container-fluid">
       <div class="navbar-header">
@@ -14,5 +19,4 @@
       </div>
     </div>
   </div>
-  {{> character}}
-</body>
+</template>

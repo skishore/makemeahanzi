@@ -91,7 +91,7 @@ const maybePushPoint = (point) => {
 
 const pushPoint = (point) => {
   if (point[0] != null && point[1] != null) {
-    push(stroke, point.map((x) => x / zoom.get()));
+    stroke.push(point.map((x) => x / zoom.get()));
   }
 }
 
@@ -118,12 +118,10 @@ Template.search.helpers({
   current: () => d(stroke.get()),
   paths: () => paths.get(),
   zoom: () => zoom.get(),
+
+  url: (character) => `#/codepoint/${character.charCodeAt(0)}`,
 });
 
 Template.search.onRendered(clear);
 Template.search.onRendered(createSketch);
 Template.search.onRendered(resize);
-
-const SearchController = function() {
-  this.getURL = (character) => `#/codepoint/${character.charCodeAt(0)}`;
-}
