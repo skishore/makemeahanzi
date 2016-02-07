@@ -1,3 +1,0 @@
-#!/bin/bash
-./node_modules/babel-cli/bin/babel.js --presets es2015 *.js > compiled
-scss demo.less > demo.css
