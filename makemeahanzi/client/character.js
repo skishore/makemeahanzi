@@ -1,12 +1,20 @@
-"use strict";
+const animations = new ReactiveVar();
+const character = new ReactiveVar();
+const metadata = new ReactiveVar();
+const strokes = new ReactiveVar();
+const tree = new ReactiveVar();
 
-const animate = window.requestAnimationFrame ||
-                ((callback) => setTimeout(callback, 1000 / 60));
+let animation = null;
+
+const orientation = new ReactiveVar('horizontal');
+const short = new ReactiveVar(false);
+
+// Methods used to render all the various pieces of character metadata.
 
 const augmentTreeWithLabels = (node, dependencies) => {
   const value = node.value;
   if (node.type === 'compound') {
-    node.label = lower(decomposition_util.ids_data[value].label);
+    node.label = lower(makemeahanzi.Decomposition.ids_data[value].label);
     node.children.map((child) => augmentTreeWithLabels(child, dependencies));
   } else {
     node.label = dependencies[node.value] || '(unknown)';
@@ -14,8 +22,8 @@ const augmentTreeWithLabels = (node, dependencies) => {
 }
 
 const constructTree = (row) => {
-  const decomposition = row.decomposition;
-  const tree = decomposition_util.convertDecompositionToTree(decomposition);
+  const util = makemeahanzi.Decomposition;
+  const tree = util.convertDecompositionToTree(row.decomposition);
   augmentTreeWithLabels(tree, row.dependencies);
   return tree;
 }
@@ -45,74 +53,97 @@ const lower = (string) => {
   return string[0].toLowerCase() + string.substr(1);
 }
 
-const DataController = function($scope, $routeParams, $http) {
-  this.character = String.fromCharCode(parseInt($routeParams.codepoint, 10));
-  this.animations = [];
-  this.decomposition = [];
-  this.metadata = [];
-  this.strokes = [];
-  this._animation = null;
-
-  this._advanceAnimation = () => {
-    if (!this._animation) {
-      return;
-    }
-    const step = this._animation.step();
-    $scope.$apply(() => {
-      const num_complete = step.animations.length - (step.complete ? 0 : 1);
-      for (let i = 0; i < num_complete; i++) {
-        this.strokes[i].class = 'complete';
-      }
-      this.animations = step.animations.slice(num_complete);
-    });
-    if (!step.complete) {
-      animate(this._advanceAnimation);
-    }
-  }
-
-  this._getCharacterData  = (character, callback) => {
-    const part = Math.floor(character.charCodeAt(0) / 256);
-    $http.get(`data/part-${part}.txt`).then((response) => {
-      const data = response.data;
-      for (let row of response.data) {
-        if (row.character === character) {
-          return callback(row);
-        }
-      }
+const refreshMetadata = (row) => {
+  const options = {delay: 0.3, speed: 0.02};
+  animation = new makemeahanzi.Animation(options, row.strokes, row.medians);
+  animate(advanceAnimation);
+  metadata.set([
+    {label: 'Definition:', value: row.definition},
+    {label: 'Pinyin:', value: row.pinyin.join(', ')},
+    {label: 'Radical:', value: row.radical},
+  ]);
+  if (row.etymology) {
+    metadata.push({
+      label: 'Formation:',
+      value: formatEtymology(row.etymology),
     });
   }
+  strokes.set(row.strokes.map((d) => ({d: d, class: 'incomplete'})));
+  tree.set(constructTree(row));
+}
 
-  this._refresh = (row) => {
-    const short = window.innerWidth <= 480;
-    this.decomposition.push(constructTree(row));
-    this.metadata = [
-      {label: (short ? 'Def.' : 'Definition:'), value: row.definition},
-      {label: (short ? 'Pin.' : 'Pinyin:'), value: row.pinyin.join(', ')},
-      {label: (short ? 'Rad.' : 'Radical:'), value: row.radical},
-    ];
-    if (row.etymology) {
-      this.metadata.push({
-        label: (short ? 'For.' : 'Formation:'),
-        value: formatEtymology(row.etymology),
-      });
+const updateCharacter = () => {
+  animation = null;
+  [animations, metadata, strokes, tree].map((x) => x.set(null));
+  const value = character.get();
+  if (value == null) {
+    return;
+  }
+  const part = Math.floor(value.charCodeAt(0) / 256);
+  $.get(`characters/part-${part}.txt`, (response, code) => {
+    if (code !== 'success') throw new Error(code);
+    const data = JSON.parse(response);
+    for (let row of data) {
+      if (row.character === character.get()) {
+        refreshMetadata(row);
+      }
     }
-    this.strokes = row.strokes.map((d) => ({d: d, class: 'incomplete'}));;
-
-    const options = {delay: 0.3, speed: 0.02};
-    this._animation = new Animation(options, row.strokes, row.medians);
-    animate(this._advanceAnimation);
-  }
-
-  this._resize = () => {
-    this.short = window.innerWidth <= 480 ? 'short ' : '';
-    this.orientation = window.innerWidth < window.innerHeight ?
-                       'vertical' : 'horizontal';
-  }
-
-  this._getCharacterData(this.character, this._refresh);
-  this._resize();
-
-  $scope.$on('$destroy', (event) => {
-    this._animation = null;
   });
 }
+
+// Methods for running the stroke-order animation.
+
+const animate = window.requestAnimationFrame ||
+                ((callback) => setTimeout(callback, 1000 / 60));
+
+const advanceAnimation = () => {
+  if (animation == null) {
+    return;
+  }
+  const step = animation.step();
+  const complete = step.animations.length - (step.complete ? 0 : 1);
+
+  if (complete > 0 && strokes.get()[complete - 1].class !== 'complete') {
+    const current = strokes.get();
+    for (let i = 0; i < complete ; i++) {
+      current[i].class = 'complete';
+    }
+    strokes.set(current);
+  }
+  animations.set(step.animations.slice(complete));
+  if (!step.complete) {
+    animate(advanceAnimation);
+  }
+}
+
+const resize = () => {
+  short.set(window.innerWidth <= 480 ? 'short ' : '');
+  orientation.set(window.innerWidth < window.innerHeight ?
+                  'vertical' : 'horizontal');
+}
+
+// Meteor template bindings.
+
+Template.character.helpers({
+  character: () => character.get(),
+  metadata: () => metadata.get(),
+  tree: () => tree.get(),
+
+  orientation: () => orientation.get(),
+  short: () => short.get(),
+
+  format: (label) => (short.get() ? label.slice(0, 3) + ':' : label),
+  horizontal: () => orientation.get() === 'horizontal',
+  vertical: () => orientation.get() === 'vertical',
+});
+
+Template.order.helpers({
+  animations: () => animations.get(),
+  strokes: () => strokes.get(),
+});
+
+Meteor.startup(() => {
+  character.set('职');
+  Deps.autorun(updateCharacter)
+  resize();
+});

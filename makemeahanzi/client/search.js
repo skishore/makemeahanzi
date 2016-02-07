@@ -10,20 +10,6 @@ makemeahanzi.mediansPromise.then((medians) => {
   Deps.autorun(refreshCandidates);
 }).catch(console.error.bind(console));
 
-// Simple helpers for interacting with reactive variables.
-
-const pop = (variable) => {
-  const value = variable.get();
-  value.pop();
-  variable.set(value);
-}
-
-const push = (variable, element) => {
-  const value = variable.get();
-  value.push(element);
-  variable.set(value);
-}
-
 // Methods needed to initialize the drawing canvas.
 
 const createSketch = function() {
@@ -91,8 +77,8 @@ const d = (path) => {
 const endStroke = () => {
   const new_path = d(stroke.get());
   if (new_path.length > 0) {
-    push(paths, new_path);
-    push(strokes, stroke.get());
+    paths.push(new_path);
+    strokes.push(stroke.get());
   }
   stroke.set([]);
 }
@@ -110,13 +96,13 @@ const pushPoint = (point) => {
 }
 
 const refreshCandidates = () => {
-  const data = strokes.get();
-  candidates.set(data.length > 0 ? matcher.match(data, 8) : []);
+  const value = strokes.get();
+  candidates.set(value.length > 0 ? matcher.match(value, 8) : []);
 }
 
 const undo = () => {
-  pop(paths);
-  pop(strokes);
+  paths.pop();
+  strokes.pop();
   stroke.set([]);
 }
 

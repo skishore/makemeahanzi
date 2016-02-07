@@ -1,0 +1,72 @@
+<template name="decomposition">
+  <div class="decomposition">
+    <div class="header"><div class="value">{{value}}</div> -</div>
+    <div class="text">{{label}}</div>
+    {{#each children}}
+      {{> decomposition this}}
+    {{/each}}
+  </div>
+</template>
+
+<template name="order">
+  <svg viewBox="0 0 1024 1024">
+    <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1"
+       transform="scale(4, 4)">
+      <line x1="0" y1="0" x2="256" y2="256"></line>
+      <line x1="256" y1="0" x2="0" y2="256"></line>
+      <line x1="128" y1="0" x2="128" y2="256"></line>
+      <line x1="0" y1="128" x2="256" y2="128"></line>
+    </g>
+    <g transform="scale(1, -1) translate(0, -900)">
+      {{#each strokes}}
+        <path class="{{class}}" d="{{d}}"></path>
+      {{/each}}
+      {{#each animations}}
+        <clipPath id="{{clip}}">
+          <path d="{{stroke}}"></path>
+        </clipPath>
+        <path class="animation {{class}}" clip-path="url(#{{clip}})"
+              d="{{median}}" stroke-dasharray="{{length}} {{spacing}}"
+              stroke-dashoffset="{{advance}}"></path>
+      {{/each}}
+    </g>
+  </svg>
+</template>
+
+<template name="character">
+  <div id="character" class="{{short}} {{orientation}}">
+    {{#if vertical}}
+      <div class="pane">{{> order}}</div>
+    {{/if}}
+    <div class="pane">
+      <div class="panel panel-primary metadata">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Metadata for {{character}}
+          </h3>
+        </div>
+        <div class="panel-body">
+          {{#each metadata}}
+            <div class="field">
+              <label class="control-label">{{format label}}</label>
+              <div class="value">{{value}}</div>
+            </div>
+          {{/each}}
+        </div>
+      </div>
+      <div class="panel panel-primary metadata">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Decomposition for {{character}}
+          </h3>
+        </div>
+        <div class="panel-body">
+          {{> decomposition tree}}
+        </div>
+      </div>
+    </div>
+    {{#if horizontal}}
+      <div class="pane">{{> order}}</div>
+    {{/if}}
+  </div>
+</template>
