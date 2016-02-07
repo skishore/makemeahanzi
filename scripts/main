@@ -1,10 +1,10 @@
-#!/usr/local/bin/node
+#!/usr/local/bin/node --use_strict
 "use strict";
 
 const fs = require('fs');
 const readline = require('readline');
 
-const match = require('./matcher');
+const match = require('./../lib/matcher');
 
 const util = {
   add: (point1, point2) => [point1[0] + point2[0], point1[1] + point2[1]],
@@ -46,7 +46,7 @@ const dumpParts = (parts, rows) => {
         }
       });
     });
-    const writer = fs.createWriteStream(`data/part-${part}.txt`);
+    const writer = fs.createWriteStream(`public/data/part-${part}.txt`);
     writer.write(JSON.stringify(parts[part]));
     writer.end();
   }
@@ -55,8 +55,8 @@ const dumpParts = (parts, rows) => {
 const main = () => {
   const input = fs.createReadStream('makemeahanzi.txt');
   const reader = readline.createInterface({input: input});
-  const writer = fs.createWriteStream('medians.bin');
-  const matcher = new match.Matcher([]);
+  const writer = fs.createWriteStream('public/medians.bin');
+  const matcher = new match.makemeahanzi.Matcher([]);
   const parts = {};
   const rows = {};
   reader.on('line', (line) => {
