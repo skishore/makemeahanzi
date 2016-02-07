@@ -116,6 +116,3 @@ const DataController = function($scope, $routeParams, $http) {
     this._animation = null;
   });
 }
-
-angular.module('makemeahanzi')
-       .controller('DataController', DataController);

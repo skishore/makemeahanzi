@@ -1,128 +1,143 @@
-"use strict";
+const candidates = new ReactiveVar([]);
+const paths = new ReactiveVar([]);
+const stroke = new ReactiveVar([]);
+const strokes = new ReactiveVar([]);
+const zoom = new ReactiveVar(1);
 
-const createSketch = ($scope, controller, canvas, svg) => {
+let matcher = null;
+makemeahanzi.mediansPromise.then((medians) => {
+  matcher = new makemeahanzi.Matcher(medians);
+  Deps.autorun(refreshCandidates);
+}).catch(console.error.bind(console));
+
+// Simple helpers for interacting with reactive variables.
+
+const pop = (variable) => {
+  const value = variable.get();
+  value.pop();
+  variable.set(value);
+}
+
+const push = (variable, element) => {
+  const value = variable.get();
+  value.push(element);
+  variable.set(value);
+}
+
+// Methods needed to initialize the drawing canvas.
+
+const createSketch = function() {
   let mousedown = false;
+  const element = $(this.firstNode);
+  const canvas = element.find('.handwriting .input');
+  const svg = element.find('.handwriting svg');
   Sketch.create({
-    container: canvas,
+    container: canvas[0],
     autoclear: false,
     fullscreen: false,
-    width: svg.clientWidth,
-    height: svg.clientHeight,
-    keydown(e) {
-      if (this.keys.C) {
-        $scope.$apply(() => {
-          mousedown = false;
-          controller.clear();
-        });
-      }
-    },
+    width: svg.width(),
+    height: svg.height(),
     mousedown(e) {
-      $scope.$apply(() => {
-        mousedown = true;
-        controller.push_point([e.x, e.y]);
-      });
+      mousedown = true;
+      pushPoint([e.x, e.y]);
     },
     mouseup(e) {
-      $scope.$apply(() => {
-        mousedown = false;
-        controller.end_stroke();
-      });
+      mousedown = false;
+      endStroke();
     },
     touchmove() {
       if (mousedown && this.touches.length > 0) {
-        $scope.$apply(() => {
-          const touch = this.touches[0];
-          controller.maybe_push_point([touch.ox, touch.oy]);
-          controller.push_point([touch.x, touch.y]);
-        });
+        const touch = this.touches[0];
+        maybePushPoint([touch.ox, touch.oy]);
+        pushPoint([touch.x, touch.y]);
       }
     }
   });
 }
 
-const SearchController = function($scope) {
-  const container = document.querySelector('#search #wrapper');
-
-  this.strokes = [];
-  this.stroke = () => this._d(this._stroke);
-  this.candidates = [];
-
-  this.getURL = (character) => `#/codepoint/${character.charCodeAt(0)}`;
-
-  this._zoom = () => {
-    const wrapper = container.parentElement;
-    const x_zoom = wrapper.clientWidth / container.clientWidth;
-    const y_zoom = wrapper.clientHeight / container.clientHeight;
-    return Math.min(x_zoom, y_zoom);
-  }
-  this.zoom = this._zoom();
-
-  this._stroke = [];
-  this._strokes = [];
-  this._matcher = null;
-
-  window.mediansPromise.then((medians) => {
-    this._matcher = new Matcher(medians);
-  }).catch(console.error.bind(console));
-
-  this._d = (path) => {
-    if (path.length < 2) return '';
-    const result = [];
-    const point = (i) => `${path[i][0]} ${path[i][1]}`;
-    const midpoint = (i) => `${(path[i][0] + path[i + 1][0])/2} ` +
-                            `${(path[i][1] + path[i + 1][1])/2}`;
-    const push = (x) => result.push(x);
-    ['M', point(0), 'L', midpoint(0)].map(push);
-    for (var i = 1; i < path.length - 1; i++) {
-      ['Q', point(i), midpoint(i)].map(push);
-    }
-    ['L', point(path.length - 1)].map(push);
-    return result.join(' ');
-  }
-  this._refresh_candidates = () => {
-    if (this._strokes.length > 0 && this._matcher) {
-      this.candidates = this._matcher.match(this._strokes, 8);
-    } else {
-      this.candidates = [];
-    }
-  }
-
-  this.clear = () => {
-    this.strokes = [];
-    this._stroke = [];
-    this._strokes = [];
-    this._refresh_candidates();
-    this.candidates = [];
-  }
-  this.end_stroke = () => {
-    if (this._stroke.length > 1) {
-      this.strokes.push(this._d(this._stroke));
-      this._strokes.push(this._stroke);
-      this._stroke = [];
-      this._refresh_candidates();
-    }
-  }
-  this.maybe_push_point = (point) => {
-    if (this._stroke.length === 0) {
-      this.push_point(point);
-    }
-  }
-  this.push_point = (point) => {
-    if (point[0] != null && point[1] != null) {
-      this._stroke.push(point.map((x) => x / this.zoom));
-    }
-  }
-  this.undo = () => {
-    this.strokes.pop();
-    this._strokes.pop();
-    this._stroke = [];
-    this._refresh_candidates();
-  }
-
-  const canvas = container.querySelector('.handwriting .input');
-  const svg = container.querySelector('.handwriting svg');
-  createSketch($scope, this, canvas, svg);
+const resize = function() {
+  const outer = $(this.firstNode);
+  const inner = outer.children();
+  const x_zoom = outer.width() / inner.outerWidth();
+  const y_zoom = outer.height() / inner.outerHeight();
+  zoom.set(Math.min(x_zoom, y_zoom));
 }
 
-angular.module('makemeahanzi')
-       .controller('SearchController', SearchController);
+// Methods for actually executing drawing commands.
+
+const clear = () => {
+  paths.set([]);
+  stroke.set([]);
+  strokes.set([]);
+}
+
+const d = (path) => {
+  if (path.length < 2) {
+    return '';
+  }
+  const result = [];
+  const point = (i) => `${path[i][0]} ${path[i][1]}`;
+  const midpoint = (i) => `${(path[i][0] + path[i + 1][0])/2} ` +
+                          `${(path[i][1] + path[i + 1][1])/2}`;
+  const push = (x) => result.push(x);
+  ['M', point(0), 'L', midpoint(0)].map(push);
+  for (var i = 1; i < path.length - 1; i++) {
+    ['Q', point(i), midpoint(i)].map(push);
+  }
+  ['L', point(path.length - 1)].map(push);
+  return result.join(' ');
+}
+
+const endStroke = () => {
+  const new_path = d(stroke.get());
+  if (new_path.length > 0) {
+    push(paths, new_path);
+    push(strokes, stroke.get());
+  }
+  stroke.set([]);
+}
+
+const maybePushPoint = (point) => {
+  if (stroke.get().length === 0) {
+    pushPoint(point);
+  }
+}
+
+const pushPoint = (point) => {
+  if (point[0] != null && point[1] != null) {
+    push(stroke, point.map((x) => x / zoom.get()));
+  }
+}
+
+const refreshCandidates = () => {
+  const data = strokes.get();
+  candidates.set(data.length > 0 ? matcher.match(data, 8) : []);
+}
+
+const undo = () => {
+  pop(paths);
+  pop(strokes);
+  stroke.set([]);
+}
+
+// Meteor template bindings.
+
+Template.search.events({
+  'click .controls .clear.button': clear,
+  'click .controls .undo.button': undo,
+});
+
+Template.search.helpers({
+  candidates: () => candidates.get(),
+  current: () => d(stroke.get()),
+  paths: () => paths.get(),
+  zoom: () => zoom.get(),
+});
+
+Template.search.onRendered(clear);
+Template.search.onRendered(createSketch);
+Template.search.onRendered(resize);
+
+const SearchController = function() {
+  this.getURL = (character) => `#/codepoint/${character.charCodeAt(0)}`;
+}
