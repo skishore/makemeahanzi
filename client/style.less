@@ -4,6 +4,13 @@ body {
   text-align: center;
 }
 
+.buttonlike {
+  cursor: pointer;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
 .navbar {
   position: fixed;
   top: 0;
@@ -17,15 +24,11 @@ body {
       float: right;
 
       .navbar-brand {
-        cursor: pointer;
         font-size: 28px;
         padding: 16px;
         text-align: center;
         width: 60px;
-
-        user-select: none;
-        -moz-user-select: none;
-        -webkit-user-select: none;
+        .buttonlike;
 
         &:hover {
           background-color: #357;
@@ -35,6 +38,64 @@ body {
 
     .navbar-brand {
       color: white !important;
+    }
+  }
+}
+
+.report.modal {
+  text-align: left;
+
+  .modal-header, .modal-body, .modal-footer {
+    padding: 12px 16px;
+  }
+
+  .modal-header {
+    .modal-title {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .close {
+      margin-top: -4px;
+      .buttonlike;
+    }
+  }
+
+  .modal-body {
+    textarea {
+      resize: vertical;
+    }
+
+    .form-control {
+      padding: 6px 8px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .modal-footer {
+    .status {
+      line-height: 33px;
+
+      &.error {
+        color: #d62c1a;
+      }
+
+      &.success {
+        color: green;
+      }
+    }
+
+    .btn {
+      outline: none;
+      padding: 4px 8px;
+    }
+
+    .status, .btn {
+      float: right;
+      margin: 0 0 0 8px;
     }
   }
 }
@@ -49,6 +110,23 @@ body {
     .panel {
       margin: 0;
       text-align: left;
+
+      .panel-title {
+        display: block;
+
+        .panel-title-right {
+          float: right;
+          font-size: 20px;
+          line-height: 16px;
+          text-align: center;
+          width: 18px;
+          .buttonlike;
+
+          &:hover {
+            background-color: #357;
+          }
+        }
+      }
 
       .panel-body {
         padding: 0 4px;
@@ -229,17 +307,13 @@ body {
     .controls .button, .output .candidate {
       box-sizing: border-box;
       color: #2c3e50;
-      cursor: pointer;
       float: left;
       height : 32px;
       line-height: 30px;
       margin: 0;
       text-align: center;
       text-decoration: none;
-
-      user-select: none;
-      -moz-user-select: none;
-      -webkit-user-select: none;
+      .buttonlike;
 
       &:hover {
         background-color: #bdf;

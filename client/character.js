@@ -123,7 +123,7 @@ const resize = () => {
                   'vertical' : 'horizontal');
 }
 
-// Meteor template bindings.
+// Various event handlers and other helpers.
 
 const linkify = (value) => {
   const result = [];
@@ -137,6 +137,43 @@ const linkify = (value) => {
   }
   return result.join('');
 }
+
+const showModal = () => {
+  // TODO(skishore): Maybe rewrite these jQuery hax in idiomatic Meteor.
+  const element = $('.modal');
+  const value = character.get();
+  element.find('.modal-title').text(`Report an error with ${value}`);
+  element.find('.form-control, .status')
+         .text('').val('').removeClass('error success');
+  element.unbind('shown.bs.modal').on('shown.bs.modal', function() {
+    $(this).find('.form-control:first').focus();
+  });
+  element.find('.submit.btn').unbind('click').on('click', () => {
+    const description = element.find('.description.form-control').val();
+    if (description.length === 0) {
+      element.find('.status').addClass('error').removeClass('success')
+             .text('You must enter a description of the problem.');
+      return;
+    }
+    element.find('.status').removeClass('error success')
+           .text('Submitting feedback...');
+    Meteor.call('reportError', value, description, (error, result) => {
+      if (error) {
+        element.find('.status').addClass('error').removeClass('success')
+               .text('There was an error in submitting your feedback.');
+        return;
+      }
+      element.find('.status').addClass('success').removeClass('error')
+             .text('Feedback submitted!');
+      element.modal('hide');
+    });
+  });
+  element.modal('show');
+}
+
+// Meteor template bindings.
+
+Template.character.events({'click .panel-title-right': showModal});
 
 Template.character.helpers({
   character: () => character.get(),
