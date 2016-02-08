@@ -92,7 +92,7 @@ const maybePushPoint = (point) => {
 
 const pushPoint = (point) => {
   if (point[0] != null && point[1] != null) {
-    stroke.push(point.map((x) => x / zoom.get()));
+    stroke.push(point.map((x) => Math.round(x / zoom.get())));
   }
 }
 
@@ -109,9 +109,15 @@ const undo = () => {
 
 // Meteor template bindings.
 
+const log = function() {
+  Meteor.call('recordHandwriting', strokes.get(), candidates.get(), this[0],
+              (error, result) => { if (error) console.error(error); });
+}
+
 Template.search.events({
   'click .controls .clear.button': clear,
   'click .controls .undo.button': undo,
+  'click .candidate': log,
 });
 
 Template.search.helpers({
