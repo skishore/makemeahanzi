@@ -137,7 +137,7 @@ Template.character.helpers({
 
 Template.order.helpers({
   animations: () => animations.get(),
-  strokes: () => strokes.get(),
+  strokes: () => strokes.get().slice().reverse(),
 });
 
 Meteor.startup(() => {
