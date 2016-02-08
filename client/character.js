@@ -202,12 +202,14 @@ Meteor.startup(() => {
 });
 
 const hashchange = () => {
-  const hash = window.location.hash;
-  [animations, character, metadata, strokes, tree].map((x) => x.set(null));
-  animation = null;
   if (Session.get('route') === 'character') {
+    const hash = window.location.hash;
     const codepoint = parseInt(hash.slice(hash.lastIndexOf('/') + 1), 10);
     character.set(String.fromCharCode(codepoint));
+    [animations, metadata, strokes, tree].map((x) => x.set(null));
+    animation = null;
+  } else {
+    character.set(null);
   }
 }
 
