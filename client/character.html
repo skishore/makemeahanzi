@@ -1,7 +1,11 @@
 <template name="decomposition">
   <div class="decomposition">
     <div class="header"><div class="value">{{value}}</div> -</div>
-    <div class="text">{{label}}</div>
+    {{#if link}}
+      <a class="text link" href="{{link}}">{{label}}</a>
+    {{else}}
+      <div class="text">{{label}}</div>
+    {{/if}}
     {{#each children}}
       {{> decomposition this}}
     {{/each}}
@@ -49,7 +53,7 @@
           {{#each metadata}}
             <div class="field">
               <label class="control-label">{{format label}}</label>
-              <div class="value">{{value}}</div>
+              <div class="value">{{{linkify value}}}</div>
             </div>
           {{/each}}
         </div>

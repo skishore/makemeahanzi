@@ -18,6 +18,9 @@ const augmentTreeWithLabels = (node, dependencies) => {
     node.children.map((child) => augmentTreeWithLabels(child, dependencies));
   } else {
     node.label = dependencies[node.value] || '(unknown)';
+    if (dependencies[node.value]) {
+      node.link = `#/codepoint/${node.value.charCodeAt(0)}`;
+    }
   }
 }
 
@@ -122,10 +125,25 @@ const resize = () => {
 
 // Meteor template bindings.
 
+const linkify = (value) => {
+  const result = [];
+  for (let character of value) {
+    if (character.match(/[\u3400-\u9FBF]/)) {
+      result.push(`<a href="#/codepoint/${character.charCodeAt(0)}" ` +
+                     `class="link">${character}</a>`);
+    } else {
+      result.push(character);
+    }
+  }
+  return result.join('');
+}
+
 Template.character.helpers({
   character: () => character.get(),
   metadata: () => metadata.get(),
   tree: () => tree.get(),
+
+  linkify: linkify,
 
   orientation: () => orientation.get(),
   short: () => short.get(),
@@ -137,7 +155,7 @@ Template.character.helpers({
 
 Template.order.helpers({
   animations: () => animations.get(),
-  strokes: () => strokes.get().slice().reverse(),
+  strokes: () => (strokes.get() || []).slice().reverse(),
 });
 
 Meteor.startup(() => {
