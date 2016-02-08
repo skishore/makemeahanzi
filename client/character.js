@@ -141,20 +141,19 @@ Template.order.helpers({
 });
 
 Meteor.startup(() => {
-  character.set('职');
   Deps.autorun(updateCharacter)
+  hashchange();
   resize();
 });
 
-window.addEventListener('hashchange', () => {
+const hashchange = () => {
   const hash = window.location.hash;
   [animations, character, metadata, strokes, tree].map((x) => x.set(null));
   animation = null;
-  if (hash.startsWith('#/codepoint/')) {
-    const codepoint = parseInt(hash.slice('#/codepoint/'.length), 10);
+  if (Session.get('route') === 'character') {
+    const codepoint = parseInt(hash.slice(hash.lastIndexOf('/') + 1), 10);
     character.set(String.fromCharCode(codepoint));
-    Session.set('route', 'character')
-  } else {
-    Session.set('route', 'search')
   }
-}, false);
+}
+
+window.addEventListener('hashchange', hashchange, false);

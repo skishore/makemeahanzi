@@ -14,6 +14,18 @@ ReactiveVar.prototype.push = function(element) {
 
 // Our hacky implementation of a routing table. Iron Router is too slow...
 
-Session.setDefault('route', 'search');
+Session.setDefault('route', null);
 
 Handlebars.registerHelper('route', () => Session.get('route'));
+
+const hashchange = () => {
+  const hash = window.location.hash;
+  if (hash.startsWith('#/codepoint/')) {
+    Session.set('route', 'character');
+  } else {
+    Session.set('route', 'search');
+  }
+}
+
+window.addEventListener('hashchange', hashchange, false);
+Meteor.startup(hashchange);

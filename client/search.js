@@ -5,6 +5,7 @@ const strokes = new ReactiveVar([]);
 const zoom = new ReactiveVar(1);
 
 let matcher = null;
+
 makemeahanzi.mediansPromise.then((medians) => {
   matcher = new makemeahanzi.Matcher(medians);
   Deps.autorun(refreshCandidates);
@@ -122,6 +123,7 @@ Template.search.helpers({
   url: (character) => `#/codepoint/${character.charCodeAt(0)}`,
 });
 
-Template.search.onRendered(clear);
 Template.search.onRendered(createSketch);
 Template.search.onRendered(resize);
+
+window.addEventListener('hashchange', clear, false);
