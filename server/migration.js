@@ -67,7 +67,6 @@ const dumpGlyph = (dictionary, graphics) => (glyph) => {
     character: glyph.character,
     strokes: strokes,
     medians: medians,
-    normalized_medians: medians.map(median_util.normalizeForMatch),
   }) + '\n');
 }
 
@@ -119,11 +118,9 @@ const migrateOldGlyphSchemaToNew = (glyph) => {
 const dumpToNewSchemaJSON = () => {
   const fs = Npm.require('fs');
   const path = Npm.require('path');
-  const directory = path.join(getPWD(), 'server', 'release');
-  const dictionary = fs.createWriteStream(
-      path.join(directory, 'dictionary.txt'));
-  const graphics = fs.createWriteStream(
-      path.join(directory, 'graphics.txt'));
+  const pwd = getPWD();
+  const dictionary = fs.createWriteStream(path.join(pwd, 'dictionary.txt'));
+  const graphics = fs.createWriteStream(path.join(pwd, 'graphics.txt'));
   runMigration(dumpGlyph(dictionary, graphics), (() => {
     dictionary.end();
     graphics.end();
