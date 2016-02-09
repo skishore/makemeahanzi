@@ -1,10 +1,13 @@
 #!/usr/local/bin/node --use_strict
 "use strict";
 
+const child_process = require('child_process');
 const fs = require('fs');
 const readline = require('readline');
 
 const match = require('./../lib/matcher');
+
+const delimiter = 'BREAK';
 
 const util = {
   add: (point1, point2) => [point1[0] + point2[0], point1[1] + point2[1]],
@@ -46,13 +49,13 @@ const dumpParts = (parts, rows) => {
         }
       });
     });
-    const writer = fs.createWriteStream(`public/data/part-${part}.txt`);
+    const writer = fs.createWriteStream(`public/characters/part-${part}.txt`);
     writer.write(JSON.stringify(parts[part]));
     writer.end();
   }
 }
 
-const main = () => {
+const callback = () => {
   const input = fs.createReadStream('makemeahanzi.txt');
   const reader = readline.createInterface({input: input});
   const writer = fs.createWriteStream('public/medians.bin');
@@ -60,7 +63,15 @@ const main = () => {
   const parts = {};
   const rows = {};
   reader.on('line', (line) => {
-    const row = JSON.parse(line.trim());
+    const pieces = line.trim().split(delimiter)
+    if (pieces.length !== 2) throw new Error(line);
+    const row = JSON.parse(pieces[0]);
+    const row2 = JSON.parse(pieces[1]);
+    for (let key in row2) {
+      row[key] = row2[key];
+    }
+    delete row.normalized_medians;
+
     writer.write(encode(matcher, row));
     const part = Math.floor(row.character.charCodeAt(0) / 256);
     parts[part] = parts[part] || [];
@@ -70,6 +81,20 @@ const main = () => {
   reader.on('close', () => {
     writer.end();
     dumpParts(parts, rows);
+    child_process.exec('rm makemeahanzi.txt', () => 0);
+  });
+}
+
+const main = () => {
+  // TODO(skishore): This whole function is a terrible hack!
+  const spacers = [];
+  Array.from(delimiter).slice(1).map((x) => spacers.push('/dev/null'));
+  const spacer = spacers.join(' ');
+  child_process.exec(`paste -d ${delimiter} makemeahanzi/dictionary.txt ` +
+                     `${spacer} makemeahanzi/graphics.txt > makemeahanzi.txt`,
+                     (error, stdout, stderr) => {
+    if (error != null) throw new Error(error);
+    callback();
   });
 }
 
