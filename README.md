@@ -127,12 +127,3 @@ rely on the fact that the two files will always come in the same order.
   paths above. These medians can be used to produce a rough stroke-order
   animation, although it is a bit tricky. Each median is a list of pairs
   of integers. This list will be as long as the strokes list.
-
-- __normalized_medians:__
-  A list of stroke medians, normalized to be in a sane coordinate system
-  so that they can be used for handwriting recognition:
-    - The upper-left corner is at position (0, 0).
-    - The lower-right corner is at position (1, 1).
-  
-  Each normalized median is a list of pairs of floating-point numbers.
-  This list will be as long as the strokes list.
