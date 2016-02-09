@@ -44,6 +44,24 @@
 <p>Unfortunately, much of the best data about hanzi is proprietary. Apple's phones include an excellent Chinese keyboard that is based on stroke vector data, and <a href="https://www.skritter.com/login">Skritter</a> uses similar data for its writing lessons. A number of websites have independently compiled stroke order graphics of varying coverage and quality.</p>
 
 <p>I started working on Make Me a Hanzi when I realized that it was possible to extract much of this data from the raw characters themselves. This project uses a variety of heuristic and trained methods to derive stroke position and order information directly from two free, open-source Chinese fonts - <a href="https://apps.ubuntu.com/cat/applications/precise/fonts-arphic-gkai00mp/">Arphic PL KaitiM GB</a> and <a href="https://apps.ubuntu.com/cat/applications/fonts-arphic-ukai/">Arphic PL UKai</a>. In addition, I reviewed the definition and pronunciation data from Unihan and the decomposition data from CJKlib and used them to build a new set of etymological data.</p>
+
+<h3>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h3>
+
+<p>The README.md file included with the data set has a detailed specification of the data format. In addition, you may find the <a href="https://github.com/skishore/makemeahanzi/tree/demo/lib">libraries used in the demo site</a> useful. These libraries include a handwriting recognition algorithm and a utility for drawing a stroke-order animation, and they are all released into the public domain.</p>
+
+<h3>
+<a id="next-steps" class="anchor" href="#next-steps" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Next steps</h3>
+
+<p>There's a lot that can be done with this data. Here are a few ideas that you might be inspired by:</p>
+
+<ul>
+<li>Render the stroke order for each character to an animated GIF.</li>
+<li>Create a free and open-source "learn to write characters" app.</li>
+<li>Use the etymology data for science! "Is the left component more likely to be phonetic than the right one?"</li>
+</ul>
+
+<p>As for me, I plan to make more corrections to the data, to build out nice APIs for using it, and to write some follow-up posts that explain how Make Me a Hanzi's font-to-stroke-order algorithms work.</p>
       </section>
     </div>
 
