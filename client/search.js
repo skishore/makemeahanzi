@@ -58,27 +58,27 @@ const clear = () => {
   strokes.set([]);
 }
 
-const d = (path) => {
-  if (path.length < 2) {
+const d = (stroke) => {
+  if (stroke.length < 2) {
     return '';
   }
   const result = [];
-  const point = (i) => `${path[i][0]} ${path[i][1]}`;
-  const midpoint = (i) => `${(path[i][0] + path[i + 1][0])/2} ` +
-                          `${(path[i][1] + path[i + 1][1])/2}`;
+  const point = (i) => `${stroke[i][0]} ${stroke[i][1]}`;
+  const midpoint = (i) => `${(stroke[i][0] + stroke[i + 1][0])/2} ` +
+                          `${(stroke[i][1] + stroke[i + 1][1])/2}`;
   const push = (x) => result.push(x);
   ['M', point(0), 'L', midpoint(0)].map(push);
-  for (var i = 1; i < path.length - 1; i++) {
+  for (var i = 1; i < stroke.length - 1; i++) {
     ['Q', point(i), midpoint(i)].map(push);
   }
-  ['L', point(path.length - 1)].map(push);
+  ['L', point(stroke.length - 1)].map(push);
   return result.join(' ');
 }
 
 const endStroke = () => {
-  const new_path = d(stroke.get());
-  if (new_path.length > 0) {
-    paths.push(new_path);
+  const path = d(stroke.get());
+  if (path.length > 0) {
+    paths.push(path);
     strokes.push(stroke.get());
   }
   stroke.set([]);
