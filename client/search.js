@@ -3,14 +3,12 @@ const stroke = new ReactiveVar([]);
 const strokes = new ReactiveVar([]);
 const zoom = new ReactiveVar(1);
 
-let matcher = null;
-
 let current = null;
 let stage = null;
 
 makemeahanzi.mediansPromise.then((medians) => {
-  matcher = new makemeahanzi.Matcher(medians);
-  Deps.autorun(refreshCandidates);
+  const matcher = new makemeahanzi.Matcher(medians);
+  Deps.autorun(() => candidates.set(matcher.match(strokes.get(), 8)));
 }).catch(console.error.bind(console));
 
 // Methods needed to initialize the drawing canvas.
@@ -83,11 +81,6 @@ const pushPoint = (point) => {
     stroke.push(point.map((x) => Math.round(x / zoom.get())));
     refreshStage();
   }
-}
-
-const refreshCandidates = () => {
-  const value = strokes.get();
-  candidates.set(value.length > 0 ? matcher.match(value, 8) : []);
 }
 
 const refreshStage = () => {
