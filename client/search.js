@@ -1,10 +1,12 @@
 const candidates = new ReactiveVar([]);
-const paths = new ReactiveVar([]);
 const stroke = new ReactiveVar([]);
 const strokes = new ReactiveVar([]);
 const zoom = new ReactiveVar(1);
 
 let matcher = null;
+
+let current = null;
+let stage = null;
 
 makemeahanzi.mediansPromise.then((medians) => {
   matcher = new makemeahanzi.Matcher(medians);
@@ -15,15 +17,13 @@ makemeahanzi.mediansPromise.then((medians) => {
 
 const createSketch = function() {
   let mousedown = false;
-  const element = $(this.firstNode);
-  const canvas = element.find('.handwriting .input');
-  const svg = element.find('.handwriting svg');
+  const element = $(this.firstNode).find('.handwriting');
   Sketch.create({
-    container: canvas[0],
+    container: element[0],
     autoclear: false,
     fullscreen: false,
-    width: svg.width(),
-    height: svg.height(),
+    width: element.width(),
+    height: element.height(),
     mousedown(e) {
       mousedown = true;
       pushPoint([e.x, e.y]);
@@ -40,6 +40,7 @@ const createSketch = function() {
       }
     }
   });
+  stage = new createjs.Stage(element.find('canvas')[0]);
 }
 
 const resize = function() {
@@ -53,35 +54,19 @@ const resize = function() {
 // Methods for actually executing drawing commands.
 
 const clear = () => {
-  paths.set([]);
   stroke.set([]);
   strokes.set([]);
-}
-
-const d = (stroke) => {
-  if (stroke.length < 2) {
-    return '';
-  }
-  const result = [];
-  const point = (i) => `${stroke[i][0]} ${stroke[i][1]}`;
-  const midpoint = (i) => `${(stroke[i][0] + stroke[i + 1][0])/2} ` +
-                          `${(stroke[i][1] + stroke[i + 1][1])/2}`;
-  const push = (x) => result.push(x);
-  ['M', point(0), 'L', midpoint(0)].map(push);
-  for (var i = 1; i < stroke.length - 1; i++) {
-    ['Q', point(i), midpoint(i)].map(push);
-  }
-  ['L', point(stroke.length - 1)].map(push);
-  return result.join(' ');
+  current = null;
+  stage.removeAllChildren();
+  stage.update();
 }
 
 const endStroke = () => {
-  const path = d(stroke.get());
-  if (path.length > 0) {
-    paths.push(path);
+  if (stroke.get().length >= 2) {
     strokes.push(stroke.get());
   }
   stroke.set([]);
+  current = null;
 }
 
 const maybePushPoint = (point) => {
@@ -93,6 +78,7 @@ const maybePushPoint = (point) => {
 const pushPoint = (point) => {
   if (point[0] != null && point[1] != null) {
     stroke.push(point.map((x) => Math.round(x / zoom.get())));
+    refreshStage();
   }
 }
 
@@ -101,10 +87,29 @@ const refreshCandidates = () => {
   candidates.set(value.length > 0 ? matcher.match(value, 8) : []);
 }
 
+const refreshStage = () => {
+  const value = stroke.get();
+  if (value.length < 2) {
+    return;
+  }
+  if (!current) {
+    current = new createjs.Shape();
+    current.graphics.setStrokeStyle(4, 'round');
+    current.graphics.beginStroke('black');
+    current.graphics.moveTo(value[0][0], value[0][1]);
+    stage.addChild(current);
+  }
+  const last = value[value.length - 1];
+  current.graphics.lineTo(last[0], last[1]);
+  current.draw(stage.canvas.getContext('2d'));
+}
+
 const undo = () => {
-  paths.pop();
-  strokes.pop();
   stroke.set([]);
+  strokes.pop();
+  current = null;
+  stage.removeChildAt(stage.children.length - 1);
+  stage.update();
 }
 
 // Meteor template bindings.
@@ -122,11 +127,8 @@ Template.search.events({
 
 Template.search.helpers({
   candidates: () => candidates.get(),
-  current: () => d(stroke.get()),
-  paths: () => paths.get(),
-  zoom: () => zoom.get(),
-
   url: (character) => `#/codepoint/${character.charCodeAt(0)}`,
+  zoom: () => zoom.get(),
 });
 
 Template.search.onRendered(createSketch);
