@@ -94,7 +94,7 @@ const refreshStage = () => {
   }
   if (!current) {
     current = new createjs.Shape();
-    current.graphics.setStrokeStyle(4, 'round');
+    current.graphics.setStrokeStyle(8, 'round');
     current.graphics.beginStroke('black');
     current.graphics.moveTo(value[0][0], value[0][1]);
     stage.addChild(current);
