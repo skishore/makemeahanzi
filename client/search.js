@@ -66,7 +66,10 @@ const endStroke = () => {
     strokes.push(stroke.get());
   }
   stroke.set([]);
-  current = null;
+  if (current) {
+    current.cache(0, 0, stage.canvas.width, stage.canvas.height);
+    current = null;
+  }
 }
 
 const maybePushPoint = (point) => {
@@ -94,14 +97,14 @@ const refreshStage = () => {
   }
   if (!current) {
     current = new createjs.Shape();
-    current.graphics.setStrokeStyle(8, 'round');
-    current.graphics.beginStroke('black');
-    current.graphics.moveTo(value[0][0], value[0][1]);
     stage.addChild(current);
   }
-  const last = value[value.length - 1];
-  current.graphics.lineTo(last[0], last[1]);
-  current.draw(stage.canvas.getContext('2d'));
+  const i = value.length - 2;
+  current.graphics.setStrokeStyle(8, 'round');
+  current.graphics.beginStroke('black');
+  current.graphics.moveTo(value[i][0], value[i][1]);
+  current.graphics.lineTo(value[i + 1][0], value[i + 1][1]);
+  stage.update();
 }
 
 const undo = () => {
