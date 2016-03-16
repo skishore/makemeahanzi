@@ -1,9 +1,9 @@
 const candidates = new ReactiveVar([]);
-const stroke = new ReactiveVar([]);
 const strokes = new ReactiveVar([]);
 const zoom = new ReactiveVar(1);
 
 let current = null;
+let stroke = [];
 let stage = null;
 
 makemeahanzi.mediansPromise.then((medians) => {
@@ -52,26 +52,27 @@ const resize = function() {
 // Methods for actually executing drawing commands.
 
 const clear = () => {
-  stroke.set([]);
   strokes.set([]);
-  current = null;
   stage.removeAllChildren();
+  clearCurrent();
+}
+
+const clearCurrent = () => {
+  current = null;
+  stroke = [];
   stage.update();
 }
 
 const endStroke = () => {
-  if (stroke.get().length >= 2) {
-    strokes.push(stroke.get());
+  if (stroke.length >= 2) {
+    strokes.push(stroke);
   }
-  stroke.set([]);
-  if (current) {
-    current.cache(0, 0, stage.canvas.width, stage.canvas.height);
-    current = null;
-  }
+  if (current) current.cache(0, 0, stage.canvas.width, stage.canvas.height);
+  clearCurrent();
 }
 
 const maybePushPoint = (point) => {
-  if (stroke.get().length === 0) {
+  if (stroke.length === 0) {
     pushPoint(point);
   }
 }
@@ -84,28 +85,25 @@ const pushPoint = (point) => {
 }
 
 const refreshStage = () => {
-  const value = stroke.get();
-  if (value.length < 2) {
+  if (stroke.length < 2) {
     return;
   }
   if (!current) {
     current = new createjs.Shape();
     stage.addChild(current);
   }
-  const i = value.length - 2;
+  const i = stroke.length - 2;
   current.graphics.setStrokeStyle(8, 'round');
   current.graphics.beginStroke('black');
-  current.graphics.moveTo(value[i][0], value[i][1]);
-  current.graphics.lineTo(value[i + 1][0], value[i + 1][1]);
+  current.graphics.moveTo(stroke[i][0], stroke[i][1]);
+  current.graphics.lineTo(stroke[i + 1][0], stroke[i + 1][1]);
   stage.update();
 }
 
 const undo = () => {
-  stroke.set([]);
   strokes.pop();
-  current = null;
   stage.removeChildAt(stage.children.length - 1);
-  stage.update();
+  clearCurrent();
 }
 
 // Meteor template bindings.
