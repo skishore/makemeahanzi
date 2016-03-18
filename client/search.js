@@ -2,6 +2,7 @@ const candidates = new ReactiveVar([]);
 const strokes = new ReactiveVar([]);
 const zoom = new ReactiveVar(1);
 
+let container = null;
 let current = null;
 let stroke = [];
 let stage = null;
@@ -38,7 +39,34 @@ const createSketch = function() {
       }
     }
   });
+  initializeStage(element);
+}
+
+const dottedLine = (x1, y1, x2, y2) => {
+  const result = new createjs.Shape();
+  result.graphics.setStrokeDash([2, 2], 0);
+  result.graphics.setStrokeStyle(2)
+  result.graphics.beginStroke('#ccc');
+  result.graphics.moveTo(x1, y1);
+  result.graphics.lineTo(x2, y2);
+  return result;
+}
+
+const initializeStage = (element) => {
+  container = new createjs.Container();
   stage = new createjs.Stage(element.find('canvas')[0]);
+
+  const cross = new createjs.Container();
+  const height = stage.canvas.height;
+  const width = stage.canvas.width;
+  cross.addChild(dottedLine(0, 0, width, height));
+  cross.addChild(dottedLine(width, 0, 0, height));
+  cross.addChild(dottedLine(width / 2, 0, width / 2, height));
+  cross.addChild(dottedLine(0, height / 2, width, height / 2));
+  cross.cache(0, 0, width, height);
+
+  stage.addChild(cross, container);
+  stage.update();
 }
 
 const resize = function() {
@@ -53,7 +81,7 @@ const resize = function() {
 
 const clear = () => {
   strokes.set([]);
-  stage.removeAllChildren();
+  container.removeAllChildren();
   clearCurrent();
 }
 
@@ -61,6 +89,13 @@ const clearCurrent = () => {
   current = null;
   stroke = [];
   stage.update();
+}
+
+const distance = (point1, point2) => {
+  const diagonal = stage.canvas.width * stage.canvas.width +
+                   stage.canvas.height * stage.canvas.height;
+  const diff = [point1[0] - point2[0], point1[1] - point2[1]];
+  return (diff[0] * diff[0] + diff[1] * diff[1]) / diagonal;
 }
 
 const endStroke = () => {
@@ -90,10 +125,11 @@ const refreshStage = () => {
   }
   if (!current) {
     current = new createjs.Shape();
-    stage.addChild(current);
+    container.addChild(current);
   }
   const i = stroke.length - 2;
-  current.graphics.setStrokeStyle(8, 'round');
+  const d = distance(stroke[i], stroke[i + 1]);
+  current.graphics.setStrokeStyle(-Math.log(d), 'round');
   current.graphics.beginStroke('black');
   current.graphics.moveTo(stroke[i][0], stroke[i][1]);
   current.graphics.lineTo(stroke[i + 1][0], stroke[i + 1][1]);
@@ -102,7 +138,7 @@ const refreshStage = () => {
 
 const undo = () => {
   strokes.pop();
-  stage.removeChildAt(stage.children.length - 1);
+  container.removeChildAt(container.children.length - 1);
   clearCurrent();
 }
 
