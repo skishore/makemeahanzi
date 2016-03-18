@@ -1,5 +1,12 @@
 // Helper methods used by the handwriting class.
 
+const kCrossWidth = 2;
+const kMinWidth = 8;
+const kMaxWidth = 12;
+const kOffset = 8;
+const kPositiveDecay = 4;
+const kNegativeDecay = 64;
+
 const createSketch = (element, handwriting) => {
   let mousedown = false;
   Sketch.create({
@@ -28,8 +35,8 @@ const createSketch = (element, handwriting) => {
 
 const dottedLine = (x1, y1, x2, y2) => {
   const result = new createjs.Shape();
-  result.graphics.setStrokeDash([2, 2], 0);
-  result.graphics.setStrokeStyle(2)
+  result.graphics.setStrokeDash([kCrossWidth, kCrossWidth], 0);
+  result.graphics.setStrokeStyle(kCrossWidth)
   result.graphics.beginStroke('#ccc');
   result.graphics.moveTo(x1, y1);
   result.graphics.lineTo(x2, y2);
@@ -53,8 +60,6 @@ const renderCross = (stage) => {
 this.makemeahanzi.Handwriting = class Handwriting {
   constructor(element, callback, zoom) {
     this._callback = callback;
-    this._shape = null;
-    this._stroke = [];
     this._zoom = zoom;
 
     createSketch(element, this);
@@ -63,7 +68,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
 
     renderCross(this._stage);
     this._stage.addChild(this._container);
-    this._stage.update();
+    this._reset();
   }
   clear() {
     this._container.removeAllChildren();
@@ -108,8 +113,9 @@ this.makemeahanzi.Handwriting = class Handwriting {
     }
     const i = this._stroke.length - 2;
     const d = this._distance(this._stroke[i], this._stroke[i + 1]);
+    const width = this._updateWidth(d);
     const graphics = this._shape.graphics;
-    graphics.setStrokeStyle(-Math.log(d), 'round');
+    graphics.setStrokeStyle(width, 'round');
     graphics.beginStroke('black');
     graphics.moveTo(this._stroke[i][0], this._stroke[i][1]);
     graphics.lineTo(this._stroke[i + 1][0], this._stroke[i + 1][1]);
@@ -118,6 +124,15 @@ this.makemeahanzi.Handwriting = class Handwriting {
   _reset() {
     this._shape = null;
     this._stroke = [];
+    this._width = kMaxWidth;
     this._stage.update();
+  }
+  _updateWidth(distance) {
+    if (distance <= 0) return this._width;
+    let offset = (Math.log(distance) + kOffset);
+    offset /= (offset > 0 ? kPositiveDecay : kNegativeDecay);
+    this._width = Math.max(Math.min(
+        this._width - offset, kMaxWidth), kMinWidth);
+    return this._width;
   }
 }
