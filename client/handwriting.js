@@ -43,6 +43,10 @@ const dottedLine = (x1, y1, x2, y2) => {
   return result;
 }
 
+const midpoint = (point1, point2) => {
+  return [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2];
+}
+
 const renderCross = (stage) => {
   const cross = new createjs.Container();
   const height = stage.canvas.height;
@@ -84,6 +88,18 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const diff = [point1[0] - point2[0], point1[1] - point2[1]];
     return (diff[0] * diff[0] + diff[1] * diff[1]) / diagonal;
   }
+  _draw(point1, point2, control) {
+    const graphics = this._shape.graphics;
+    graphics.setStrokeStyle(this._width, 'round');
+    graphics.beginStroke('black');
+    graphics.moveTo(point1[0], point1[1]);
+    if (control) {
+      graphics.curveTo(control[0], control[1], point2[0], point2[1]);
+    } else {
+      graphics.lineTo(point2[0], point2[1]);
+    }
+    this._stage.update();
+  }
   _endStroke() {
     if (this._shape) {
       this._callback(this._stroke);
@@ -107,32 +123,30 @@ this.makemeahanzi.Handwriting = class Handwriting {
     if (this._stroke.length < 2) {
       return;
     }
-    if (!this._shape) {
+    const i = this._stroke.length - 2;
+    const last = this._midpoint;
+    this._midpoint = midpoint(this._stroke[i], this._stroke[i + 1]);
+    if (this._shape) {
+      this._updateWidth(this._distance(this._stroke[i], this._stroke[i + 1]));
+      this._draw(last, this._midpoint, this._stroke[i]);
+    } else {
       this._shape = new createjs.Shape();
       this._container.addChild(this._shape);
+      this._draw(this._stroke[i], this._midpoint);
     }
-    const i = this._stroke.length - 2;
-    const d = this._distance(this._stroke[i], this._stroke[i + 1]);
-    const width = this._updateWidth(d);
-    const graphics = this._shape.graphics;
-    graphics.setStrokeStyle(width, 'round');
-    graphics.beginStroke('black');
-    graphics.moveTo(this._stroke[i][0], this._stroke[i][1]);
-    graphics.lineTo(this._stroke[i + 1][0], this._stroke[i + 1][1]);
-    this._stage.update();
   }
   _reset() {
+    this._midpoint = null;
     this._shape = null;
     this._stroke = [];
     this._width = kMaxWidth;
     this._stage.update();
   }
   _updateWidth(distance) {
-    if (distance <= 0) return this._width;
+    if (distance <= 0) return;
     let offset = (Math.log(distance) + kOffset);
     offset /= (offset > 0 ? kPositiveDecay : kNegativeDecay);
     this._width = Math.max(Math.min(
         this._width - offset, kMaxWidth), kMinWidth);
-    return this._width;
   }
 }
