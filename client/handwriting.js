@@ -1,10 +1,10 @@
 // Helper methods used by the handwriting class.
 
 const kCrossWidth = 2;
-const kMinWidth = 8;
-const kMaxWidth = 12;
-const kOffset = 8;
-const kPositiveDecay = 4;
+const kMinWidth = 6;
+const kMaxWidth = 10;
+const kOffset = 10;
+const kPositiveDecay = 16;
 const kNegativeDecay = 64;
 
 const createSketch = (element, handwriting) => {
