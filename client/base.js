@@ -22,6 +22,8 @@ const hashchange = () => {
   const hash = window.location.hash;
   if (hash.startsWith('#/codepoint/')) {
     Session.set('route', 'character');
+  } else if (hash.startsWith('#/teach/')) {
+    Session.set('route', 'teach');
   } else {
     Session.set('route', 'search');
   }
