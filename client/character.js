@@ -76,20 +76,8 @@ const refreshMetadata = (row) => {
 }
 
 const updateCharacter = () => {
-  const value = character.get();
-  if (value == null) {
-    return;
-  }
-  const part = Math.floor(value.charCodeAt(0) / 256);
-  $.get(`characters/part-${part}.txt`, (response, code) => {
-    if (code !== 'success') throw new Error(code);
-    const data = JSON.parse(response);
-    for (let row of data) {
-      if (row.character === character.get()) {
-        refreshMetadata(row);
-      }
-    }
-  });
+  makemeahanzi.lookupCharacter(character.get(), (row) => {
+      if (row.character === character.get()) refreshMetadata(row); });
 }
 
 // Methods for running the stroke-order animation.
