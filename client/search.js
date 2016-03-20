@@ -9,19 +9,11 @@ makemeahanzi.mediansPromise.then((medians) => {
   Deps.autorun(() => candidates.set(matcher.match(strokes.get(), 8)));
 }).catch(console.error.bind(console));
 
-const getZoom = (outer) => {
-  const inner = outer.children();
-  const x_zoom = outer.width() / inner.outerWidth();
-  const y_zoom = outer.height() / inner.outerHeight();
-  return Math.min(x_zoom, y_zoom);
-}
-
 const onRendered = function() {
-  const outer = $(this.firstNode);
-  const element = outer.find('.handwriting');
-  const callback = strokes.push.bind(strokes);
   strokes.set([]);
-  zoom.set(getZoom(outer));
+  zoom.set(this.getZoom());
+  const element = $(this.firstNode).find('.handwriting');
+  const callback = strokes.push.bind(strokes);
   handwriting = new makemeahanzi.Handwriting(element, callback, zoom.get());
 }
 

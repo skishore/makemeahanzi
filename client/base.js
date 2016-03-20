@@ -12,6 +12,16 @@ ReactiveVar.prototype.push = function(element) {
   this.set(value);
 }
 
+// Some code for dealing with common template logic.
+
+Blaze.TemplateInstance.prototype.getZoom = function() {
+  const outer = $(this.firstNode);
+  const inner = outer.children();
+  const x_zoom = outer.width() / inner.outerWidth();
+  const y_zoom = outer.height() / inner.outerHeight();
+  return Math.min(x_zoom, y_zoom);
+}
+
 // Our hacky implementation of a routing table. Iron Router is too slow...
 
 Session.setDefault('route', null);
