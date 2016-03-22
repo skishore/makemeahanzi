@@ -15,7 +15,7 @@ const kMaxMistakes = 3;
 
 let characters = [];
 let definitions = {};
-let offset = 1;
+let offset = -1;
 
 // A couple small utility functions for Euclidean geometry.
 
@@ -25,6 +25,9 @@ const scale = (median, k) => median.map((point) => point.map((x) => k * x));
 
 const advance = () => {
   offset = (offset + 1) % characters.length;
+  if (offset === 0) {
+    characters = _.shuffle(characters);
+  }
   character.set(characters[offset]);
 }
 
@@ -53,8 +56,6 @@ const onData = (data, code) => {
     characters.push(character);
     definitions[character] = terms[3];
   }
-  if (characters.length === 0) throw new Error(data);
-  characters = _.shuffle(characters);
   advance();
 }
 
