@@ -108,6 +108,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._reset();
   }
   clear() {
+    createjs.Tween.removeAllTweens();
+    this._animation.removeAllChildren();
     this._container.removeAllChildren();
     this._reset();
   }
