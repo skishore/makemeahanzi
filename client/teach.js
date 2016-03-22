@@ -52,7 +52,7 @@ const onStroke = (stroke) => {
   }
   current[index] = true;
   complete.set(current);
-  console.log(`Matched stroke ${index}.`);
+  handwriting.emplace(strokes.get()[index]);
   if (current.every((x) => x)) {
     console.log('Success!');
   }

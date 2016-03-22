@@ -47,6 +47,38 @@ const midpoint = (point1, point2) => {
   return [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2];
 }
 
+const pathToShape = (path, size) => {
+  const scale = 1024 / size;
+  const result = new createjs.Shape();
+  const graphics = result.graphics;
+  result.graphics.beginFill('black');
+  const tokens = path.split(' ');
+  let index = 0;
+  const next = () => {
+    index += 2;
+    let result = [tokens[index - 2], tokens[index - 1]];
+    result = result.map((x) => parseInt(x, 10));
+    result[1] = 900 - result[1];
+    return result.map((x) => Math.round(x / scale));
+  }
+  while (index < tokens.length - 2) {
+    index += 1;
+    const command = tokens[index - 1];
+    const point = next();
+    if (command === 'M') {
+      graphics.moveTo(point[0], point[1]);
+    } else if (command === 'L') {
+      graphics.lineTo(point[0], point[1]);
+    } else if (command === 'Q') {
+      const end = next();
+      graphics.curveTo(point[0], point[1], end[0], end[1]);
+    } else {
+      console.error(`Invalid command: ${command}`);
+    }
+  }
+  return result;
+}
+
 const renderCross = (stage) => {
   const cross = new createjs.Container();
   const height = stage.canvas.height;
@@ -78,6 +110,10 @@ this.makemeahanzi.Handwriting = class Handwriting {
   clear() {
     this._container.removeAllChildren();
     this._reset();
+  }
+  emplace(path) {
+    this._container.removeChildAt(this._container.children.length - 1);
+    this._animation.addChild(pathToShape(path, this._stage.canvas.width));
   }
   fade() {
     const children = this._container.children;
