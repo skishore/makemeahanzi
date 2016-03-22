@@ -99,7 +99,9 @@ const onStroke = (stroke) => {
   current[index] = true;
   complete.set(current);
   handwriting.emplace(strokes.get()[index]);
-  if (missing[0] < index) {
+  if (missing.length === 1) {
+    handwriting.glow();
+  } else if (missing[0] < index) {
     handwriting.flash(strokes.get()[missing[0]]);
   } else {
     mistakes.set(0);

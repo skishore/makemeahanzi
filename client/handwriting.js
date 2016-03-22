@@ -137,6 +137,11 @@ this.makemeahanzi.Handwriting = class Handwriting {
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', this._stage);
   }
+  glow() {
+    for (let child of this._animation.children) {
+      child.shadow = new createjs.Shadow('#4f0', 0, 0, 64);
+    }
+  }
   undo() {
     this._container.removeChildAt(this._container.children.length - 1);
     this._reset();
