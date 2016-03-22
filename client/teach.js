@@ -42,7 +42,7 @@ const onRendered = function() {
 const onStroke = (stroke) => {
   const index = match(scale(stroke, 1 / kCanvasSize));
   if (index < 0) {
-    console.log('No match...');
+    handwriting.fade();
     return;
   }
   const current = complete.get();

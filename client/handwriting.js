@@ -1,10 +1,10 @@
 // Helper methods used by the handwriting class.
 
 const kCrossWidth = 2;
-const kMinWidth = 6;
-const kMaxWidth = 10;
+const kMinWidth = 8;
+const kMaxWidth = 16;
 const kOffset = 10;
-const kPositiveDecay = 16;
+const kPositiveDecay = 8;
 const kNegativeDecay = 64;
 
 const createSketch = (element, handwriting) => {
@@ -67,16 +67,27 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._zoom = zoom;
 
     createSketch(element, this);
+    this._animation = new createjs.Container();
     this._container = new createjs.Container();
     this._stage = new createjs.Stage(element.find('canvas')[0]);
 
     renderCross(this._stage);
-    this._stage.addChild(this._container);
+    this._stage.addChild(this._animation, this._container);
     this._reset();
   }
   clear() {
     this._container.removeAllChildren();
     this._reset();
+  }
+  fade() {
+    const children = this._container.children;
+    const child = children[children.length - 1];
+    this._container.removeChildAt(children.length - 1);
+    this._animation.addChild(child);
+    createjs.Tween.get(child).to({alpha: 0}, 200)
+                  .call(() => this._animation.removeChild(child));
+    createjs.Ticker.setFPS(60);
+    createjs.Ticker.addEventListener('tick', this._stage);
   }
   undo() {
     this._container.removeChildAt(this._container.children.length - 1);
@@ -102,9 +113,9 @@ this.makemeahanzi.Handwriting = class Handwriting {
   }
   _endStroke() {
     if (this._shape) {
-      this._callback(this._stroke);
       this._shape.cache(0, 0, this._stage.canvas.width,
                         this._stage.canvas.height);
+      this._callback(this._stroke);
     }
     this._reset();
   }
