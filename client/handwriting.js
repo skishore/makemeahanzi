@@ -47,11 +47,11 @@ const midpoint = (point1, point2) => {
   return [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2];
 }
 
-const pathToShape = (path, size) => {
+const pathToShape = (path, size, color) => {
   const scale = 1024 / size;
   const result = new createjs.Shape();
   const graphics = result.graphics;
-  result.graphics.beginFill('black');
+  result.graphics.beginFill(color || 'black');
   const tokens = path.split(' ');
   let index = 0;
   const next = () => {
@@ -94,9 +94,10 @@ const renderCross = (stage) => {
 // Methods for actually executing drawing commands.
 
 this.makemeahanzi.Handwriting = class Handwriting {
-  constructor(element, callback, zoom) {
-    this._callback = callback;
-    this._zoom = zoom;
+  constructor(element, options) {
+    this._onclick = options.onclick;
+    this._onstroke = options.onstroke;
+    this._zoom = options.zoom || 1;
 
     createSketch(element, this);
     this._animation = new createjs.Container();
@@ -127,6 +128,15 @@ this.makemeahanzi.Handwriting = class Handwriting {
     createjs.Ticker.setFPS(60);
     createjs.Ticker.addEventListener('tick', this._stage);
   }
+  flash(path) {
+    const child = pathToShape(path, this._stage.canvas.width, 'blue');
+    this._container.removeChildAt(this._container.children.length - 1);
+    this._animation.addChild(child);
+    createjs.Tween.get(child).to({alpha: 0}, 800)
+                  .call(() => this._animation.removeChild(child));
+    createjs.Ticker.setFPS(60);
+    createjs.Ticker.addEventListener('tick', this._stage);
+  }
   undo() {
     this._container.removeChildAt(this._container.children.length - 1);
     this._reset();
@@ -153,7 +163,11 @@ this.makemeahanzi.Handwriting = class Handwriting {
     if (this._shape) {
       this._shape.cache(0, 0, this._stage.canvas.width,
                         this._stage.canvas.height);
-      this._callback(this._stroke);
+      if (this._onstroke) {
+        this._onstroke(this._stroke);
+      }
+    } else if (this._onclick) {
+      this._onclick();
     }
     this._reset();
   }

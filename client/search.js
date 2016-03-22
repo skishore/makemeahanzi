@@ -13,8 +13,11 @@ const onRendered = function() {
   strokes.set([]);
   zoom.set(this.getZoom());
   const element = $(this.firstNode).find('.handwriting');
-  const callback = strokes.push.bind(strokes);
-  handwriting = new makemeahanzi.Handwriting(element, callback, zoom.get());
+  const options = {
+    zoom: zoom.get(),
+    onstroke: strokes.push.bind(strokes),
+  };
+  handwriting = new makemeahanzi.Handwriting(element, options);
 }
 
 // Meteor template bindings.

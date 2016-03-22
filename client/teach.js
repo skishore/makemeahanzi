@@ -2,6 +2,7 @@ const character = new ReactiveVar();
 const complete = new ReactiveVar();
 const label = new ReactiveVar();
 const medians = new ReactiveVar();
+const mistakes = new ReactiveVar();
 const strokes = new ReactiveVar();
 const zoom = new ReactiveVar(1);
 
@@ -10,6 +11,7 @@ let handwriting = null;
 const kCanvasSize = 512;
 const kFontSize = 1024;
 const kMatchThreshold = -200;
+const kMaxMistakes = 3;
 
 let characters = [];
 let definitions = {};
@@ -59,29 +61,48 @@ const onData = (data, code) => {
 const onRendered = function() {
   zoom.set(this.getZoom());
   const element = $(this.firstNode).find('.handwriting');
-  handwriting = new makemeahanzi.Handwriting(element, onStroke, zoom.get());
+  const options = {
+    onclick: onStroke,
+    onstroke: onStroke,
+    zoom: zoom.get(),
+  };
+  handwriting = new makemeahanzi.Handwriting(element, options);
 }
 
 const onStroke = (stroke) => {
+  const current = complete.get();
+  const missing = _.range(current.length).filter((i) => !current[i]);
+  if (missing.length === 0) {
+    handwriting.clear();
+    advance();
+  }
+  if (missing.length === 0 || !stroke) {
+    return;
+  }
+
   const scaled = scale(stroke, 1 / kCanvasSize);
   const index = match(scaled);
   if (index < 0) {
     handwriting.fade();
+    mistakes.set(mistakes.get() + 1);
+    if (mistakes.get() >= kMaxMistakes) {
+      handwriting.flash(strokes.get()[missing[0]]);
+    }
     return;
   }
-  const current = complete.get();
   if (current[index]) {
     handwriting.undo();
-    console.log(`Re-matched stroke ${index}.`);
+    handwriting.flash(strokes.get()[index]);
     return;
   }
+
   current[index] = true;
   complete.set(current);
   handwriting.emplace(strokes.get()[index]);
-  if (current.every((x) => x)) {
-    console.log('Success!');
-    handwriting.clear();
-    advance();
+  if (missing[0] < index) {
+    handwriting.flash(strokes.get()[missing[0]]);
+  } else {
+    mistakes.set(0);
   }
 }
 
@@ -93,6 +114,7 @@ const updateCharacter = () => {
       label.set(`${row.pinyin.join(', ')} - ${definition}`);
       medians.set(row.medians.map(fixMedianCoordinates)
                              .map((x) => scale(x, 1 / kFontSize)));
+      mistakes.set(0);
       strokes.set(row.strokes);
     }
   });
