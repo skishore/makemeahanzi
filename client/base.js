@@ -24,6 +24,10 @@ Blaze.TemplateInstance.prototype.getZoom = function() {
 
 // Our hacky implementation of a routing table. Iron Router is too slow...
 
+Template.navbar.helpers({
+  href: () => Session.get('route') === 'search' ? '#/teach/' : '#',
+});
+
 Session.setDefault('route', null);
 
 Handlebars.registerHelper('route', () => Session.get('route'));
