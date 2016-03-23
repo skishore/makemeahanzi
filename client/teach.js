@@ -10,7 +10,6 @@ let handwriting = null;
 
 const kCanvasSize = 512;
 const kFontSize = 1024;
-const kMatchThreshold = -200;
 const kMaxMistakes = 3;
 
 let characters = [];
@@ -33,10 +32,9 @@ const advance = () => {
 
 const match = (stroke) => {
   let best_index = -1;
-  let best_score = kMatchThreshold;
-  const matcher = new makemeahanzi.Matcher([], {bounds: [[0, 0], [1, 1]]});
+  let best_score = -Infinity;
   for (let i = 0; i < medians.get().length; i++) {
-    const score = matcher.score(stroke, medians.get()[i]);
+    const score = makemeahanzi.recognize(stroke, medians.get()[i]);
     if (score > best_score) {
       best_index = i;
       best_score = score;
