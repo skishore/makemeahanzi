@@ -1,0 +1,22 @@
+<template name="item">
+  <svg viewBox="0 0 1024 1024">
+    <g fill="#aaa" transform="scale(1, -1) translate(0, -900)">
+      {{#each strokes}}
+        <path d="{{this}}"></path>
+      {{/each}}
+    </g>
+    <g fill="none" stroke-width="16">
+      {{#each medians}}
+        <path d="{{d}}" stroke="{{stroke}}"></path>
+      {{/each}}
+    </g>
+  </svg>
+</template>
+
+<template name="test">
+  <div id="test">
+    {{#each items}}
+      {{> item this}}
+    {{/each}}
+  </div>
+</template>
