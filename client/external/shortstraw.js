@@ -18,7 +18,8 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
     this.DIAGONAL_INTERVAL = 40;
     this.STRAW_WINDOW = 3;
     this.MEDIAN_THRESHOLD = 0.95;
-    this.LINE_THRESHOLD = 0.80;
+    this.LINE_THRESHOLD_1 = 1.00;
+    this.LINE_THRESHOLD_2 = 0.80;
   }
   run(points) {
     points = points.map((x) => ({x: x[0], y: x[1]}));
@@ -70,7 +71,9 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
       }
     }
     corners.push(points.length - 1);
-    return this._postProcessCorners(points, corners, straws);
+    this._postProcessCorners(points, corners, straws, this.LINE_THRESHOLD_1);
+    this._postProcessCorners(points, corners, straws, this.LINE_THRESHOLD_2);
+    return corners;
   }
   _getDistance(p1, p2) {
     const dx = p2.x - p1.x;
@@ -89,10 +92,10 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
     }
     return minIndex;
   }
-  _isLine(points, a, b) {
+  _isLine(points, a, b, threshold) {
     const distance = this._getDistance(points[a], points[b]);
     const pathDistance = this._pathDistance(points, a, b);
-    return (distance / pathDistance) > this.LINE_THRESHOLD;
+    return (distance / pathDistance) > threshold;
   }
   _median(values) {
     const sorted = values.concat().sort();
@@ -109,7 +112,7 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
     }
     return d;
   }
-  _postProcessCorners(points, corners, straws) {
+  _postProcessCorners(points, corners, straws, threshold) {
     let go = false;
     let c1, c2;
     while (!go) {
@@ -117,7 +120,7 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
       for (let i = 1; i < corners.length; i++) {
         c1 = corners[i - 1];
         c2 = corners[i];
-        if (!this._isLine(points, c1, c2)) {
+        if (!this._isLine(points, c1, c2, threshold)) {
           const newCorner = this._halfwayCorner(straws, c1, c2);
           if (newCorner > c1 && newCorner < c2) {
             corners.splice(i, 0, newCorner);
@@ -129,12 +132,11 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
     for (let i = 1; i < corners.length - 1; i++) {
       c1 = corners[i - 1];
       c2 = corners[i + 1];
-      if (this._isLine(points, c1, c2)) {
+      if (this._isLine(points, c1, c2, threshold)) {
         corners.splice(i, 1);
         i--;
       }
     }
-    return corners;
   }
   _resamplePoints(points, spacing) {
     const resampled = [points[0]];
