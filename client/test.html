@@ -4,10 +4,13 @@
       {{#each strokes}}
         <path d="{{this}}"></path>
       {{/each}}
+      {{#each points}}
+        <circle fill="black" cx="{{x}}" cy="{{y}}" r="4"></circle>
+      {{/each}}
     </g>
-    <g fill="none" stroke-width="16">
+    <g fill="none">
       {{#each medians}}
-        <path d="{{d}}" stroke="{{stroke}}"></path>
+        <path class="{{class}}" d="{{d}}"></path>
       {{/each}}
     </g>
   </svg>
