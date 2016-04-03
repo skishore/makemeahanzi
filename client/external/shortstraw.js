@@ -18,8 +18,7 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
     this.DIAGONAL_INTERVAL = 40;
     this.STRAW_WINDOW = 3;
     this.MEDIAN_THRESHOLD = 0.95;
-    this.LINE_THRESHOLD_1 = 1.00;
-    this.LINE_THRESHOLD_2 = 0.80;
+    this.LINE_THRESHOLDS = [0.95, 0.90, 0.80];
   }
   run(points) {
     points = points.map((x) => ({x: x[0], y: x[1]}));
@@ -71,8 +70,9 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
       }
     }
     corners.push(points.length - 1);
-    this._postProcessCorners(points, corners, straws, this.LINE_THRESHOLD_1);
-    this._postProcessCorners(points, corners, straws, this.LINE_THRESHOLD_2);
+    this.LINE_THRESHOLDS.map((threshold) => {
+      this._postProcessCorners(points, corners, straws, threshold);
+    });
     return corners;
   }
   _getDistance(p1, p2) {

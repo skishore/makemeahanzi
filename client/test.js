@@ -52,15 +52,53 @@ const computeMedian = (d, median) => {
     half1 = half1.reverse();
     half2 = half2.reverse();
   }
-  const halves = [half1, half2].map((x) => refine(x, 64));
-  return _.range(64).map((i) => Point.midpoint(halves[0][i], halves[1][i]));
+  const halves = [half1, half2].map((x) => refine(x, 64).slice(4, 60));
+  return _.range(56).map((i) => Point.midpoint(halves[0][i], halves[1][i]));
+}
+
+const findCorners = (median) => {
+  const first_pass = shortstraw.run(median);
+  if (first_pass.length === 2) return first_pass;
+  return first_pass;
+  const source = getBounds([median]);
+  const target = [[0, 0], [1, 1]];
+  return shortstraw.run(median.map(getAffineTransform(source, target)))
+                   .map(getAffineTransform(target, source));
+}
+
+const getAffineTransform = (source, target) => {
+  const util = {subtract: (a, b) => [b[0] - a[0], b[1] - a[1]]};
+  const sdiff = util.subtract(source[1], source[0]);
+  const tdiff = util.subtract(target[1], target[0]);
+  const ratio = [tdiff[0]/sdiff[0], tdiff[1]/sdiff[1]];
+  return (point) => [
+    ratio[0]*(point[0] - source[0][0]) + target[0][0],
+    ratio[1]*(point[1] - source[0][1]) + target[0][1],
+  ];
+}
+
+const getBounds = (medians) => {
+  const min = [Infinity, Infinity];
+  const max = [-Infinity, -Infinity];
+  medians.map((median) => median.map((point) => {
+    min[0] = Math.min(min[0], point[0]);
+    min[1] = Math.min(min[1], point[1]);
+    max[0] = Math.max(max[0], point[0]);
+    max[1] = Math.max(max[1], point[1]);
+  }));
+  return [min, max];
+}
+
+const pathLength = (median) => {
+  let total = 0;
+  const distances = _.range(median.length - 1).map(
+      (i) => Math.sqrt(Point.distance2(median[i], median[i + 1])));
+  distances.map((x) => total += x);
+  return total;
 }
 
 const refine = (median, n) => {
-  const distances = _.range(median.length - 1).map(
-      (i) => Math.sqrt(Point.distance2(median[i], median[i + 1])));
-  let total = 0;
-  distances.map((x) => total += x);
+  const total = pathLength(median);
   const result = [];
   let index = 0;
   let position = median[0];
@@ -86,7 +124,14 @@ const refine = (median, n) => {
   return result;
 }
 
-$.get('characters/part-100.txt', (response, code) => {
+const truncate = (median, cutoff) => {
+  const n = 64;
+  const length = pathLength(median);
+  const index = Math.round(n * Math.min(cutoff / length, 0.25));
+  return refine(median, n).slice(index, n - index);
+}
+
+$.get('characters/part-130.txt', (response, code) => {
   if (code !== 'success') throw new Error(code);
   const data = JSON.parse(response);
   const result = [];
@@ -95,10 +140,10 @@ $.get('characters/part-100.txt', (response, code) => {
       class: median.length > 2 ? 'corner' : 'line',
       d: toSVGPath(median),
     });
-    const medians = row.strokes.map((d, i) => computeMedian(d, row.medians[i]))
-                               .map(fixMedianCoordinates)
+    const medians = row.medians.map(fixMedianCoordinates)
+                               .map((x) => truncate(x, 16))
                                .map((x) => scale(x, 1 / 1024));
-    const corners = medians.map(shortstraw.run.bind(shortstraw))
+    const corners = medians.map(findCorners)
                            .map((x) => scale(x, 1024))
                            .map(toCorner);
     const raw = medians.map((x) => scale(x, 1024))
