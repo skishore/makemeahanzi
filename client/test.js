@@ -56,16 +56,6 @@ const computeMedian = (d, median) => {
   return _.range(56).map((i) => Point.midpoint(halves[0][i], halves[1][i]));
 }
 
-const findCorners = (median) => {
-  const first_pass = shortstraw.run(median);
-  if (first_pass.length === 2) return first_pass;
-  return first_pass;
-  const source = getBounds([median]);
-  const target = [[0, 0], [1, 1]];
-  return shortstraw.run(median.map(getAffineTransform(source, target)))
-                   .map(getAffineTransform(target, source));
-}
-
 const getAffineTransform = (source, target) => {
   const util = {subtract: (a, b) => [b[0] - a[0], b[1] - a[1]]};
   const sdiff = util.subtract(source[1], source[0]);
@@ -128,10 +118,19 @@ const truncate = (median, cutoff) => {
   const n = 64;
   const length = pathLength(median);
   const index = Math.round(n * Math.min(cutoff / length, 0.25));
-  return refine(median, n).slice(index, n - index);
+  const refined = refine(median, n);
+  for (let i = 0; i < index; i++) {
+    refined[index - i - 1] = [
+        (i + 1) * refined[index][0] - i * refined[index + 1][0],
+        (i + 1) * refined[index][1] - i * refined[index + 1][1]];
+    refined[n + i - index] = [
+        (i + 1) * refined[n - index - 1][0] - i * refined[n - index - 2][0],
+        (i + 1) * refined[n - index - 1][1] - i * refined[n - index - 2][1]];
+  }
+  return refined;
 }
 
-$.get('characters/part-130.txt', (response, code) => {
+$.get('characters/part-100.txt', (response, code) => {
   if (code !== 'success') throw new Error(code);
   const data = JSON.parse(response);
   const result = [];
@@ -141,9 +140,9 @@ $.get('characters/part-130.txt', (response, code) => {
       d: toSVGPath(median),
     });
     const medians = row.medians.map(fixMedianCoordinates)
-                               .map((x) => truncate(x, 16))
+                               .map((x) => truncate(x, 64))
                                .map((x) => scale(x, 1 / 1024));
-    const corners = medians.map(findCorners)
+    const corners = medians.map(shortstraw.run.bind(shortstraw))
                            .map((x) => scale(x, 1024))
                            .map(toCorner);
     const raw = medians.map((x) => scale(x, 1024))
