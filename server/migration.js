@@ -70,6 +70,33 @@ const dumpGlyph = (dictionary, graphics) => (glyph) => {
   }) + '\n');
 }
 
+const fixBrokenMedians = (glyph, threshold) => {
+  threshold = threshold || 16;
+  for (let stroke of glyph.stages.order) {
+    const distance = Math.sqrt(Point.distance2(
+        stroke.median[0], stroke.median[stroke.median.length - 1]));
+    if (distance < threshold) {
+      console.log(`Found broken median in ${glyph.character}`);
+      const paths = svg.convertSVGPathToPaths(
+          glyph.stages.strokes[stroke.stroke]);
+      assert(paths.length === 1);
+      const polygon = svg.getPolygonApproximation(paths[0], threshold);
+      let best_point = null;
+      let best_value = -Infinity;
+      for (let point of polygon) {
+        const value = Point.distance2(point, stroke.median[0])
+        if (value > best_value) {
+          best_point = point;
+          best_value = value;
+        }
+      }
+      assert(best_point !== null);
+      stroke.median = [best_point, stroke.median[0]];
+      Glyphs.save(glyph);
+    }
+  }
+}
+
 const migrateOldGlyphSchemaToNew = (glyph) => {
   const codepoint = parseInt(glyph.name.substr(3), 16);
   const character = String.fromCodePoint(codepoint);
