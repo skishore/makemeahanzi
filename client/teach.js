@@ -108,7 +108,12 @@ const onStroke = (stroke) => {
 }
 
 const updateCharacter = () => {
-  makemeahanzi.lookupCharacter(character.get(), (row) => {
+  makemeahanzi.lookupCharacter(character.get(), (row, error) => {
+    if (error) {
+      console.error(error);
+      Meteor.setTimeout(advance);
+      return;
+    }
     if (row.character === character.get()) {
       const definition = definitions[row.character] || row.definition;
       complete.set(new Array(row.medians.length).fill(false));
