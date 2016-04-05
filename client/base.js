@@ -38,8 +38,6 @@ const hashchange = () => {
     Session.set('route', 'character');
   } else if (hash.startsWith('#/teach/')) {
     Session.set('route', 'teach');
-  } else if (hash.startsWith('#/test/')) {
-    Session.set('route', 'test');
   } else {
     Session.set('route', 'search');
   }

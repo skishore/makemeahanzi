@@ -169,7 +169,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
       this._shape.cache(0, 0, this._stage.canvas.width,
                         this._stage.canvas.height);
       if (this._onstroke) {
-        this._onstroke(this._stroke);
+        this._onstroke(this._stroke.map(
+            (x) => x.map((y) => y / this._stage.canvas.width)));
       }
     } else if (this._onclick) {
       this._onclick();

@@ -12,8 +12,6 @@ const zoom = new ReactiveVar(1);
 
 let handwriting = null;
 
-const kCanvasSize = 512;
-const kFontSize = 1024;
 const kMaxMistakes = 3;
 
 let characters = [];
@@ -23,8 +21,6 @@ let offset = -1;
 // A couple small utility functions for Euclidean geometry.
 
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
-
-const scale = (median, k) => median.map((point) => point.map((x) => k * x));
 
 const advance = () => {
   offset = (offset + 1) % characters.length;
@@ -83,8 +79,8 @@ const onStroke = (stroke) => {
     return;
   }
 
-  const scaled = scale(stroke, 1 / kCanvasSize);
-  const index = match(scaled);
+  const shortstraw = new makemeahanzi.Shortstraw;
+  const index = match(shortstraw.run(stroke));
   if (index < 0) {
     handwriting.fade();
     mistakes.set(mistakes.get() + 1);
@@ -117,8 +113,7 @@ const updateCharacter = () => {
       const definition = definitions[row.character] || row.definition;
       complete.set(new Array(row.medians.length).fill(false));
       label.set(`${row.pinyin.join(', ')} - ${definition}`);
-      medians.set(row.medians.map(fixMedianCoordinates)
-                             .map((x) => scale(x, 1 / kFontSize)));
+      medians.set(makemeahanzi.findCorners(row.medians));
       mistakes.set(0);
       strokes.set(row.strokes);
     }
