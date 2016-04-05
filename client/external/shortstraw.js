@@ -11,11 +11,12 @@
 // For comments on this JS port, email Joshua Koo (zz85nus @ gmail.com)
 //
 // Released under MIT license: http://www.opensource.org/licenses/mit-license.php
-this.makemeahanzi = this.makemeahanzi || {}; 
+"use strict";
+this.makemeahanzi = this.makemeahanzi || {};
 
 this.makemeahanzi.Shortstraw = class Shortstraw {
   constructor() {
-    this.DIAGONAL_INTERVAL = 40;
+    this.DIAGONAL_INTERVAL = 100;
     this.STRAW_WINDOW = 3;
     this.MEDIAN_THRESHOLD = 0.95;
     this.LINE_THRESHOLDS = [0.95, 0.90, 0.80];
@@ -27,12 +28,43 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
     const corners = this._getCorners(resampled);
     return corners.map((i) => [resampled[i].x, resampled[i].y]);
   }
+  _addAcuteAngles(points, corners) {
+    const temp = corners.slice();
+    corners.length = 1;
+    for (let i = 1; i < temp.length; i++) {
+      let best_index = null;
+      let best_angle = Math.PI / 2;
+      const cutoff = Math.max(1, Math.round(0.1 * (temp[i] - temp[i - 1])));
+      for (let j = temp[i - 1] + cutoff; j <= temp[i] - cutoff; j++) {
+        const angle = Math.abs(this._getAngle(
+            points, temp[i - 1], j, temp[i]));
+        if (angle > best_angle) {
+          best_angle = angle;
+          best_index = j;
+        }
+      }
+      if (best_index !== null) {
+        corners.push(best_index);
+      }
+      corners.push(temp[i]);
+    }
+  }
   _determineResampleSpacing(points) {
     const box = this._getBoundingBox(points);
     const p1 = {x: box.x, y: box.y};
     const p2 = {x: box.x + box.w, y: box.y + box.h};
     const d = this._getDistance(p1, p2);
     return d / this.DIAGONAL_INTERVAL;
+  }
+  _getAngle(points, i, j, k) {
+    const d1 = [points[j].x - points[i].x, points[j].y - points[i].y];
+    const d2 = [points[k].x - points[j].x, points[k].y - points[j].y];
+    const a1 = Math.atan2(d1[1], d1[0]);
+    const a2 = Math.atan2(d2[1], d2[0]);
+    const a = Math.abs(a2 - a1);
+    if (a < -Math.PI) return a + 2 * Math.PI;
+    if (a >= Math.PI) return a - 2 * Math.PI;
+    return a;
   }
   _getBoundingBox(points) {
     let minX = Number.POSITIVE_INFINITY;
@@ -73,6 +105,7 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
     this.LINE_THRESHOLDS.map((threshold) => {
       this._postProcessCorners(points, corners, straws, threshold);
     });
+    this._addAcuteAngles(points, corners);
     return corners;
   }
   _getDistance(p1, p2) {
