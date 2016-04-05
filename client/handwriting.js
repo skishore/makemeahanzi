@@ -1,4 +1,6 @@
 // Helper methods used by the handwriting class.
+//
+// TODO(skishore): Make the success fanfare more appealing.
 
 const kCrossWidth = 2;
 const kMinWidth = 8;
