@@ -6,7 +6,7 @@ const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
 const scale = (median, k) => median.map((point) => point.map((x) => k * x));
 
-const toSVGPath = (median) => {
+const convertToSVGPath = (median) => {
   result = [];
   for (let i = 0; i < median.length; i++) {
     result.push(i === 0 ? 'M' : 'L');
@@ -15,75 +15,46 @@ const toSVGPath = (median) => {
   return result.join(' ');
 }
 
-const argmin = (list, method) => {
-  let min_elt = null;
-  let min_val = Infinity;
-  list.map((x) => {
-    const val = method(x);
-    if (val < min_val) {
-      min_elt = x;
-      min_val = val;
+const detectCorners = (median) => {
+  const angle = (median, i, j, k) => {
+    const d1 = [median[j][0] - median[i][0], median[j][1] - median[i][1]];
+    const d2 = [median[k][0] - median[j][0], median[k][1] - median[j][1]];
+    const a1 = Math.atan2(d1[1], d1[0]);
+    const a2 = Math.atan2(d2[1], d2[0]);
+    const a = Math.abs(a2 - a1);
+    if (a < -Math.PI) return a + 2 * Math.PI;
+    if (a >= Math.PI) return a - 2 * Math.PI;
+    return a;
+  }
+  const recursion = (median, i, k) => {
+    let best_angle = Math.PI / 2;
+    let best_index = null;
+    for (let j = i + 1; j < k; j++) {
+      const a = Math.abs(angle(median, i, j, k));
+      if (a > best_angle) {
+        best_angle = a;
+        best_index = j;
+      }
     }
-  });
-  return min_elt;
-}
-
-const computeMedian = (d, median) => {
-  const error = 64;
-  const threshold = 64;
-  const paths = svg.convertSVGPathToPaths(d);
-  assert(paths.length === 1);
-  const polygon = svg.getPolygonApproximation(paths[0], error);
-  const last = median[median.length - 1];
-  let start = argmin(polygon, (point) => Point.distance2(point, median[0]));
-  const end = argmin(polygon, (point) => Point.distance2(point, last));
-  if (Point.distance2(start, end) < threshold * threshold) {
-    start = argmin(polygon, (point) => -Point.distance2(point, end));
+    if (best_index !== null) {
+      return recursion(median, i, best_index).concat(
+          recursion(median, best_index, k).slice(1));
+    }
+    return [i, k];
   }
-
-  const i = polygon.indexOf(start);
-  const j = polygon.indexOf(end);
-  assert(i !== j);
-  let half1 = polygon.slice(Math.min(i, j), Math.max(i, j) + 1);
-  let half2 = polygon.slice(Math.max(i, j))
-                     .concat(polygon.slice(0, Math.min(i, j) + 1))
-                     .reverse();
-  if (i > j) {
-    half1 = half1.reverse();
-    half2 = half2.reverse();
-  }
-  const halves = [half1, half2].map((x) => refine(x, 64).slice(4, 60));
-  return _.range(56).map((i) => Point.midpoint(halves[0][i], halves[1][i]));
+  const refined = refine(median, 64);
+  return recursion(refined, 0, refined.length - 1).map((i) => refined[i]);
 }
 
-const getAffineTransform = (source, target) => {
-  const util = {subtract: (a, b) => [b[0] - a[0], b[1] - a[1]]};
-  const sdiff = util.subtract(source[1], source[0]);
-  const tdiff = util.subtract(target[1], target[0]);
-  const ratio = [tdiff[0]/sdiff[0], tdiff[1]/sdiff[1]];
-  return (point) => [
-    ratio[0]*(point[0] - source[0][0]) + target[0][0],
-    ratio[1]*(point[1] - source[0][1]) + target[0][1],
-  ];
-}
-
-const getBounds = (medians) => {
-  const min = [Infinity, Infinity];
-  const max = [-Infinity, -Infinity];
-  medians.map((median) => median.map((point) => {
-    min[0] = Math.min(min[0], point[0]);
-    min[1] = Math.min(min[1], point[1]);
-    max[0] = Math.max(max[0], point[0]);
-    max[1] = Math.max(max[1], point[1]);
-  }));
-  return [min, max];
+const distance = (point1, point2) => {
+  const diff = [point1[0] - point2[0], point1[1] - point2[1]];
+  return Math.sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
 }
 
 const pathLength = (median) => {
   let total = 0;
-  const distances = _.range(median.length - 1).map(
-      (i) => Math.sqrt(Point.distance2(median[i], median[i + 1])));
-  distances.map((x) => total += x);
+  _.range(median.length - 1).map(
+      (i) => total += distance(median[i], median[i + 1]));
   return total;
 }
 
@@ -96,7 +67,7 @@ const refine = (median, n) => {
   for (let i of _.range(n - 1)) {
     const target = i*total/(n - 1);
     while (total_so_far < target) {
-      const step = Math.sqrt(Point.distance2(position, median[index + 1]));
+      const step = distance(position, median[index + 1]);
       if (total_so_far + step < target) {
         index += 1;
         position = median[index];
@@ -108,7 +79,7 @@ const refine = (median, n) => {
         total_so_far = target;
       }
     }
-    result.push(Point.clone(position));
+    result.push([position[0], position[1]]);
   }
   result.push(median[median.length - 1]);
   return result;
@@ -118,35 +89,26 @@ const truncate = (median, cutoff) => {
   const n = 64;
   const length = pathLength(median);
   const index = Math.round(n * Math.min(cutoff / length, 0.25));
-  const refined = refine(median, n);
-  for (let i = 0; i < index; i++) {
-    refined[index - i - 1] = [
-        (i + 1) * refined[index][0] - i * refined[index + 1][0],
-        (i + 1) * refined[index][1] - i * refined[index + 1][1]];
-    refined[n + i - index] = [
-        (i + 1) * refined[n - index - 1][0] - i * refined[n - index - 2][0],
-        (i + 1) * refined[n - index - 1][1] - i * refined[n - index - 2][1]];
-  }
-  return refined;
+  return refined = refine(median, n).slice(index, n - index);
 }
 
-$.get('characters/part-100.txt', (response, code) => {
+$.get('characters/part-92.txt', (response, code) => {
   if (code !== 'success') throw new Error(code);
   const data = JSON.parse(response);
   const result = [];
   for (let row of data) {
     const toCorner = (median) => ({
       class: median.length > 2 ? 'corner' : 'line',
-      d: toSVGPath(median),
+      d: convertToSVGPath(median),
     });
     const medians = row.medians.map(fixMedianCoordinates)
-                               .map((x) => truncate(x, 64))
+                               .map((x) => truncate(x, 16))
                                .map((x) => scale(x, 1 / 1024));
     const corners = medians.map(shortstraw.run.bind(shortstraw))
                            .map((x) => scale(x, 1024))
                            .map(toCorner);
     const raw = medians.map((x) => scale(x, 1024))
-                       .map((x) => ({class: 'raw', d: toSVGPath(x)}));
+                       .map((x) => ({class: 'raw', d: convertToSVGPath(x)}));
     const points = [];
     result.push({
       medians: corners.concat(raw),
