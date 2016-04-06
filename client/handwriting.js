@@ -6,6 +6,7 @@ const kCrossWidth = 2;
 const kMinWidth = 8;
 const kMaxWidth = 16;
 const kOffset = 10;
+const kMaxRotation = Math.PI / 6;
 const kMinDistance = 1 / 32;
 const kPositiveDecay = 8;
 const kNegativeDecay = 64;
@@ -17,8 +18,12 @@ const animate = (shape, size, source, target) => {
   shape.regY = size * (target[0][1] + target[1][1]) / 2;
   shape.x = size * (source[0][0] + source[1][0]) / 2;
   shape.y = size * (source[0][1] + source[1][1]) / 2;
-  const rotation = (180 / Math.PI) * (angle(source) - angle(target));
+  const degrees = 180 / Math.PI;
+  const rotation = degrees * (angle(source) - angle(target));
   shape.rotation = ((Math.round(rotation) + 180) % 360) - 180;
+  if (Math.abs(shape.rotation) > degrees * kMaxRotation) {
+    shape.rotation = Math.sign(shape.rotation) * degrees * kMaxRotation;
+  }
   const scale = distance(source) / (distance(target) + kMinDistance);
   shape.scaleX = scale;
   shape.scaleY = scale;
