@@ -28,10 +28,11 @@ const advance = () => {
   character.set(characters[offset]);
 }
 
-const match = (stroke) => {
+const match = (stroke, expected) => {
   let best_result = {index: -1, score: -Infinity};
   for (let i = 0; i < medians.get().length; i++) {
-    const result = makemeahanzi.recognize(stroke, medians.get()[i]);
+    const offset = i - expected;
+    const result = makemeahanzi.recognize(stroke, medians.get()[i], offset);
     if (result.score > best_result.score) {
       best_result = result;
       best_result.index = i;
@@ -77,7 +78,7 @@ const onStroke = (stroke) => {
   }
 
   const shortstraw = new makemeahanzi.Shortstraw;
-  const result = match(shortstraw.run(stroke));
+  const result = match(shortstraw.run(stroke), missing[0]);
   const index = result.index;
   if (index < 0) {
     handwriting.fade();
