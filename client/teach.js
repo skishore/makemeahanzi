@@ -96,7 +96,9 @@ const onStroke = (stroke) => {
 
   current[index] = true;
   complete.set(current);
-  handwriting.emplace(strokes.get()[index], result.source, result.target);
+  const rotate = medians.get()[index].length === 2;
+  handwriting.emplace(strokes.get()[index], rotate,
+                      result.source, result.target);
   if (missing.length === 1) {
     handwriting.glow();
   } else if (missing[0] < index) {
