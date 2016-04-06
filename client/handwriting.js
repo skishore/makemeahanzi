@@ -131,6 +131,10 @@ this.makemeahanzi.Handwriting = class Handwriting {
     renderCross(this._stage);
     this._stage.addChild(this._animation, this._container);
     this._reset();
+
+    createjs.Ticker.setFPS(60);
+    createjs.Ticker.removeAllEventListeners();
+    createjs.Ticker.addEventListener('tick', this._stage);
   }
   clear() {
     createjs.Tween.removeAllTweens();
@@ -144,8 +148,6 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._container.removeChildAt(this._container.children.length - 1);
     this._animation.addChild(child);
     createjs.Tween.get(child).to(endpoint, 200);
-    createjs.Ticker.setFPS(60);
-    createjs.Ticker.addEventListener('tick', this._stage);
   }
   fade() {
     const children = this._container.children;
@@ -154,8 +156,6 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._animation.addChild(child);
     createjs.Tween.get(child).to({alpha: 0}, 200)
                   .call(() => this._animation.removeChild(child));
-    createjs.Ticker.setFPS(60);
-    createjs.Ticker.addEventListener('tick', this._stage);
   }
   flash(path) {
     const child = pathToShape(path, this._size, 'blue');
@@ -163,8 +163,6 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._animation.addChild(child);
     createjs.Tween.get(child).to({alpha: 0}, 800)
                   .call(() => this._animation.removeChild(child));
-    createjs.Ticker.setFPS(60);
-    createjs.Ticker.addEventListener('tick', this._stage);
   }
   glow() {
     for (let child of this._animation.children) {

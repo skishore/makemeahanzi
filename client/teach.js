@@ -1,5 +1,3 @@
-// TODO(skishore): Animate strokes when the user gets them correct.
-//
 // TODO(skishore): Do some kind of smoothing to avoid giving users hints based
 // off of the straight segments where strokes intersects.
 const character = new ReactiveVar();
