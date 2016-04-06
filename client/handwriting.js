@@ -6,8 +6,24 @@ const kCrossWidth = 2;
 const kMinWidth = 8;
 const kMaxWidth = 16;
 const kOffset = 10;
+const kMinDistance = 1 / 32;
 const kPositiveDecay = 8;
 const kNegativeDecay = 64;
+
+const angle = (xs) => Math.atan2(xs[1][1] - xs[0][1], xs[1][0] - xs[0][0]);
+
+const animate = (shape, size, source, target) => {
+  shape.regX = size * (target[0][0] + target[1][0]) / 2;
+  shape.regY = size * (target[0][1] + target[1][1]) / 2;
+  shape.x = size * (source[0][0] + source[1][0]) / 2;
+  shape.y = size * (source[0][1] + source[1][1]) / 2;
+  const rotation = (180 / Math.PI) * (angle(source) - angle(target));
+  shape.rotation = ((Math.round(rotation) + 180) % 360) - 180;
+  const scale = distance(source) / (distance(target) + kMinDistance);
+  shape.scaleX = scale;
+  shape.scaleY = scale;
+  return {rotation: 0, scaleX: 1, scaleY: 1, x: shape.regX, y: shape.regY};
+}
 
 const createSketch = (element, handwriting) => {
   let mousedown = false;
@@ -33,6 +49,11 @@ const createSketch = (element, handwriting) => {
       }
     }
   });
+}
+
+const distance = (xs) => {
+  const diff = [xs[1][0] - xs[0][0], xs[1][1] - xs[0][1]];
+  return Math.sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
 }
 
 const dottedLine = (x1, y1, x2, y2) => {
@@ -105,6 +126,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._animation = new createjs.Container();
     this._container = new createjs.Container();
     this._stage = new createjs.Stage(element.find('canvas')[0]);
+    this._size = this._stage.canvas.width;
 
     renderCross(this._stage);
     this._stage.addChild(this._animation, this._container);
@@ -116,9 +138,14 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._container.removeAllChildren();
     this._reset();
   }
-  emplace(path) {
+  emplace(path, source, target) {
+    const child = pathToShape(path, this._size);
+    const endpoint = animate(child, this._size, source, target);
     this._container.removeChildAt(this._container.children.length - 1);
-    this._animation.addChild(pathToShape(path, this._stage.canvas.width));
+    this._animation.addChild(child);
+    createjs.Tween.get(child).to(endpoint, 200);
+    createjs.Ticker.setFPS(60);
+    createjs.Ticker.addEventListener('tick', this._stage);
   }
   fade() {
     const children = this._container.children;
@@ -131,7 +158,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     createjs.Ticker.addEventListener('tick', this._stage);
   }
   flash(path) {
-    const child = pathToShape(path, this._stage.canvas.width, 'blue');
+    const child = pathToShape(path, this._size, 'blue');
     this._container.removeChildAt(this._container.children.length - 1);
     this._animation.addChild(child);
     createjs.Tween.get(child).to({alpha: 0}, 800)
@@ -149,8 +176,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._reset();
   }
   _distance(point1, point2) {
-    const diagonal = this._stage.canvas.width * this._stage.canvas.width +
-                     this._stage.canvas.height * this._stage.canvas.height;
+    const diagonal = 2 * this._size * this._size;
     const diff = [point1[0] - point2[0], point1[1] - point2[1]];
     return (diff[0] * diff[0] + diff[1] * diff[1]) / diagonal;
   }

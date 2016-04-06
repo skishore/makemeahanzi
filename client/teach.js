@@ -31,16 +31,15 @@ const advance = () => {
 }
 
 const match = (stroke) => {
-  let best_index = -1;
-  let best_score = -Infinity;
+  let best_result = {index: -1, score: -Infinity};
   for (let i = 0; i < medians.get().length; i++) {
-    const score = makemeahanzi.recognize(stroke, medians.get()[i]);
-    if (score > best_score) {
-      best_index = i;
-      best_score = score;
+    const result = makemeahanzi.recognize(stroke, medians.get()[i]);
+    if (result.score > best_result.score) {
+      best_result = result;
+      best_result.index = i;
     }
   }
-  return best_index;
+  return best_result;
 }
 
 // Event handlers which will be bound to various Meteor-dispatched events.
@@ -80,7 +79,8 @@ const onStroke = (stroke) => {
   }
 
   const shortstraw = new makemeahanzi.Shortstraw;
-  const index = match(shortstraw.run(stroke));
+  const result = match(shortstraw.run(stroke));
+  const index = result.index;
   if (index < 0) {
     handwriting.fade();
     mistakes.set(mistakes.get() + 1);
@@ -97,7 +97,7 @@ const onStroke = (stroke) => {
 
   current[index] = true;
   complete.set(current);
-  handwriting.emplace(strokes.get()[index]);
+  handwriting.emplace(strokes.get()[index], result.source, result.target);
   if (missing.length === 1) {
     handwriting.glow();
   } else if (missing[0] < index) {
