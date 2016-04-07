@@ -149,7 +149,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const endpoint = animate(child, this._size, rotate, source, target);
     this._container.removeChildAt(this._container.children.length - 1);
     this._animation.addChild(child);
-    createjs.Tween.get(child).to(endpoint, 200);
+    createjs.Tween.get(child).to(endpoint, 200)
+                  .call(() => child.cache(0, 0, this._size, this._size));
   }
   fade() {
     const children = this._container.children;
@@ -194,11 +195,9 @@ this.makemeahanzi.Handwriting = class Handwriting {
   }
   _endStroke() {
     if (this._shape) {
-      this._shape.cache(0, 0, this._stage.canvas.width,
-                        this._stage.canvas.height);
+      this._shape.cache(0, 0, this._size, this._size);
       if (this._onstroke) {
-        this._onstroke(this._stroke.map(
-            (x) => x.map((y) => y / this._stage.canvas.width)));
+        this._onstroke(this._stroke.map((x) => x.map((y) => y / this._size)));
       }
     } else if (this._onclick) {
       this._onclick();
