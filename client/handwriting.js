@@ -77,6 +77,7 @@ const pathToShape = (path, size, color) => {
   const result = new createjs.Shape();
   const graphics = result.graphics;
   result.graphics.beginFill(color || 'black');
+  result.graphics.beginStroke(color || 'black');
   const tokens = path.split(' ');
   let index = 0;
   const next = () => {
@@ -169,7 +170,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
   }
   glow() {
     for (let child of this._animation.children) {
-      child.shadow = new createjs.Shadow('#4f0', 0, 0, 64);
+      child.shadow = new createjs.Shadow('black', 0, 0, 64);
     }
   }
   undo() {
