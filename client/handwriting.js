@@ -22,6 +22,22 @@ const animate = (shape, size, rotate, source, target) => {
   return {rotation: 0, scaleX: 1, scaleY: 1, x: shape.regX, y: shape.regY};
 }
 
+const convertShapeStyles = (shape, start, end) => {
+  if (!shape.graphics || !shape.graphics.instructions) {
+    return;
+  }
+  let updated = false;
+  for (let instruction of shape.graphics.instructions) {
+    if (instruction.style === start) {
+      instruction.style = end;
+      updated = true;
+    }
+  }
+  if (updated && shape.cacheCanvas) {
+    shape.updateCache();
+  }
+}
+
 const createSketch = (element, handwriting) => {
   let mousedown = false;
   Sketch.create({
@@ -117,12 +133,12 @@ const renderCross = (stage) => {
 class BasicBrush {
   constructor(container, point, options) {
     options = options || {};
-    const width = options.width || 12;
+    this._color = options.color || '#888';
+    this._width = options.width || 16;
 
     this._shape = new createjs.Shape;
     this._endpoint = point;
     this._midpoint = null;
-    this._width = width;
     container.addChild(this._shape);
   }
   advance(point) {
@@ -139,7 +155,7 @@ class BasicBrush {
   _draw(point1, point2, control) {
     const graphics = this._shape.graphics;
     graphics.setStrokeStyle(this._width, 'round');
-    graphics.beginStroke('black');
+    graphics.beginStroke(this._color);
     graphics.moveTo(point1[0], point1[1]);
     if (control) {
       graphics.curveTo(control[0], control[1], point2[0], point2[1]);
@@ -239,7 +255,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const endpoint = animate(child, this._size, rotate, source, target);
     this._container.removeChildAt(this._container.children.length - 1);
     this._animation.addChild(child);
-    createjs.Tween.get(child).to(endpoint, 200)
+    createjs.Tween.get(child).to(endpoint, 150)
                   .call(() => child.cache(0, 0, this._size, this._size));
   }
   fade() {
@@ -247,19 +263,19 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const child = children[children.length - 1];
     this._container.removeChildAt(children.length - 1);
     this._animation.addChild(child);
-    createjs.Tween.get(child).to({alpha: 0}, 200)
+    createjs.Tween.get(child).to({alpha: 0}, 150)
                   .call(() => this._animation.removeChild(child));
   }
   flash(path) {
     const child = pathToShape(path, this._size, 'blue');
     this._container.removeChildAt(this._container.children.length - 1);
     this._animation.addChild(child);
-    createjs.Tween.get(child).to({alpha: 0}, 800)
+    createjs.Tween.get(child).to({alpha: 0}, 750)
                   .call(() => this._animation.removeChild(child));
   }
   glow() {
     for (let child of this._animation.children) {
-      child.shadow = new createjs.Shadow('black', 0, 0, 64);
+      convertShapeStyles(child, 'black', '#0a0');
     }
   }
   undo() {
