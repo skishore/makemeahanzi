@@ -165,63 +165,6 @@ class BasicBrush {
   }
 }
 
-class InkBrush {
-  constructor(container, point, options) {
-    options = options || {};
-    const bristles = options.bristles || 8;
-    const ink = options.ink || 8;
-    const width = options.width || 12;
-
-    this._active = new createjs.Container;
-    this._cached = new createjs.Container;
-    this._container = new createjs.Container;
-    this._bristles = [];
-    this._offsets = [];
-    this._index = 0;
-
-    for (let i = 0; i < bristles; i++) {
-      const offset = this._offset(width);
-      this._bristles.push(new BasicBrush(
-          this._active, this._add(point, offset), {width: ink}));
-      this._offsets.push(offset);
-    }
-    this._container.addChild(this._cached);
-    this._container.addChild(this._active);
-    container.addChild(this._container);
-  }
-  advance(point) {
-    for (let i = 0; i < this._bristles.length; i++) {
-      this._bristles[i].advance(this._add(point, this._offsets[i]));
-    }
-    this._index += 1;
-    if (this._index % Math.ceil(200 / this._bristles.length) == 0) {
-      this._cache();
-    }
-  }
-  _add(point1, point2) {
-    return [point1[0] + point2[0], point1[1] + point2[1]];
-  }
-  _cache() {
-    this._active.removeAllChildren();
-    for (let i = 0; i < this._bristles.length; i++) {
-      this._cached.addChild(this._bristles[i]._shape);
-      this._bristles[i]._shape = new createjs.Shape;
-      this._active.addChild(this._bristles[i]._shape);
-    }
-    this._cached.cache(0, 0, 512, 512);
-  }
-  _offset(width) {
-    const rx = width * Math.random();
-    const c = 2 * Math.PI * Math.random();
-    const c0 = 2 * Math.PI * Math.random();
-    const x0 = rx * Math.sin(c0);
-    const y0 = rx * Math.cos(c0) / 2;
-    const cos = Math.cos(c);
-    const sin = Math.sin(c);
-    return [x0 * cos - y0 * sin, x0 * sin - y0 * cos];
-  }
-}
-
 // Methods for actually executing drawing commands.
 
 this.makemeahanzi.Handwriting = class Handwriting {
