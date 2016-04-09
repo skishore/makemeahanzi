@@ -3,12 +3,7 @@
 // TODO(skishore): Make the success fanfare more appealing.
 
 const kCrossWidth = 2;
-const kMinWidth = 8;
-const kMaxWidth = 16;
-const kOffset = 10;
 const kMinDistance = 1 / 32;
-const kPositiveDecay = 8;
-const kNegativeDecay = 64;
 
 const angle = (xs) => Math.atan2(xs[1][1] - xs[0][1], xs[1][0] - xs[0][0]);
 
@@ -117,6 +112,39 @@ const renderCross = (stage) => {
   stage.addChild(cross);
 }
 
+// A helper brush class that allows us to draw nice ink facsimiles.
+
+class Brush {
+  constructor(container, point) {
+    this._shape = new createjs.Shape;
+    this._endpoint = point;
+    this._midpoint = null;
+    container.addChild(this._shape);
+  }
+  advance(point) {
+    const last_endpoint = this._endpoint;
+    const last_midpoint = this._midpoint;
+    this._endpoint = point;
+    this._midpoint = midpoint(last_endpoint, this._endpoint);
+    if (last_midpoint) {
+      this._draw(last_midpoint, this._midpoint, last_endpoint);
+    } else {
+      this._draw(last_endpoint, this._midpoint);
+    }
+  }
+  _draw(point1, point2, control) {
+    const graphics = this._shape.graphics;
+    graphics.setStrokeStyle(1, 'round');
+    graphics.beginStroke('black');
+    graphics.moveTo(point1[0], point1[1]);
+    if (control) {
+      graphics.curveTo(control[0], control[1], point2[0], point2[1]);
+    } else {
+      graphics.lineTo(point2[0], point2[1]);
+    }
+  }
+}
+
 // Methods for actually executing drawing commands.
 
 this.makemeahanzi.Handwriting = class Handwriting {
@@ -182,21 +210,10 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const diff = [point1[0] - point2[0], point1[1] - point2[1]];
     return (diff[0] * diff[0] + diff[1] * diff[1]) / diagonal;
   }
-  _draw(point1, point2, control) {
-    const graphics = this._shape.graphics;
-    graphics.setStrokeStyle(this._width, 'round');
-    graphics.beginStroke('black');
-    graphics.moveTo(point1[0], point1[1]);
-    if (control) {
-      graphics.curveTo(control[0], control[1], point2[0], point2[1]);
-    } else {
-      graphics.lineTo(point2[0], point2[1]);
-    }
-    this._stage.update();
-  }
   _endStroke() {
-    if (this._shape) {
-      this._shape.cache(0, 0, this._size, this._size);
+    if (this._brush) {
+      this._container.children[this._container.children.length - 1]
+                     .cache(0, 0, this._size, this._size);
       if (this._onstroke) {
         this._onstroke(this._stroke.map((x) => x.map((y) => y / this._size)));
       }
@@ -220,30 +237,16 @@ this.makemeahanzi.Handwriting = class Handwriting {
     if (this._stroke.length < 2) {
       return;
     }
-    const i = this._stroke.length - 2;
-    const last = this._midpoint;
-    this._midpoint = midpoint(this._stroke[i], this._stroke[i + 1]);
-    if (this._shape) {
-      this._updateWidth(this._distance(this._stroke[i], this._stroke[i + 1]));
-      this._draw(last, this._midpoint, this._stroke[i]);
-    } else {
-      this._shape = new createjs.Shape();
-      this._container.addChild(this._shape);
-      this._draw(this._stroke[i], this._midpoint);
+    const n = this._stroke.length;
+    if (!this._brush) {
+      this._brush = new Brush(this._container, this._stroke[n - 2]);
     }
-  }
-  _reset() {
-    this._midpoint = null;
-    this._shape = null;
-    this._stroke = [];
-    this._width = kMaxWidth;
+    this._brush.advance(this._stroke[n - 1]);
     this._stage.update();
   }
-  _updateWidth(distance) {
-    if (distance <= 0) return;
-    let offset = (Math.log(distance) + kOffset);
-    offset /= (offset > 0 ? kPositiveDecay : kNegativeDecay);
-    this._width = Math.max(Math.min(
-        this._width - offset, kMaxWidth), kMinWidth);
+  _reset() {
+    this._brush = null;
+    this._stroke = [];
+    this._stage.update();
   }
 }
