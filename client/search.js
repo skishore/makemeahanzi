@@ -5,7 +5,7 @@ const zoom = new ReactiveVar(1);
 let handwriting = null;
 
 makemeahanzi.mediansPromise.then((medians) => {
-  const matcher = new makemeahanzi.Matcher(medians);
+  const matcher = new makemeahanzi.Matcher(medians, {min_width: 1 / 64});
   Deps.autorun(() => candidates.set(matcher.match(strokes.get(), 8)));
 }).catch(console.error.bind(console));
 
