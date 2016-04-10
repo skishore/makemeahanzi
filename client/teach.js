@@ -11,6 +11,7 @@ const zoom = new ReactiveVar(1);
 let handwriting = null;
 
 const kMaxMistakes = 3;
+const kNumCharacters = 300;
 
 let characters = [];
 let definitions = {};
@@ -43,8 +44,17 @@ const match = (stroke, expected) => {
 
 // Event handlers which will be bound to various Meteor-dispatched events.
 
-const onData = (data, code) => {
-  if (code !== 'success') throw new Error(code);
+const onLoadFrequency = (data, code) => {
+  for (let line of data.split('\n')) {
+    if (line.length === 0 || line[0] === '#') continue;
+    const terms = line.split('\t');
+    if (terms.length < 2) continue;
+    if (parseInt(terms[0], 10) > kNumCharacters) continue;
+    characters.push(terms[1]);
+  }
+}
+
+const onLoadRadicals = (data, code) => {
   for (let line of data.split('\n')) {
     const terms = line.split('\t');
     if (terms.length < 4) continue;
@@ -52,7 +62,6 @@ const onData = (data, code) => {
     characters.push(character);
     definitions[character] = terms[3];
   }
-  advance();
 }
 
 const onRendered = function() {
@@ -128,7 +137,11 @@ const updateCharacter = () => {
 
 // Meteor template bindings.
 
-$.get('radicals.txt', onData);
+$.get('frequency.tsv', (data, code) => {
+  if (code !== 'success') throw new Error(code);
+  onLoadFrequency(data);
+  advance();
+});
 
 Template.teach.helpers({
   label: () => label.get(),
