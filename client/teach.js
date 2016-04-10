@@ -81,8 +81,9 @@ const onStroke = (stroke) => {
   if (missing.length === 0) {
     handwriting.clear();
     advance();
-  }
-  if (missing.length === 0 || !stroke) {
+    return;
+  } else if (!stroke) {
+    handwriting.flash(strokes.get()[missing[0]]);
     return;
   }
 
