@@ -1,7 +1,27 @@
 body {
-  background-color: #68a;
   margin: 0;
   text-align: center;
+}
+
+.background, .foreground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.background {
+  background-image: url("background.jpg");
+  background-position-y: -300px;
+}
+
+.foreground {
+  background-image: url("foreground.jpg");
+  background-size: cover;
+  mix-blend-mode: difference;
+  pointer-events: none;
+  -webkit-filter: invert(1);
 }
 
 .buttonlike {
@@ -258,10 +278,11 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  top: 60px;
+  top: 0;
 
   #wrapper {
     display: inline-block;
+    opacity: 0.92;
     overflow: hidden;
     padding: 32px;
     text-align: left;
@@ -275,12 +296,12 @@ body {
 
     .prompt {
       background-color: white;
-      border: 2px solid #2c3e50;
       box-sizing: border-box;
       color: #2c3e50;
       font-size: 32px;
       height: 64px;
       line-height: 60px;
+      margin-bottom: 64px;
       text-align: center;
       width: 100%;
     }
