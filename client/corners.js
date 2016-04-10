@@ -1,12 +1,28 @@
 // This module defines one public method, findCorners, which takes a list of
 // medians and returns a list of corners for each one.
 
+const kMinFirstSegmentFraction = 0.1;
+const kMinLastSegmentFraction = 0.05;
 const kFontSize = 1024;
 const kTruncation = 16;
 
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
 const scale = (median, k) => median.map((point) => point.map((x) => k * x));
+
+const dropDanglingHooks = (median) => {
+  const n = median.length;
+  if (n < 3) return median;
+  const total = pathLength(median);
+  const indices_to_drop = {};
+  if (distance(median[0], median[1]) < kMinFirstSegmentFraction) {
+    indices_to_drop[1] = true;
+  }
+  if (distance(median[n - 2], median[n - 1]) < kMinLastSegmentFraction) {
+    indices_to_drop[n - 2] = true;
+  }
+  return median.filter((value, i) => !indices_to_drop[i]);;
+}
 
 const distance = (point1, point2) => {
   const diff = [point1[0] - point2[0], point1[1] - point2[1]];
@@ -59,5 +75,6 @@ this.makemeahanzi.findCorners = (medians) => {
   return medians.map(fixMedianCoordinates)
                 .map((x) => truncate(x, kTruncation))
                 .map((x) => scale(x, 1 / kFontSize))
-                .map(shortstraw.run.bind(shortstraw));
+                .map(shortstraw.run.bind(shortstraw))
+                .map(dropDanglingHooks);
 }
