@@ -1,7 +1,8 @@
 // Helper methods used by the handwriting class.
 
-const kCrossWidth = 2;
+const kCrossWidth = 1 / 256;
 const kMinDistance = 1 / 32;
+const kStrokeWidth = 1 / 32;
 
 const angle = (xs) => Math.atan2(xs[1][1] - xs[0][1], xs[1][0] - xs[0][0]);
 
@@ -43,7 +44,7 @@ const createSketch = (element, handwriting) => {
     autoclear: false,
     fullscreen: false,
     width: element.width(),
-    height: element.height(),
+    height: element.width(),
     mousedown(e) {
       mousedown = true;
       handwriting._pushPoint([e.x, e.y]);
@@ -67,10 +68,10 @@ const distance = (xs) => {
   return Math.sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
 }
 
-const dottedLine = (x1, y1, x2, y2) => {
+const dottedLine = (width, x1, y1, x2, y2) => {
   const result = new createjs.Shape();
-  result.graphics.setStrokeDash([kCrossWidth, kCrossWidth], 0);
-  result.graphics.setStrokeStyle(kCrossWidth)
+  result.graphics.setStrokeDash([width, width], 0);
+  result.graphics.setStrokeStyle(width)
   result.graphics.beginStroke('#ccc');
   result.graphics.moveTo(x1, y1);
   result.graphics.lineTo(x2, y2);
@@ -118,10 +119,11 @@ const renderCross = (stage) => {
   const cross = new createjs.Container();
   const height = stage.canvas.height;
   const width = stage.canvas.width;
-  cross.addChild(dottedLine(0, 0, width, height));
-  cross.addChild(dottedLine(width, 0, 0, height));
-  cross.addChild(dottedLine(width / 2, 0, width / 2, height));
-  cross.addChild(dottedLine(0, height / 2, width, height / 2));
+  const stroke = width * kCrossWidth;
+  cross.addChild(dottedLine(stroke, 0, 0, width, height));
+  cross.addChild(dottedLine(stroke, width, 0, 0, height));
+  cross.addChild(dottedLine(stroke, width / 2, 0, width / 2, height));
+  cross.addChild(dottedLine(stroke, 0, height / 2, width, height / 2));
   cross.cache(0, 0, width, height);
   stage.addChild(cross);
 }
@@ -132,7 +134,7 @@ class BasicBrush {
   constructor(container, point, options) {
     options = options || {};
     this._color = options.color || '#888';
-    this._width = options.width || 16;
+    this._width = options.width || 1;
 
     this._shape = new createjs.Shape;
     this._endpoint = point;
@@ -275,7 +277,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
     }
     const n = this._stroke.length;
     if (!this._brush) {
-      this._brush = new BasicBrush(this._container, this._stroke[n - 2]);
+      this._brush = new BasicBrush(this._container, this._stroke[n - 2],
+                                   {width: this._size * kStrokeWidth});
     }
     this._brush.advance(this._stroke[n - 1]);
     this._stage.update();

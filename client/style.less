@@ -3,27 +3,6 @@ body {
   text-align: center;
 }
 
-.background, .foreground {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-}
-
-.background {
-  background-image: url("background.jpg");
-  background-position-y: -300px;
-}
-
-.foreground {
-  background-image: url("foreground.jpg");
-  background-size: cover;
-  mix-blend-mode: difference;
-  pointer-events: none;
-  -webkit-filter: invert(1);
-}
-
 .buttonlike {
   cursor: pointer;
   user-select: none;
@@ -31,93 +10,17 @@ body {
   -webkit-user-select: none;
 }
 
-.navbar {
-  position: fixed;
+.full-size {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
   top: 0;
-  width: 100%;
-
-  .navbar-header {
-    display: inline-block;
-    float: left;
-
-    &.navbar-right {
-      float: right;
-
-      .navbar-brand {
-        font-size: 28px;
-        padding: 16px;
-        text-align: center;
-        width: 60px;
-        .buttonlike;
-
-        .no-touch &:hover, .touch &:active {
-          background-color: #357;
-        }
-      }
-    }
-
-    .navbar-brand {
-      color: white !important;
-    }
-  }
 }
 
-.report.modal {
-  text-align: left;
-
-  .modal-header, .modal-body, .modal-footer {
-    padding: 12px 16px;
-  }
-
-  .modal-header {
-    .modal-title {
-      font-size: 20px;
-      line-height: 1;
-    }
-
-    .close {
-      margin-top: -4px;
-      .buttonlike;
-    }
-  }
-
-  .modal-body {
-    textarea {
-      resize: vertical;
-    }
-
-    .form-control {
-      padding: 6px 8px;
-    }
-
-    .form-group:last-child {
-      margin-bottom: 0;
-    }
-  }
-
-  .modal-footer {
-    .status {
-      line-height: 33px;
-
-      &.error {
-        color: #d62c1a;
-      }
-
-      &.success {
-        color: green;
-      }
-    }
-
-    .btn {
-      outline: none;
-      padding: 4px 8px;
-    }
-
-    .status, .btn {
-      float: right;
-      margin: 0 0 0 8px;
-    }
-  }
+.paperlike {
+  background-color: white;
+  opacity: 0.88;
 }
 
 #character {
@@ -273,78 +176,53 @@ body {
   }
 }
 
-#search, #teach {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  top: 0;
+#teach {
+  .full-size;
 
-  #wrapper {
-    display: inline-block;
-    opacity: 0.92;
-    overflow: hidden;
-    padding: 32px;
-    text-align: left;
+  .background {
+    background-blend-mode: screen;
+    background-color: #383020;
+    background-image: url("background.jpg");
+    background-position-y: -300px;
+    .full-size;
+  }
 
-    position: absolute;
-    left: 50%;
-    top: 50%;
+  .foreground {
+    background-image: url("foreground.jpg");
+    background-size: cover;
+    mix-blend-mode: difference;
+    pointer-events: none;
+    -webkit-filter: invert(1);
+    .full-size;
+  }
 
-    transform-origin: 0 0 0;
-    -webkit-transform-origin: 0 0 0;
+  .prompt {
+    font-family: Georgia, serif;
+    font-size: 1.5em;
+    position: fixed;
+    text-align: center;
+    width: 100%;
+    .paperlike;
 
-    .prompt {
-      background-color: white;
-      box-sizing: border-box;
-      color: #2c3e50;
-      font-size: 32px;
-      height: 64px;
-      line-height: 60px;
-      margin-bottom: 64px;
-      text-align: center;
-      width: 100%;
+    .pinyin, .definition {
+      margin: 0.5em;
     }
+  }
+
+  .wrapper {
+    padding: 0 2em;
+    transform: translateY(50%);
+    .full-size;
+    top: 10em;
 
     .handwriting {
-      background-color: white;
-      height: 512px;
-      width: 512px;
-    }
+      display: inline-block;
+      transform: translateY(-50%);
+      width: 100%;
+      .paperlike;
 
-    .controls .button {
-      background-color: white;
-      border: 2px solid #2c3e50;
-      font-size: 32px;
-      width: 50%;
-    }
-
-    .output {
-      background-color: white;
-      clear: both;
-      margin-top: 96px;
-      height: 64px;
-
-      .candidate {
-        border: 2px dotted lightgray;
-        font-size: 40px;
-        width: 64px;
-      }
-    }
-
-    .controls .button, .output .candidate {
-      box-sizing: border-box;
-      color: #2c3e50;
-      float: left;
-      height : 64px;
-      line-height: 60px;
-      margin: 0;
-      text-align: center;
-      text-decoration: none;
-      .buttonlike;
-
-      .no-touch &:hover, .touch &:active {
-        background-color: #bdf;
+      canvas {
+        vertical-align: middle;
       }
     }
   }

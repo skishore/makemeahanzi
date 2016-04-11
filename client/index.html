@@ -4,51 +4,5 @@
       width=device-width, user-scalable=no, initial-scale=1">
 </head>
 <body>
-  <div class="background"></div>
-  {{> Template.dynamic template=route}}
-  <div class="foreground"></div>
+  {{> teach}}
 </body>
-
-<template name="navbar">
-  <div id="navbar" class="navbar navbar-default navbar-static-top">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <div class="navbar-brand">Make Me a Hanzi Demo</div>
-      </div>
-      <div class="navbar-header navbar-right">
-        <a class="navbar-brand search" href="{{href}}">&#9998;</a>
-      </div>
-    </div>
-  </div>
-</template>
-
-<template name="report">
-  <div id="modal" class="report modal fade" tabIndex="1"
-       data-backdrop="static">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal"
-                  aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-          <h3 class="modal-title">Report an error</h3>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="email">Description:</label>
-            <textarea class="description form-control" rows="3" tabIndex="2"
-                      placeholder="Describe the problem that you found."
-             ></textarea>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="submit btn btn-danger">Submit</button>
-          <button type="button" class="btn btn-primary"
-                  data-dismiss="modal">Cancel</button>
-          <div class="status"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>

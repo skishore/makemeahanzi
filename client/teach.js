@@ -2,11 +2,11 @@
 // off of the straight segments where strokes intersects.
 const character = new ReactiveVar();
 const complete = new ReactiveVar();
-const label = new ReactiveVar();
+const definition = new ReactiveVar();
 const medians = new ReactiveVar();
 const mistakes = new ReactiveVar();
+const pinyin = new ReactiveVar();
 const strokes = new ReactiveVar();
-const zoom = new ReactiveVar(1);
 
 let handwriting = null;
 
@@ -65,13 +65,8 @@ const onLoadRadicals = (data, code) => {
 }
 
 const onRendered = function() {
-  zoom.set(this.getZoom());
   const element = $(this.firstNode).find('.handwriting');
-  const options = {
-    onclick: onStroke,
-    onstroke: onStroke,
-    zoom: zoom.get(),
-  };
+  const options = {onclick: onStroke, onstroke: onStroke};
   handwriting = new makemeahanzi.Handwriting(element, options);
 }
 
@@ -126,11 +121,11 @@ const updateCharacter = () => {
       return;
     }
     if (row.character === character.get()) {
-      const definition = definitions[row.character] || row.definition;
       complete.set(new Array(row.medians.length).fill(false));
-      label.set(`${row.pinyin.join(', ')} - ${definition}`);
+      definition.set(definitions[row.character] || row.definition);
       medians.set(makemeahanzi.findCorners(row.medians));
       mistakes.set(0);
+      pinyin.set(row.pinyin.join(', '));
       strokes.set(row.strokes);
     }
   });
@@ -145,8 +140,9 @@ $.get('frequency.tsv', (data, code) => {
 });
 
 Template.teach.helpers({
-  label: () => label.get(),
-  zoom: () => zoom.get(),
+  definition: () => definition.get(),
+  pinyin: () => pinyin.get(),
+  solution: () => solution.get(),
 });
 
 Template.teach.onRendered(onRendered);
