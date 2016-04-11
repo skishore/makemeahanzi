@@ -19,11 +19,6 @@ body {
   top: 0;
 }
 
-.paperlike {
-  background-color: white;
-  opacity: 0.84;
-}
-
 #character {
   margin-top: 60px;
 
@@ -178,31 +173,49 @@ body {
 }
 
 #teach {
-  .full-size;
-
-  .background {
-    background-blend-mode: screen;
-    background-color: #444;
-    background-image: url("background.jpg");
-    background-position-y: -300px;
+  &, .background, .foreground {
     .full-size;
   }
 
-  .foreground {
-    background-image: url("foreground.jpg");
-    background-size: cover;
-    mix-blend-mode: difference;
-    pointer-events: none;
-    -webkit-filter: invert(1);
-    .full-size;
+  &.theme-flat {
+    .background {
+      background-color: #a4d4ff;
+    }
+
+    .prompt, .wrapper .handwriting {
+      background-color: #f5f5f5;
+    }
+  }
+
+  &.theme-painterly, &.theme-textured {
+    .background {
+      background-blend-mode: luminosity;
+      background-color: white;
+      background-image: url("background.jpg");
+      background-position-y: -300px;
+    }
+
+    .prompt, .wrapper .handwriting {
+      box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.5);
+      opacity: 0.92;
+    }
+  }
+
+  &.theme-textured {
+    .foreground {
+      background-image: url("foreground.jpg");
+      background-size: cover;
+      mix-blend-mode: difference;
+      -webkit-filter: invert(1);
+    }
   }
 
   .prompt {
+    background-color: white;
     font-family: Georgia, serif;
     position: fixed;
     text-align: center;
     width: 100%;
-    .paperlike;
 
     .pinyin, .definition {
       font-size: 5.6vw;
@@ -217,14 +230,18 @@ body {
     top: 27%;
 
     .handwriting {
+      background-color: white;
       display: inline-block;
       transform: translateY(-50%);
       width: 100%;
-      .paperlike;
 
       canvas {
         vertical-align: middle;
       }
     }
+  }
+
+  .foreground {
+    pointer-events: none;
   }
 }
