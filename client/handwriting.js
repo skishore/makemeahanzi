@@ -1,6 +1,4 @@
 // Helper methods used by the handwriting class.
-//
-// TODO(skishore): Make the success fanfare more appealing.
 
 const kCrossWidth = 2;
 const kMinDistance = 1 / 32;
@@ -177,6 +175,9 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._animation = new createjs.Container();
     this._container = new createjs.Container();
     this._stage = new createjs.Stage(element.find('canvas')[0]);
+
+    this._pending_animations = 0;
+    this._running_animations = 0;
     this._size = this._stage.canvas.width;
 
     renderCross(this._stage);
@@ -185,45 +186,60 @@ this.makemeahanzi.Handwriting = class Handwriting {
 
     createjs.Ticker.setFPS(60);
     createjs.Ticker.removeAllEventListeners();
-    createjs.Ticker.addEventListener('tick', this._stage);
+    createjs.Ticker.addEventListener('tick', this.tick.bind(this));
   }
   clear() {
     createjs.Tween.removeAllTweens();
     this._animation.removeAllChildren();
     this._container.removeAllChildren();
+    this._pending_animations = 0;
+    this._running_animations = 0;
     this._reset();
   }
   emplace(path, rotate, source, target) {
     const child = pathToShape(path, this._size);
     const endpoint = animate(child, this._size, rotate, source, target);
     this._container.removeChildAt(this._container.children.length - 1);
-    this._animation.addChild(child);
-    createjs.Tween.get(child).to(endpoint, 150)
-                  .call(() => child.cache(0, 0, this._size, this._size));
+    this._animate(child, endpoint, 150,
+                  () => child.cache(0, 0, this._size, this._size));
   }
   fade() {
     const children = this._container.children;
     const child = children[children.length - 1];
     this._container.removeChildAt(children.length - 1);
-    this._animation.addChild(child);
-    createjs.Tween.get(child).to({alpha: 0}, 150)
-                  .call(() => this._animation.removeChild(child));
+    this._animate(child, {alpha: 0}, 150,
+                  () => this._animation.removeChild(child));
   }
   flash(path) {
     const child = pathToShape(path, this._size, 'blue');
     this._container.removeChildAt(this._container.children.length - 1);
     this._animation.addChild(child);
-    createjs.Tween.get(child).to({alpha: 0}, 750)
-                  .call(() => this._animation.removeChild(child));
+    this._animate(child, {alpha: 0}, 750,
+                  () => this._animation.removeChild(child));
   }
   glow() {
     for (let child of this._animation.children) {
       convertShapeStyles(child, 'black', '#0a0');
     }
   }
+  tick(event) {
+    if (this._running_animations) {
+      this._stage.update(event);
+      this._running_animations -= this._pending_animations;
+      this._pending_animations = 0;
+    }
+  }
   undo() {
     this._container.removeChildAt(this._container.children.length - 1);
     this._reset();
+  }
+  _animate(shape, target, duration, callback) {
+    this._animation.addChild(shape);
+    this._running_animations += 1;
+    createjs.Tween.get(shape).to(target, duration).call(() => {
+      this._pending_animations += 1;
+      callback();
+    });
   }
   _distance(point1, point2) {
     const diagonal = 2 * this._size * this._size;
