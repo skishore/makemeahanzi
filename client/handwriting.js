@@ -1,5 +1,6 @@
 // Helper methods used by the handwriting class.
 
+const kCanvasSize = 512;
 const kCrossWidth = 1 / 256;
 const kMinDistance = 1 / 32;
 const kStrokeWidth = 1 / 32;
@@ -43,8 +44,8 @@ const createSketch = (element, handwriting) => {
     container: element[0],
     autoclear: false,
     fullscreen: false,
-    width: element.width(),
-    height: element.width(),
+    width: kCanvasSize,
+    height: kCanvasSize,
     mousedown(e) {
       mousedown = true;
       handwriting._pushPoint([e.x, e.y]);
@@ -61,6 +62,10 @@ const createSketch = (element, handwriting) => {
       }
     }
   });
+  const canvas = element.find('canvas')[0];
+  canvas.style.width = `${element.width()}px`;
+  canvas.style.height = `${element.width()}px`;
+  return element.width() / kCanvasSize;
 }
 
 const distance = (xs) => {
@@ -171,9 +176,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
   constructor(element, options) {
     this._onclick = options.onclick;
     this._onstroke = options.onstroke;
-    this._zoom = options.zoom || 1;
+    this._zoom = createSketch(element, this);
 
-    createSketch(element, this);
     this._animation = new createjs.Container();
     this._container = new createjs.Container();
     this._stage = new createjs.Stage(element.find('canvas')[0]);
