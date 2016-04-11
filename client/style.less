@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  overflow: hidden;
   text-align: center;
 }
 
@@ -20,7 +21,7 @@ body {
 
 .paperlike {
   background-color: white;
-  opacity: 0.88;
+  opacity: 0.84;
 }
 
 #character {
@@ -181,7 +182,7 @@ body {
 
   .background {
     background-blend-mode: screen;
-    background-color: #383020;
+    background-color: #444;
     background-image: url("background.jpg");
     background-position-y: -300px;
     .full-size;
@@ -198,22 +199,22 @@ body {
 
   .prompt {
     font-family: Georgia, serif;
-    font-size: 1.5em;
     position: fixed;
     text-align: center;
     width: 100%;
     .paperlike;
 
     .pinyin, .definition {
-      margin: 0.5em;
+      font-size: 5.6vw;
+      margin: 3%;
     }
   }
 
   .wrapper {
-    padding: 0 2em;
+    padding: 0 6%;
     transform: translateY(50%);
     .full-size;
-    top: 10em;
+    top: 27%;
 
     .handwriting {
       display: inline-block;
