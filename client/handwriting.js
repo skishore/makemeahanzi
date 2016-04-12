@@ -5,6 +5,12 @@ const kCrossWidth = 1 / 256;
 const kMinDistance = 1 / 32;
 const kStrokeWidth = 1 / 32;
 
+const kBrushedColor = '#888888';
+const kFailureColor = '#ff4d4d';
+const kHintingColor = '#0080ff';
+const kRevealsColor = '#cccccc';
+const kSuccessColor = '#4dc84d';
+
 const angle = (xs) => Math.atan2(xs[1][1] - xs[0][1], xs[1][0] - xs[0][0]);
 
 const animate = (shape, size, rotate, source, target) => {
@@ -138,7 +144,7 @@ const renderCross = (stage) => {
 class BasicBrush {
   constructor(container, point, options) {
     options = options || {};
-    this._color = options.color || '#888';
+    this._color = options.color || kBrushedColor;
     this._width = options.width || 1;
 
     this._shape = new createjs.Shape;
@@ -217,7 +223,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
                   () => this._animation.removeChild(child));
   }
   flash(path) {
-    const child = pathToShape(path, this._size, 'blue');
+    const child = pathToShape(path, this._size, kHintingColor);
     this._container.removeChildAt(this._container.children.length - 1);
     this._animation.addChild(child);
     this._animate(child, {alpha: 0}, 750,
@@ -225,8 +231,16 @@ this.makemeahanzi.Handwriting = class Handwriting {
   }
   glow() {
     for (let child of this._animation.children) {
-      convertShapeStyles(child, 'black', '#0a0');
+      convertShapeStyles(child, 'black', kSuccessColor);
     }
+  }
+  reveal(paths) {
+    for (let path of paths) {
+      const child = pathToShape(path, this._size, kRevealsColor);
+      child.cache(0, 0, this._size, this._size);
+      this._animation.addChild(child);
+    }
+    this._stage.update();
   }
   tick(event) {
     if (this._running_animations) {
