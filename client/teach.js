@@ -1,39 +1,34 @@
 // TODO(skishore): Do some kind of smoothing to avoid giving users hints based
 // off of the straight segments where strokes intersects.
 const character = new ReactiveVar();
-const complete = new ReactiveVar();
 const definition = new ReactiveVar();
-const medians = new ReactiveVar();
-const mistakes = new ReactiveVar();
 const pinyin = new ReactiveVar();
-const strokes = new ReactiveVar();
 
 let handwriting = null;
 
 const kMaxMistakes = 3;
 const kNumCharacters = 300;
 
-let characters = [];
-let definitions = {};
-let offset = -1;
+const item = {done: [], mistakes: 0, medians: [], strokes: []};
+const list = {characters: [], definitions: {}, offset: -1};
 
 // A couple small utility functions for Euclidean geometry.
 
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
 const advance = () => {
-  offset = (offset + 1) % characters.length;
-  if (offset === 0) {
-    characters = _.shuffle(characters);
+  list.offset = (list.offset + 1) % list.characters.length;
+  if (list.offset === 0) {
+    list.characters = _.shuffle(list.characters);
   }
-  character.set(characters[offset]);
+  character.set(list.characters[list.offset]);
 }
 
 const match = (stroke, expected) => {
   let best_result = {index: -1, score: -Infinity};
-  for (let i = 0; i < medians.get().length; i++) {
+  for (let i = 0; i < item.medians.length; i++) {
     const offset = i - expected;
-    const result = makemeahanzi.recognize(stroke, medians.get()[i], offset);
+    const result = makemeahanzi.recognize(stroke, item.medians[i], offset);
     if (result.score > best_result.score) {
       best_result = result;
       best_result.index = i;
@@ -50,7 +45,7 @@ const onLoadFrequency = (data, code) => {
     const terms = line.split('\t');
     if (terms.length < 2) continue;
     if (parseInt(terms[0], 10) > kNumCharacters) continue;
-    characters.push(terms[1]);
+    list.characters.push(terms[1]);
   }
 }
 
@@ -59,8 +54,8 @@ const onLoadRadicals = (data, code) => {
     const terms = line.split('\t');
     if (terms.length < 4) continue;
     const character = terms[0][0];
-    characters.push(character);
-    definitions[character] = terms[3];
+    list.characters.push(character);
+    list.definitions[character] = terms[3];
   }
 }
 
@@ -71,14 +66,13 @@ const onRendered = function() {
 }
 
 const onStroke = (stroke) => {
-  const current = complete.get();
-  const missing = _.range(current.length).filter((i) => !current[i]);
+  const missing = _.range(item.done.length).filter((i) => !item.done[i]);
   if (missing.length === 0) {
     handwriting.clear();
     advance();
     return;
   } else if (!stroke) {
-    handwriting.flash(strokes.get()[missing[0]]);
+    handwriting.flash(item.strokes[missing[0]]);
     return;
   }
 
@@ -87,29 +81,28 @@ const onStroke = (stroke) => {
   const index = result.index;
   if (index < 0) {
     handwriting.fade();
-    mistakes.set(mistakes.get() + 1);
-    if (mistakes.get() >= kMaxMistakes) {
-      handwriting.flash(strokes.get()[missing[0]]);
+    item.mistakes += 1;
+    if (item.mistakes >= kMaxMistakes) {
+      handwriting.flash(item.strokes[missing[0]]);
     }
     return;
   }
-  if (current[index]) {
+  if (item.done[index]) {
     handwriting.undo();
-    handwriting.flash(strokes.get()[index]);
+    handwriting.flash(item.strokes[index]);
     return;
   }
 
-  current[index] = true;
-  complete.set(current);
-  const rotate = medians.get()[index].length === 2;
-  handwriting.emplace(strokes.get()[index], rotate,
+  item.done[index] = true;
+  const rotate = item.medians[index].length === 2;
+  handwriting.emplace(item.strokes[index], rotate,
                       result.source, result.target);
   if (missing.length === 1) {
     handwriting.glow();
   } else if (missing[0] < index) {
-    handwriting.flash(strokes.get()[missing[0]]);
+    handwriting.flash(item.strokes[missing[0]]);
   } else {
-    mistakes.set(0);
+    item.mistakes = 0;
   }
 }
 
@@ -121,12 +114,12 @@ const updateCharacter = () => {
       return;
     }
     if (row.character === character.get()) {
-      complete.set(new Array(row.medians.length).fill(false));
-      definition.set(definitions[row.character] || row.definition);
-      medians.set(makemeahanzi.findCorners(row.medians));
-      mistakes.set(0);
+      definition.set(list.definitions[row.character] || row.definition);
       pinyin.set(row.pinyin.join(', '));
-      strokes.set(row.strokes);
+      item.done = new Array(row.medians.length).fill(false);
+      item.medians = makemeahanzi.findCorners(row.medians);
+      item.mistakes = 0;
+      item.strokes = row.strokes;
     }
   });
 }
