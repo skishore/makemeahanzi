@@ -71,6 +71,7 @@ const truncate = (median, truncation) => {
 }
 
 this.makemeahanzi.findCorners = (medians) => {
+  // TODO(skishore): Handle the "shu wan gou" stroke better.
   const shortstraw = new makemeahanzi.Shortstraw;
   return medians.map(fixMedianCoordinates)
                 .map((x) => truncate(x, kTruncation))
