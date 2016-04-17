@@ -66,8 +66,8 @@ const onDouble = () => {
   if (maybeAdvance()) return;
   const missing = _.range(item.steps.length)
                    .filter((i) => !item.steps[i].done);
-  item.penalties += kMaxPenalties;
-  missing.map((i) => handwriting.flash(item.steps[i].stroke));
+  handwriting.reveal(item.steps.map((x) => x.stroke));
+  handwriting.highlight(item.steps[missing[0]].stroke);
 }
 
 const onLoadFrequency = (data, code) => {
@@ -130,11 +130,13 @@ const onStroke = (stroke) => {
                       result.source, result.target);
   if (missing.length === 1) {
     handwriting.glow(item.penalties < kMaxPenalties);
+    handwriting.highlight();
   } else if (missing[0] < index) {
     item.penalties += 2 * (index - missing[0]);
     handwriting.flash(item.steps[missing[0]].stroke);
   } else {
     item.mistakes = 0;
+    handwriting.highlight(item.steps[missing[1]].stroke);
   }
 }
 

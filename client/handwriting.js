@@ -1,7 +1,7 @@
 // Helper methods used by the handwriting class.
 
 const kCanvasSize = 512;
-const kDoubleClickTimeout = 200;
+const kDoubleClickTimeout = 300;
 
 const kCrossWidth = 1 / 256;
 const kMinDistance = 1 / 32;
@@ -189,14 +189,16 @@ this.makemeahanzi.Handwriting = class Handwriting {
 
     this._animation = new createjs.Container();
     this._container = new createjs.Container();
+    this._watermark = new createjs.Container();
     this._stage = new createjs.Stage(element.find('canvas')[0]);
 
+    this._highlight = undefined;
     this._pending_animations = 0;
     this._running_animations = 0;
     this._size = this._stage.canvas.width;
 
     renderCross(this._stage);
-    this._stage.addChild(this._animation, this._container);
+    this._stage.addChild(this._watermark, this._animation, this._container);
     this._reset();
 
     createjs.Ticker.setFPS(60);
@@ -207,6 +209,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
     createjs.Tween.removeAllTweens();
     this._animation.removeAllChildren();
     this._container.removeAllChildren();
+    this._watermark.removeAllChildren();
+    this._highlight = undefined;
     this._pending_animations = 0;
     this._running_animations = 0;
     this._reset();
@@ -228,7 +232,6 @@ this.makemeahanzi.Handwriting = class Handwriting {
   flash(path) {
     const child = pathToShape(path, this._size, kHintingColor);
     this._container.removeChildAt(this._container.children.length - 1);
-    this._animation.addChild(child);
     this._animate(child, {alpha: 0}, 750,
                   () => this._animation.removeChild(child));
   }
@@ -238,13 +241,28 @@ this.makemeahanzi.Handwriting = class Handwriting {
       convertShapeStyles(child, 'black', color);
     }
   }
+  highlight(path) {
+    if (this._watermark.children.length === 0) return;
+    if (this._highlight) {
+      const child = this._highlight;
+      this._highlight = undefined;
+      this._animate(child, {alpha: 0}, 150,
+                    () => this._animation.removeChild(child));
+    }
+    if (path) {
+      this._highlight = pathToShape(path, this._size, kHintingColor);
+      this._highlight.alpha = 0;
+      this._animation.addChildAt(this._highlight, 0);
+      this._animate(this._highlight, {alpha: 1}, 150, () => {});
+    }
+  }
   reveal(paths) {
+    if (this._watermark.children.length > 0) return;
     for (let path of paths) {
       const child = pathToShape(path, this._size, kRevealsColor);
       child.cache(0, 0, this._size, this._size);
-      this._animation.addChild(child);
+      this._watermark.addChild(child);
     }
-    this._stage.update();
   }
   tick(event) {
     if (this._running_animations) {
@@ -258,7 +276,9 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._reset();
   }
   _animate(shape, target, duration, callback) {
-    this._animation.addChild(shape);
+    if (shape.parent !== this._animation) {
+      this._animation.addChild(shape);
+    }
     this._running_animations += 1;
     createjs.Tween.get(shape).to(target, duration).call(() => {
       this._pending_animations += 1;
