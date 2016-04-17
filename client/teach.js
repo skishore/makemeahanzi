@@ -128,6 +128,9 @@ const onStroke = (stroke) => {
   const rotate = item.steps[index].median.length === 2;
   handwriting.emplace(item.steps[index].stroke, rotate,
                       result.source, result.target);
+  if (result.warning) {
+    handwriting.warn(result.warning);
+  }
   if (missing.length === 1) {
     handwriting.glow(item.penalties < kMaxPenalties);
     handwriting.highlight();

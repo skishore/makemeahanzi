@@ -275,6 +275,14 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._container.removeChildAt(this._container.children.length - 1);
     this._reset();
   }
+  warn(warning) {
+    const child = new createjs.Text(warning, '48px Georgia', kHintingColor);
+    const bounds = child.getBounds();
+    child.x = (kCanvasSize - bounds.width) / 2;
+    child.y = kCanvasSize - 2 * bounds.height;
+    this._animate(child, {alpha: 0}, 1500,
+                  () => this._animation.removeChild(child));
+  }
   _animate(shape, target, duration, callback) {
     if (shape.parent !== this._animation) {
       this._animation.addChild(shape);
