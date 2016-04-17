@@ -268,15 +268,16 @@ this.makemeahanzi.Handwriting = class Handwriting {
     return (diff[0] * diff[0] + diff[1] * diff[1]) / diagonal;
   }
   _endStroke() {
+    let handler = () => this._onclick && this._onclick();
     if (this._brush) {
-      this._container.children[this._container.children.length - 1]
-                     .cache(0, 0, this._size, this._size);
-      if (this._onstroke) {
-        this._onstroke(this._stroke.map((x) => x.map((y) => y / this._size)));
+      const stroke = this._stroke.map((x) => x.map((y) => y / this._size));
+      if (distance([stroke[0], stroke[stroke.length - 1]]) > kMinDistance) {
+        this._container.children[this._container.children.length - 1]
+                       .cache(0, 0, this._size, this._size);
+        handler = () => this._onstroke && this._onstroke(stroke);
       }
-    } else if (this._onclick) {
-      this._onclick();
     }
+    handler();
     this._reset();
   }
   _maybePushPoint(point) {
