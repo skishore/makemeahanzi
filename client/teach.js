@@ -9,10 +9,12 @@ let handwriting = null;
 const kMaxMistakes = 3;
 const kNumCharacters = 300;
 
-const item = {done: [], mistakes: 0, medians: [], strokes: []};
+const item = {mistakes: 0, steps: []};
 const list = {characters: [], definitions: {}, offset: -1};
 
 // A couple small utility functions for Euclidean geometry.
+
+const findCorners = (median) => makemeahanzi.findCorners([median])[0];
 
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
@@ -26,9 +28,10 @@ const advance = () => {
 
 const match = (stroke, expected) => {
   let best_result = {index: -1, score: -Infinity};
-  for (let i = 0; i < item.medians.length; i++) {
+  for (let i = 0; i < item.steps.length; i++) {
+    const median = item.steps[i].median;
     const offset = i - expected;
-    const result = makemeahanzi.recognize(stroke, item.medians[i], offset);
+    const result = makemeahanzi.recognize(stroke, median, offset);
     if (result.score > best_result.score) {
       best_result = result;
       best_result.index = i;
@@ -66,13 +69,14 @@ const onRendered = function() {
 }
 
 const onStroke = (stroke) => {
-  const missing = _.range(item.done.length).filter((i) => !item.done[i]);
+  const missing = _.range(item.steps.length)
+                   .filter((i) => !item.steps[i].done);
   if (missing.length === 0) {
     handwriting.clear();
     advance();
     return;
   } else if (!stroke) {
-    handwriting.flash(item.strokes[missing[0]]);
+    handwriting.flash(item.steps[missing[0]].stroke);
     return;
   }
 
@@ -83,24 +87,24 @@ const onStroke = (stroke) => {
     handwriting.fade();
     item.mistakes += 1;
     if (item.mistakes >= kMaxMistakes) {
-      handwriting.flash(item.strokes[missing[0]]);
+      handwriting.flash(item.steps[missing[0]].stroke);
     }
     return;
   }
-  if (item.done[index]) {
+  if (item.steps[index].done) {
     handwriting.undo();
-    handwriting.flash(item.strokes[index]);
+    handwriting.flash(item.steps[index].stroke);
     return;
   }
 
-  item.done[index] = true;
-  const rotate = item.medians[index].length === 2;
-  handwriting.emplace(item.strokes[index], rotate,
+  item.steps[index].done = true;
+  const rotate = item.steps[index].median.length === 2;
+  handwriting.emplace(item.steps[index].stroke, rotate,
                       result.source, result.target);
   if (missing.length === 1) {
     handwriting.glow();
   } else if (missing[0] < index) {
-    handwriting.flash(item.strokes[missing[0]]);
+    handwriting.flash(item.steps[missing[0]].stroke);
   } else {
     item.mistakes = 0;
   }
@@ -116,10 +120,12 @@ const updateCharacter = () => {
     if (row.character === character.get()) {
       definition.set(list.definitions[row.character] || row.definition);
       pinyin.set(row.pinyin.join(', '));
-      item.done = new Array(row.medians.length).fill(false);
-      item.medians = makemeahanzi.findCorners(row.medians);
       item.mistakes = 0;
-      item.strokes = row.strokes;
+      item.steps = _.range(row.strokes.length).map((i) => ({
+        done: false,
+        median: findCorners(row.medians[i]),
+        stroke: row.strokes[i],
+      }));
     }
   });
 }
