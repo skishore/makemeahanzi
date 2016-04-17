@@ -229,9 +229,10 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._animate(child, {alpha: 0}, 750,
                   () => this._animation.removeChild(child));
   }
-  glow() {
+  glow(success) {
+    const color = success ? kSuccessColor : kFailureColor;
     for (let child of this._animation.children) {
-      convertShapeStyles(child, 'black', kSuccessColor);
+      convertShapeStyles(child, 'black', color);
     }
   }
   reveal(paths) {

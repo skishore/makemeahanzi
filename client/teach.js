@@ -7,9 +7,10 @@ const pinyin = new ReactiveVar();
 let handwriting = null;
 
 const kMaxMistakes = 3;
+const kMaxPenalties  = 4;
 const kNumCharacters = 300;
 
-const item = {mistakes: 0, steps: []};
+const item = {mistakes: 0, penalties: 0, steps: []};
 const list = {characters: [], definitions: {}, offset: -1};
 
 // A couple small utility functions for Euclidean geometry.
@@ -76,6 +77,7 @@ const onStroke = (stroke) => {
     advance();
     return;
   } else if (!stroke) {
+    item.penalties += kMaxPenalties;
     handwriting.flash(item.steps[missing[0]].stroke);
     return;
   }
@@ -84,14 +86,16 @@ const onStroke = (stroke) => {
   const result = match(shortstraw.run(stroke), missing[0]);
   const index = result.index;
   if (index < 0) {
-    handwriting.fade();
     item.mistakes += 1;
+    handwriting.fade();
     if (item.mistakes >= kMaxMistakes) {
+      item.penalties += kMaxPenalties;
       handwriting.flash(item.steps[missing[0]].stroke);
     }
     return;
   }
   if (item.steps[index].done) {
+    item.penalties += 1;
     handwriting.undo();
     handwriting.flash(item.steps[index].stroke);
     return;
@@ -102,8 +106,9 @@ const onStroke = (stroke) => {
   handwriting.emplace(item.steps[index].stroke, rotate,
                       result.source, result.target);
   if (missing.length === 1) {
-    handwriting.glow();
+    handwriting.glow(item.penalties < kMaxPenalties);
   } else if (missing[0] < index) {
+    item.penalties += 2 * (index - missing[0]);
     handwriting.flash(item.steps[missing[0]].stroke);
   } else {
     item.mistakes = 0;
@@ -121,6 +126,7 @@ const updateCharacter = () => {
       definition.set(list.definitions[row.character] || row.definition);
       pinyin.set(row.pinyin.join(', '));
       item.mistakes = 0;
+      item.penalties = 0;
       item.steps = _.range(row.strokes.length).map((i) => ({
         done: false,
         median: findCorners(row.medians[i]),
