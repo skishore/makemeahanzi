@@ -1,6 +1,8 @@
 // Helper methods used by the handwriting class.
 
 const kCanvasSize = 512;
+const kDoubleClickTimeout = 200;
+
 const kCrossWidth = 1 / 256;
 const kMinDistance = 1 / 32;
 const kStrokeWidth = 1 / 32;
@@ -181,6 +183,7 @@ class BasicBrush {
 this.makemeahanzi.Handwriting = class Handwriting {
   constructor(element, options) {
     this._onclick = options.onclick;
+    this._ondouble = options.ondouble;
     this._onstroke = options.onstroke;
     this._zoom = createSketch(element, this);
 
@@ -262,13 +265,20 @@ this.makemeahanzi.Handwriting = class Handwriting {
       callback();
     });
   }
+  _click() {
+    const timestamp = new Date().getTime();
+    const cutoff = (this._last_click_timestamp || 0) + kDoubleClickTimeout;
+    const handler = timestamp < cutoff ? this._ondouble : this._onclick;
+    this._last_click_timestamp = timestamp;
+    handler && handler();
+  }
   _distance(point1, point2) {
     const diagonal = 2 * this._size * this._size;
     const diff = [point1[0] - point2[0], point1[1] - point2[1]];
     return (diff[0] * diff[0] + diff[1] * diff[1]) / diagonal;
   }
   _endStroke() {
-    let handler = () => this._onclick && this._onclick();
+    let handler = () => this._click();
     if (this._brush) {
       const stroke = this._stroke.map((x) => x.map((y) => y / this._size));
       if (distance([stroke[0], stroke[stroke.length - 1]]) > kMinDistance) {

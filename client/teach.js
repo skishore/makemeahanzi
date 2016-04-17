@@ -41,7 +41,34 @@ const match = (stroke, expected) => {
   return best_result;
 }
 
+const maybeAdvance = () => {
+  const missing = _.range(item.steps.length)
+                   .filter((i) => !item.steps[i].done);
+  if (missing.length === 0) {
+    handwriting.clear();
+    advance();
+    return true;
+  }
+  return false;
+}
+
 // Event handlers which will be bound to various Meteor-dispatched events.
+
+const onClick = () => {
+  if (maybeAdvance()) return;
+  const missing = _.range(item.steps.length)
+                   .filter((i) => !item.steps[i].done);
+  item.penalties += kMaxPenalties;
+  handwriting.flash(item.steps[missing[0]].stroke);
+}
+
+const onDouble = () => {
+  if (maybeAdvance()) return;
+  const missing = _.range(item.steps.length)
+                   .filter((i) => !item.steps[i].done);
+  item.penalties += kMaxPenalties;
+  missing.map((i) => handwriting.flash(item.steps[i].stroke));
+}
 
 const onLoadFrequency = (data, code) => {
   for (let line of data.split('\n')) {
@@ -65,26 +92,19 @@ const onLoadRadicals = (data, code) => {
 
 const onRendered = function() {
   const element = $(this.firstNode).find('.handwriting');
-  const options = {onclick: onStroke, onstroke: onStroke};
+  const options = {onclick: onClick, ondouble: onDouble, onstroke: onStroke};
   handwriting = new makemeahanzi.Handwriting(element, options);
 }
 
 const onStroke = (stroke) => {
+  if (maybeAdvance()) return;
   const missing = _.range(item.steps.length)
                    .filter((i) => !item.steps[i].done);
-  if (missing.length === 0) {
-    handwriting.clear();
-    advance();
-    return;
-  } else if (!stroke) {
-    item.penalties += kMaxPenalties;
-    handwriting.flash(item.steps[missing[0]].stroke);
-    return;
-  }
-
   const shortstraw = new makemeahanzi.Shortstraw;
   const result = match(shortstraw.run(stroke), missing[0]);
   const index = result.index;
+
+  // The user's input does not match any of the character's strokes.
   if (index < 0) {
     item.mistakes += 1;
     handwriting.fade();
@@ -94,6 +114,8 @@ const onStroke = (stroke) => {
     }
     return;
   }
+
+  // The user's input matches a stroke that was already drawn.
   if (item.steps[index].done) {
     item.penalties += 1;
     handwriting.undo();
@@ -101,6 +123,7 @@ const onStroke = (stroke) => {
     return;
   }
 
+  // The user's input matches one of the remaining strokes.
   item.steps[index].done = true;
   const rotate = item.steps[index].median.length === 2;
   handwriting.emplace(item.steps[index].stroke, rotate,
