@@ -82,7 +82,7 @@ const distance = (xs) => {
 }
 
 const dottedLine = (width, x1, y1, x2, y2) => {
-  const result = new createjs.Shape();
+  const result = new createjs.Shape;
   result.graphics.setStrokeDash([width, width], 0);
   result.graphics.setStrokeStyle(width)
   result.graphics.beginStroke('#ccc');
@@ -97,7 +97,7 @@ const midpoint = (point1, point2) => {
 
 const pathToShape = (path, size, color) => {
   const scale = 1024 / size;
-  const result = new createjs.Shape();
+  const result = new createjs.Shape;
   const graphics = result.graphics;
   result.graphics.beginFill(color || 'black');
   result.graphics.beginStroke(color || 'black');
@@ -128,17 +128,13 @@ const pathToShape = (path, size, color) => {
   return result;
 }
 
-const renderCross = (stage) => {
-  const cross = new createjs.Container();
-  const height = stage.canvas.height;
-  const width = stage.canvas.width;
-  const stroke = width * kCrossWidth;
-  cross.addChild(dottedLine(stroke, 0, 0, width, height));
-  cross.addChild(dottedLine(stroke, width, 0, 0, height));
-  cross.addChild(dottedLine(stroke, width / 2, 0, width / 2, height));
-  cross.addChild(dottedLine(stroke, 0, height / 2, width, height / 2));
-  cross.cache(0, 0, width, height);
-  stage.addChild(cross);
+const renderCross = (size, container) => {
+  const stroke = size * kCrossWidth;
+  container.addChild(dottedLine(stroke, 0, 0, size, size));
+  container.addChild(dottedLine(stroke, size, 0, 0, size));
+  container.addChild(dottedLine(stroke, size / 2, 0, size / 2, size));
+  container.addChild(dottedLine(stroke, 0, size/ 2, size, size / 2));
+  container.cache(0, 0, size, size);
 }
 
 // A helper brush class that allows us to draw nice ink facsimiles.
@@ -180,25 +176,37 @@ class BasicBrush {
 
 // Methods for actually executing drawing commands.
 
+const Layer = {
+  CROSS: 0,
+  WATERMARK: 1,
+  HIGHLIGHT: 2,
+  COMPLETE: 3,
+  HINT: 4,
+  STROKE: 5,
+  WARNING: 6,
+  ALL: 7,
+};
+
 this.makemeahanzi.Handwriting = class Handwriting {
   constructor(element, options) {
     this._onclick = options.onclick;
     this._ondouble = options.ondouble;
     this._onstroke = options.onstroke;
+
     this._zoom = createSketch(element, this);
-
-    this._animation = new createjs.Container();
-    this._container = new createjs.Container();
-    this._watermark = new createjs.Container();
     this._stage = new createjs.Stage(element.find('canvas')[0]);
-
-    this._highlight = undefined;
-    this._pending_animations = 0;
-    this._running_animations = 0;
     this._size = this._stage.canvas.width;
 
-    renderCross(this._stage);
-    this._stage.addChild(this._watermark, this._animation, this._container);
+    this._layers = [];
+    for (let i = 0; i < Layer.ALL; i++) {
+      const layer = new createjs.Container;
+      this._layers.push(layer);
+      this._stage.addChild(layer);
+    }
+    renderCross(this._size, this._layers[Layer.CROSS]);
+
+    this._pending_animations = 0;
+    this._running_animations = 0;
     this._reset();
 
     createjs.Ticker.setFPS(60);
@@ -207,10 +215,9 @@ this.makemeahanzi.Handwriting = class Handwriting {
   }
   clear() {
     createjs.Tween.removeAllTweens();
-    this._animation.removeAllChildren();
-    this._container.removeAllChildren();
-    this._watermark.removeAllChildren();
-    this._highlight = undefined;
+    for (let layer of this._layers) {
+      layer.removeAllChildren();
+    }
     this._pending_animations = 0;
     this._running_animations = 0;
     this._reset();
@@ -218,51 +225,52 @@ this.makemeahanzi.Handwriting = class Handwriting {
   emplace(path, rotate, source, target) {
     const child = pathToShape(path, this._size);
     const endpoint = animate(child, this._size, rotate, source, target);
-    this._container.removeChildAt(this._container.children.length - 1);
+    this._layers[Layer.STROKE].children.pop();
+    this._layers[Layer.COMPLETE].addChild(child);
     this._animate(child, endpoint, 150,
                   () => child.cache(0, 0, this._size, this._size));
   }
   fade() {
-    const children = this._container.children;
-    const child = children[children.length - 1];
-    this._container.removeChildAt(children.length - 1);
+    const stroke = this._layers[Layer.STROKE];
+    const child = stroke.children[stroke.children.length - 1];
     this._animate(child, {alpha: 0}, 150,
-                  () => this._animation.removeChild(child));
+                  () => child.parent.removeChild(child));
   }
   flash(path) {
     const child = pathToShape(path, this._size, kHintingColor);
-    this._container.removeChildAt(this._container.children.length - 1);
+    this._layers[Layer.HINT].addChild(child);
     this._animate(child, {alpha: 0}, 750,
-                  () => this._animation.removeChild(child));
+                  () => child.parent.removeChild(child));
   }
   glow(success) {
     const color = success ? kSuccessColor : kFailureColor;
-    for (let child of this._animation.children) {
+    for (let child of this._layers[Layer.COMPLETE].children) {
       convertShapeStyles(child, 'black', color);
     }
   }
   highlight(path) {
-    if (this._watermark.children.length === 0) return;
-    if (this._highlight) {
-      const child = this._highlight;
-      this._highlight = undefined;
-      this._animate(child, {alpha: 0}, 150,
-                    () => this._animation.removeChild(child));
+    if (this._layers[Layer.WATERMARK].children.length === 0) return;
+    const layer = this._layers[Layer.HIGHLIGHT];
+    for (let child of layer.children) {
+      this._animate(child, {alpha: 0}, 150, () => layer.removeChild(child));
     }
     if (path) {
-      this._highlight = pathToShape(path, this._size, kHintingColor);
-      this._highlight.alpha = 0;
-      this._animation.addChildAt(this._highlight, 0);
-      this._animate(this._highlight, {alpha: 1}, 150, () => {});
+      const child = pathToShape(path, this._size, kHintingColor);
+      child.alpha = 0;
+      layer.addChild(child);
+      this._animate(child, {alpha: 1}, 150, () => {});
     }
   }
   reveal(paths) {
-    if (this._watermark.children.length > 0) return;
+    const layer = this._layers[Layer.WATERMARK];
+    if (layer.children.length > 0) return;
+    const container = new createjs.Container;
     for (let path of paths) {
       const child = pathToShape(path, this._size, kRevealsColor);
-      child.cache(0, 0, this._size, this._size);
-      this._watermark.addChild(child);
+      container.addChild(child);
     }
+    container.cache(0, 0, this._size, this._size);
+    layer.addChild(container);
   }
   tick(event) {
     if (this._running_animations) {
@@ -272,7 +280,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     }
   }
   undo() {
-    this._container.removeChildAt(this._container.children.length - 1);
+    this._layers[Layer.STROKE].children.pop();
     this._reset();
   }
   warn(warning) {
@@ -280,13 +288,11 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const bounds = child.getBounds();
     child.x = (kCanvasSize - bounds.width) / 2;
     child.y = kCanvasSize - 2 * bounds.height;
+    this._layers[Layer.WARNING].addChild(child);
     this._animate(child, {alpha: 0}, 1500,
-                  () => this._animation.removeChild(child));
+                  () => child.parent.removeChild(child));
   }
   _animate(shape, target, duration, callback) {
-    if (shape.parent !== this._animation) {
-      this._animation.addChild(shape);
-    }
     this._running_animations += 1;
     createjs.Tween.get(shape).to(target, duration).call(() => {
       this._pending_animations += 1;
@@ -307,12 +313,15 @@ this.makemeahanzi.Handwriting = class Handwriting {
   }
   _endStroke() {
     let handler = () => this._click();
+    const layer = this._layers[Layer.STROKE];
     if (this._brush) {
       const stroke = this._stroke.map((x) => x.map((y) => y / this._size));
       if (distance([stroke[0], stroke[stroke.length - 1]]) > kMinDistance) {
-        this._container.children[this._container.children.length - 1]
-                       .cache(0, 0, this._size, this._size);
+        layer.children[layer.children.length - 1].cache(
+            0, 0, this._size, this._size);
         handler = () => this._onstroke && this._onstroke(stroke);
+      } else {
+        layer.children.pop();
       }
     }
     handler();
@@ -335,7 +344,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
     }
     const n = this._stroke.length;
     if (!this._brush) {
-      this._brush = new BasicBrush(this._container, this._stroke[n - 2],
+      const layer = this._layers[Layer.STROKE];
+      this._brush = new BasicBrush(layer, this._stroke[n - 2],
                                    {width: this._size * kStrokeWidth});
     }
     this._brush.advance(this._stroke[n - 1]);
