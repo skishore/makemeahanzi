@@ -7,10 +7,11 @@ const kCrossWidth = 1 / 256;
 const kMinDistance = 1 / 32;
 const kStrokeWidth = 1 / 32;
 
-const kBrushedColor = '#888888';
+const kBrushColor   = '#888888';
 const kFailureColor = '#ff4d4d';
-const kHintingColor = '#0080ff';
-const kRevealsColor = '#cccccc';
+const kHintColor    = '#0080ff';
+const kRevealColor  = '#cccccc';
+const kStrokeColor  = '#000000';
 const kSuccessColor = '#4dc84d';
 
 const angle = (xs) => Math.atan2(xs[1][1] - xs[0][1], xs[1][0] - xs[0][0]);
@@ -99,8 +100,8 @@ const pathToShape = (path, size, color) => {
   const scale = 1024 / size;
   const result = new createjs.Shape;
   const graphics = result.graphics;
-  result.graphics.beginFill(color || 'black');
-  result.graphics.beginStroke(color || 'black');
+  result.graphics.beginFill(color);
+  result.graphics.beginStroke(color);
   const tokens = path.split(' ');
   let index = 0;
   const next = () => {
@@ -142,7 +143,7 @@ const renderCross = (size, container) => {
 class BasicBrush {
   constructor(container, point, options) {
     options = options || {};
-    this._color = options.color || kBrushedColor;
+    this._color = options.color || kBrushColor;
     this._width = options.width || 1;
 
     this._shape = new createjs.Shape;
@@ -223,7 +224,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._reset();
   }
   emplace(path, rotate, source, target) {
-    const child = pathToShape(path, this._size);
+    const child = pathToShape(path, this._size, kStrokeColor);
     const endpoint = animate(child, this._size, rotate, source, target);
     this._layers[Layer.STROKE].children.pop();
     this._layers[Layer.COMPLETE].addChild(child);
@@ -237,7 +238,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
                   () => child.parent.removeChild(child));
   }
   flash(path) {
-    const child = pathToShape(path, this._size, kHintingColor);
+    const child = pathToShape(path, this._size, kHintColor);
     this._layers[Layer.HINT].addChild(child);
     this._animate(child, {alpha: 0}, 750,
                   () => child.parent.removeChild(child));
@@ -245,7 +246,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
   glow(success) {
     const color = success ? kSuccessColor : kFailureColor;
     for (let child of this._layers[Layer.COMPLETE].children) {
-      convertShapeStyles(child, 'black', color);
+      convertShapeStyles(child, kStrokeColor, color);
     }
   }
   highlight(path) {
@@ -255,7 +256,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
       this._animate(child, {alpha: 0}, 150, () => layer.removeChild(child));
     }
     if (path) {
-      const child = pathToShape(path, this._size, kHintingColor);
+      const child = pathToShape(path, this._size, kHintColor);
       child.alpha = 0;
       layer.addChild(child);
       this._animate(child, {alpha: 1}, 150, () => {});
@@ -266,7 +267,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     if (layer.children.length > 0) return;
     const container = new createjs.Container;
     for (let path of paths) {
-      const child = pathToShape(path, this._size, kRevealsColor);
+      const child = pathToShape(path, this._size, kRevealColor);
       container.addChild(child);
     }
     container.cache(0, 0, this._size, this._size);
@@ -284,7 +285,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._reset();
   }
   warn(warning) {
-    const child = new createjs.Text(warning, '48px Georgia', kHintingColor);
+    const child = new createjs.Text(warning, '48px Georgia', kHintColor);
     const bounds = child.getBounds();
     child.x = (kCanvasSize - bounds.width) / 2;
     child.y = kCanvasSize - 2 * bounds.height;
@@ -345,8 +346,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const n = this._stroke.length;
     if (!this._brush) {
       const layer = this._layers[Layer.STROKE];
-      this._brush = new BasicBrush(layer, this._stroke[n - 2],
-                                   {width: this._size * kStrokeWidth});
+      const options = {width: this._size * kStrokeWidth};
+      this._brush = new BasicBrush(layer, this._stroke[n - 2], options);
     }
     this._brush.advance(this._stroke[n - 1]);
     this._stage.update();
