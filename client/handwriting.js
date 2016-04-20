@@ -288,9 +288,11 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const bounds = child.getBounds();
     child.x = (kCanvasSize - bounds.width) / 2;
     child.y = kCanvasSize - 2 * bounds.height;
+    child.cache(0, 0, this._size, this._size);
+    this._layers[Layer.WARNING].removeAllChildren();
     this._layers[Layer.WARNING].addChild(child);
     this._animate(child, {alpha: 0}, 1500,
-                  () => child.parent.removeChild(child));
+                  () => child.parent && child.parent.removeChild(child));
   }
   _animate(shape, target, duration, callback) {
     this._running_animations += 1;
