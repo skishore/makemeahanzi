@@ -1,6 +1,6 @@
 // TODO(skishore): Do some kind of smoothing to avoid giving users hints based
 // off of the straight segments where strokes intersects.
-const character = new ReactiveVar();
+const character = new ReactiveVar(null, () => false);
 const definition = new ReactiveVar();
 const pinyin = new ReactiveVar();
 
