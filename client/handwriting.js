@@ -94,7 +94,7 @@ const midpoint = (point1, point2) => {
   return [(point1[0] + point2[0]) / 2, (point1[1] + point2[1]) / 2];
 }
 
-const pathToShape = (path, size, color, uncache) => {
+const pathToShape = (path, size, color, uncached) => {
   const scale = 1024 / size;
   const result = new createjs.Shape;
   const graphics = result.graphics;
@@ -124,7 +124,7 @@ const pathToShape = (path, size, color, uncache) => {
       console.error(`Invalid command: ${command}`);
     }
   }
-  if (!uncache) result.cache(0, 0, size, size);
+  if (!uncached) result.cache(0, 0, size, size);
   return result;
 }
 
@@ -266,7 +266,7 @@ this.makemeahanzi.Handwriting = class Handwriting {
     const container = new createjs.Container;
     for (let path of paths) {
       const child = pathToShape(
-          path, this._size, kRevealColor, true /* uncache */);
+          path, this._size, kRevealColor, true /* uncached */);
       container.addChild(child);
     }
     container.cache(0, 0, this._size, this._size);
