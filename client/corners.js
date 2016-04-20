@@ -6,6 +6,9 @@ const kMinLastSegmentFraction = 0.05;
 const kFontSize = 1024;
 const kTruncation = 16;
 
+const kShuWanGouShapes = [[[4, 0], [0, 4], [4, 0], [0, -1]],
+                          [[0, 4], [4, 0], [0, -1]]];
+
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
 const scale = (median, k) => median.map((point) => point.map((x) => k * x));
@@ -20,6 +23,17 @@ const dropDanglingHooks = (median) => {
   }
   if (distance(median[n - 2], median[n - 1]) < kMinLastSegmentFraction) {
     indices_to_drop[n - 2] = true;
+  }
+  return median.filter((value, i) => !indices_to_drop[i]);;
+}
+
+const fixShuWanGou = (median) => {
+  if (median.length === 2) return median;
+  const indices_to_drop = {};
+  for (let shape of kShuWanGouShapes) {
+    if (makemeahanzi.match(median, shape)) {
+      indices_to_drop[shape.length - 2] = true;
+    }
   }
   return median.filter((value, i) => !indices_to_drop[i]);;
 }
@@ -71,11 +85,11 @@ const truncate = (median, truncation) => {
 }
 
 this.makemeahanzi.findCorners = (medians) => {
-  // TODO(skishore): Handle the "shu wan gou" stroke better.
   const shortstraw = new makemeahanzi.Shortstraw;
   return medians.map(fixMedianCoordinates)
                 .map((x) => truncate(x, kTruncation))
                 .map((x) => scale(x, 1 / kFontSize))
                 .map(shortstraw.run.bind(shortstraw))
-                .map(dropDanglingHooks);
+                .map(dropDanglingHooks)
+                .map(fixShuWanGou);
 }
