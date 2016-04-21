@@ -1,0 +1,20 @@
+By default, this app will attempt to make DDP connections to the server
+every time the user completes a character and moves on to the next. This
+behavior is because the mobile app use a local server to serve static content,
+but that server connects to the app's main server to check for changes to that
+content. To disable this behavior, run it with a main server at localhost:
+
+  meteor run android-device --mobile-server localhost:3000
+
+Note: Running the app this way will completely break any other client-server
+connection as well. Maybe there is another way to disable the DDP client.
+
+One thing that might work is calling Meteor.disconnect().
+
+----
+
+Background image: "Red Village" by Li Keran. Found on April 21, 2016 at:
+http://www.icollector.com/Chinese-WC-Red-Village-Li-Keran-1907-1989_i21176495
+
+Foreground image: "White Linen Paper Texture". Found on April 21, 2016 at:
+http://www.freecreatives.com/backgrounds/white-paper-texture.html
