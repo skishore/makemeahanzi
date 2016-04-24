@@ -14,6 +14,8 @@ const kRevealColor  = '#cccccc';
 const kStrokeColor  = '#000000';
 const kSuccessColor = '#4dc84d';
 
+let ticker = null;
+
 const angle = (xs) => Math.atan2(xs[1][1] - xs[0][1], xs[1][0] - xs[0][0]);
 
 const animate = (shape, size, rotate, source, target) => {
@@ -210,8 +212,8 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._reset();
 
     createjs.Ticker.setFPS(60);
-    createjs.Ticker.removeAllEventListeners();
-    createjs.Ticker.addEventListener('tick', this.tick.bind(this));
+    createjs.Ticker.removeEventListener('tick', ticker);
+    ticker = createjs.Ticker.addEventListener('tick', this.tick.bind(this));
   }
   clear() {
     createjs.Tween.removeAllTweens();
