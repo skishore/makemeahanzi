@@ -1,4 +1,9 @@
+@base-color: #444;
+@fade-color: #aaa;
+@font-size: 5.6vw;
+
 body {
+  color: @base-color;
   font-family: Georgia, serif;
   margin: 0;
   overflow: hidden;
@@ -221,23 +226,23 @@ body {
 }
 
 #index {
-  background-color: #222;
+  background-color: @base-color;
   color: white;
   .full-size;
 
   > .title {
     font-family: fantasy;
-    font-size: 16.8vw;
-    margin: 16% 0;
-    transform: translateY(5.6vw);
+    font-size: 3 * @font-size;
+    margin: 14% 0;
+    transform: translateY(@font-size);
   }
 
   > .button {
     border: 1px solid white;
-    border-radius: 1.4vw;
+    border-radius: 0.25 * @font-size;
     color: white;
     display: block;
-    font-size: 5.6vw;
+    font-size: @font-size;
     margin: 8% auto;
     padding: 2% 4%;
     text-align: left;
@@ -247,11 +252,14 @@ body {
 
     &.play {
       background-color: white;
-      color: #222;
+      color: @base-color;
     }
 
-    > i {
+    > .icon {
+      display: inline-block;
       margin-right: 4%;
+      text-align: center;
+      width: @font-size;
     }
   }
 }
@@ -263,8 +271,21 @@ body {
     text-align: center;
     width: 100%;
 
-    > .pinyin, .definition {
-      font-size: 5.6vw;
+    > .control {
+      color: @fade-color;
+      left: 0;
+      position: absolute;
+      width: @font-size;
+      .buttonlike;
+
+      &.right {
+        left: auto;
+        right: 0;
+      }
+    }
+
+    > .control, .pinyin, .definition {
+      font-size: @font-size;
       margin: 3%;
     }
   }
