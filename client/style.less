@@ -21,24 +21,24 @@ body {
 }
 
 #layout {
-  &, .background, .foreground {
+  &, > .background, > .foreground {
     .full-size;
   }
 
   &.theme-flat {
-    .background {
+    > .background {
       background-color: #a4d4ff;
     }
 
     #teach {
-      .prompt, .wrapper .handwriting {
+      > .prompt, > .wrapper > .handwriting {
         background-color: #f5f5f5;
       }
     }
   }
 
   &.theme-painterly, &.theme-textured {
-    .background {
+    > .background {
       background-blend-mode: luminosity;
       background-color: white;
       background-image: url("background.jpg");
@@ -46,7 +46,7 @@ body {
     }
 
     #teach {
-      .prompt, .wrapper .handwriting {
+      > .prompt, > .wrapper > .handwriting {
         box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.5);
         opacity: 0.92;
       }
@@ -54,7 +54,7 @@ body {
   }
 
   &.theme-textured {
-    .foreground {
+    > .foreground {
       background-image: url("foreground.jpg");
       background-size: cover;
       mix-blend-mode: difference;
@@ -62,7 +62,7 @@ body {
     }
   }
 
-  .foreground {
+  > .foreground {
     pointer-events: none;
   }
 }
@@ -225,14 +225,14 @@ body {
   color: white;
   .full-size;
 
-  .title {
+  > .title {
     font-family: fantasy;
     font-size: 16.8vw;
     margin: 16% 0;
     transform: translateY(5.6vw);
   }
 
-  .button {
+  > .button {
     border: 1px solid white;
     border-radius: 1.4vw;
     color: white;
@@ -250,38 +250,38 @@ body {
       color: #222;
     }
 
-    i {
+    > i {
       margin-right: 4%;
     }
   }
 }
 
 #teach {
-  .prompt {
+  > .prompt {
     background-color: white;
     position: fixed;
     text-align: center;
     width: 100%;
 
-    .pinyin, .definition {
+    > .pinyin, .definition {
       font-size: 5.6vw;
       margin: 3%;
     }
   }
 
-  .wrapper {
+  > .wrapper {
     padding: 0 6%;
     transform: translateY(50%);
     .full-size;
     top: 27%;
 
-    .handwriting {
+    > .handwriting {
       background-color: white;
       display: inline-block;
       transform: translateY(-50%);
       width: 100%;
 
-      canvas {
+      > canvas {
         vertical-align: middle;
       }
     }
