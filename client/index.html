@@ -3,6 +3,28 @@
   <meta name="viewport" content="
       width=device-width, user-scalable=no, initial-scale=1">
 </head>
-<body>
-  {{> teach}}
-</body>
+
+<template name="layout">
+  <div id="layout" class="theme-{{theme}}">
+    <div class="background"></div>
+    {{#transitioner}}
+      {{> yield}}
+    {{/transitioner}}
+    <div class="foreground"></div>
+  </div>
+</template>
+
+<template name="index">
+  <div id="index">
+    <div class="title">Inkstone</div>
+    <a class="play button" href="{{pathFor 'teach'}}">
+      <i class="ion-paintbrush"></i> Write
+    </a>
+    <a class="lists button" href="{{pathFor 'teach'}}">
+      <i class="ion-android-list"></i> Lists
+    </a>
+    <a class="settings button" href="{{pathFor 'teach'}}">
+      <i class="ion-android-settings"></i> Settings
+    </a>
+  </div>
+</template>

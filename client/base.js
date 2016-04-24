@@ -12,11 +12,16 @@ ReactiveVar.prototype.push = function(element) {
   this.set(value);
 }
 
-// Some code for dealing with common template logic.
+// Set up the routing table and transitioner.
 
-Blaze.TemplateInstance.prototype.getZoom = function() {
-  const element = $(this.find('.zoomable'));
-  const x_zoom = element.parent().width() / element.outerWidth();
-  const y_zoom = element.parent().height() / element.outerHeight();
-  return Math.min(x_zoom, y_zoom);
-}
+Router.configure({layoutTemplate: 'layout'});
+Router.route('index', {path: '/'});
+Router.route('teach');
+
+Transitioner.default({in: 'transition.fadeIn', out: 'transition.fadeOut'});
+
+// Set up global template helpers.
+
+Session.setDefault('theme', 'textured');
+
+Template.registerHelper('theme', () => Session.get('theme'));
