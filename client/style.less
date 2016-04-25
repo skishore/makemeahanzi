@@ -44,10 +44,9 @@ body {
 
   &.theme-painterly, &.theme-textured {
     > .background {
-      background-blend-mode: luminosity;
-      background-color: white;
-      background-image: url("background.jpg");
-      background-position-y: -300px;
+      background-image: url("background-optimized.jpg");
+      background-position-y: -100px;
+      background-size: cover;
     }
 
     #teach {
@@ -60,10 +59,9 @@ body {
 
   &.theme-textured {
     > .foreground {
-      background-image: url("foreground.jpg");
+      background-image: url("foreground-optimized.jpg");
       background-size: cover;
       mix-blend-mode: difference;
-      -webkit-filter: invert(1);
     }
   }
 
