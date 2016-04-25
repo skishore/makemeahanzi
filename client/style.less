@@ -1,6 +1,7 @@
 @base-color: #444;
 @fade-color: #aaa;
 @font-size: 5.6vw;
+@link-color: #00c0ff;
 
 body {
   color: @base-color;
@@ -242,6 +243,7 @@ body {
     }
 
     > .button {
+      background-color: #222;
       border: 1px solid white;
       border-radius: 0.25 * @font-size;
       color: white;
@@ -254,9 +256,19 @@ body {
       width: 75%;
       .buttonlike;
 
+      &:hover {
+        background-color: #013;
+        border: 1px solid @link-color;
+        color: @link-color;
+      }
+
       &.teach {
         background-color: white;
         color: @base-color;
+
+        &:hover {
+          background-color: @link-color;
+        }
       }
 
       > .icon {
@@ -282,6 +294,10 @@ body {
       position: absolute;
       width: @font-size;
       .buttonlike;
+
+      &:hover {
+        color: @link-color;
+      }
 
       &.right {
         left: auto;

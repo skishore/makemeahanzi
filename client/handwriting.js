@@ -9,7 +9,7 @@ const kStrokeWidth = 1 / 32;
 
 const kBrushColor   = '#888888';
 const kFailureColor = '#ff4d4d';
-const kHintColor    = '#0080ff';
+const kHintColor    = '#00c0ff';
 const kRevealColor  = '#cccccc';
 const kStrokeColor  = '#000000';
 const kSuccessColor = '#4dc84d';
