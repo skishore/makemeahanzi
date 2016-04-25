@@ -4,9 +4,6 @@ $font-color: #222;
 $font-size: 5.6vw;
 $link-color: #00c0ff;
 
-@import '_variables';
-@import '.meteor/local/build/programs/server/assets/packages/meteoric_ionic-sass/_ionic';
-
 @mixin buttonlike {
   cursor: pointer;
   user-select: none;
