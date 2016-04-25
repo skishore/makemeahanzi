@@ -1,0 +1,41 @@
+<template name="settings">
+  {{#ionBody}}
+    {{#ionSideMenuContainer}}
+      {{#ionSideMenuContent}}
+        {{> ionNavBar class="bar-positive"}}
+        {{#ionNavView}}
+          {{> inner_settings}}
+        {{/ionNavView}}
+      {{/ionSideMenuContent}}
+    {{/ionSideMenuContainer}}
+  {{/ionBody}}
+</template>
+
+<template name="inner_settings">
+  {{#contentFor "headerButtonLeft"}}
+    {{> ionNavBackButton path="index"}}
+  {{/contentFor}}
+
+  {{#contentFor "headerTitle"}}
+    <h1 class="title">Settings</h1>
+  {{/contentFor}}
+
+  {{#ionView}}
+    {{#ionContent}}
+      {{#ionList}}
+        {{#ionItem iconRight=true}}
+          Advanced Writing
+          {{> ionIcon icon="ios-arrow-right"}}
+        {{/ionItem}}
+        {{#ionItem iconRight=true}}
+          Paper Filter
+          {{> ionIcon icon="ios-arrow-right"}}
+        {{/ionItem}}
+        {{#ionItem iconRight=true}}
+          Reveal Options
+          {{> ionIcon icon="ios-arrow-right"}}
+        {{/ionItem}}
+      {{/ionList}}
+    {{/ionContent}}
+  {{/ionView}}
+</template>

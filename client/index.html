@@ -18,16 +18,16 @@
   <div id="index">
     <div class="wrapper">
       <div class="title">Inkstone</div>
-      {{> button icon="paintbrush" label="Write" route="teach"}}
-      {{> button icon="android-list" label="Lists" route="lists"}}
-      {{> button icon="android-settings" label="Settings" route="settings"}}
-      {{> button icon="help-circled" label="Help" route="help"}}
+      {{> option icon="paintbrush" label="Write" route="teach"}}
+      {{> option icon="android-list" label="Lists" route="lists"}}
+      {{> option icon="android-settings" label="Settings" route="settings"}}
+      {{> option icon="help-circled" label="Help" route="help"}}
     </div>
   </div>
 </template>
 
-<template name="button">
-  <a class="{{route}} button" href="{{pathFor route}}">
+<template name="option">
+  <a class="{{route}} option" href="{{pathFor route}}">
     <div class="icon"><i class="ion-{{icon}}"></i></div>{{label}}
   </a>
 </template>
@@ -35,5 +35,3 @@
 <template name="help"></template>
 
 <template name="lists"></template>
-
-<template name="settings"></template>

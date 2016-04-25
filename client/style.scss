@@ -1,24 +1,20 @@
-@base-color: #444;
-@fade-color: #aaa;
-@font-size: 5.6vw;
-@link-color: #00c0ff;
+$base-color: #444;
+$fade-color: #aaa;
+$font-color: #222;
+$font-size: 5.6vw;
+$link-color: #00c0ff;
 
-body {
-  color: @base-color;
-  font-family: Georgia, serif;
-  margin: 0;
-  overflow: hidden;
-  text-align: center;
-}
+@import '_variables';
+@import '.meteor/local/build/programs/server/assets/packages/meteoric_ionic-sass/_ionic';
 
-.buttonlike {
+@mixin buttonlike {
   cursor: pointer;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
 }
 
-.full-size {
+@mixin full-size {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -26,9 +22,21 @@ body {
   top: 0;
 }
 
+body {
+  color: $font-color;
+  font-family: Georgia, serif;
+  margin: 0;
+  overflow: hidden;
+  text-align: center;
+
+  .ionic-body {
+    text-align: left;
+  }
+}
+
 #layout {
   &, > .background, > .foreground {
-    .full-size;
+    @include full-size;
   }
 
   &.theme-flat {
@@ -68,6 +76,7 @@ body {
 
   > .foreground {
     pointer-events: none;
+    z-index: 3;
   }
 }
 
@@ -92,7 +101,7 @@ body {
           margin: -8px -8px 0 0;
           text-align: center;
           width: 32px;
-          .buttonlike;
+          @include buttonlike;
 
           .no-touch &:hover, .touch &:active {
             background-color: #357;
@@ -225,49 +234,49 @@ body {
 }
 
 #index {
-  background-color: @base-color;
+  background-color: $base-color;
   color: white;
-  .full-size;
+  @include full-size;
 
   > .wrapper {
     transform: translateY(-50%);
-    .full-size;
+    @include full-size;
     bottom: auto;
     top: 50%;
 
     > .title {
       font-family: fantasy;
-      font-size: 3 * @font-size;
+      font-size: 3 * $font-size;
       margin-bottom: 16%;
-      transform: translateY(@font-size);
+      transform: translateY($font-size);
     }
 
-    > .button {
+    > .option {
       background-color: #222;
       border: 1px solid white;
-      border-radius: 0.25 * @font-size;
+      border-radius: 0.25 * $font-size;
       color: white;
       display: block;
-      font-size: @font-size;
+      font-size: $font-size;
       margin: 8% auto;
       padding: 2% 4%;
       text-align: left;
       text-decoration: none;
       width: 75%;
-      .buttonlike;
+      @include buttonlike;
 
       &:hover {
         background-color: #013;
-        border: 1px solid @link-color;
-        color: @link-color;
+        border: 1px solid $link-color;
+        color: $link-color;
       }
 
       &.teach {
         background-color: white;
-        color: @base-color;
+        color: $font-color;
 
         &:hover {
-          background-color: @link-color;
+          background-color: $link-color;
         }
       }
 
@@ -275,7 +284,7 @@ body {
         display: inline-block;
         margin-right: 4%;
         text-align: center;
-        width: @font-size;
+        width: $font-size;
       }
     }
   }
@@ -289,14 +298,14 @@ body {
     width: 100%;
 
     > .control {
-      color: @fade-color;
+      color: $fade-color;
       left: 0;
       position: absolute;
-      width: @font-size;
-      .buttonlike;
+      width: $font-size;
+      @include buttonlike;
 
       &:hover {
-        color: @link-color;
+        color: $link-color;
       }
 
       &.right {
@@ -306,7 +315,7 @@ body {
     }
 
     > .control, .pinyin, .definition {
-      font-size: @font-size;
+      font-size: $font-size;
       margin: 3%;
     }
   }
@@ -314,7 +323,7 @@ body {
   > .wrapper {
     padding: 0 6%;
     transform: translateY(50%);
-    .full-size;
+    @include full-size;
     top: 27%;
 
     > .handwriting {
