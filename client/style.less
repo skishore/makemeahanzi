@@ -228,36 +228,43 @@ body {
   color: white;
   .full-size;
 
-  > .title {
-    font-family: fantasy;
-    font-size: 3 * @font-size;
-    margin: 14% 0;
-    transform: translateY(@font-size);
-  }
+  > .wrapper {
+    transform: translateY(-50%);
+    .full-size;
+    bottom: auto;
+    top: 50%;
 
-  > .button {
-    border: 1px solid white;
-    border-radius: 0.25 * @font-size;
-    color: white;
-    display: block;
-    font-size: @font-size;
-    margin: 8% auto;
-    padding: 2% 4%;
-    text-align: left;
-    text-decoration: none;
-    width: 75%;
-    .buttonlike;
-
-    &.play {
-      background-color: white;
-      color: @base-color;
+    > .title {
+      font-family: fantasy;
+      font-size: 3 * @font-size;
+      margin-bottom: 16%;
+      transform: translateY(@font-size);
     }
 
-    > .icon {
-      display: inline-block;
-      margin-right: 4%;
-      text-align: center;
-      width: @font-size;
+    > .button {
+      border: 1px solid white;
+      border-radius: 0.25 * @font-size;
+      color: white;
+      display: block;
+      font-size: @font-size;
+      margin: 8% auto;
+      padding: 2% 4%;
+      text-align: left;
+      text-decoration: none;
+      width: 75%;
+      .buttonlike;
+
+      &.teach {
+        background-color: white;
+        color: @base-color;
+      }
+
+      > .icon {
+        display: inline-block;
+        margin-right: 4%;
+        text-align: center;
+        width: @font-size;
+      }
     }
   }
 }

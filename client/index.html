@@ -16,20 +16,20 @@
 
 <template name="index">
   <div id="index">
-    <div class="title">Inkstone</div>
-    <a class="play button" href="{{pathFor 'teach'}}">
-      <div class="icon"><i class="ion-paintbrush"></i></div>Write
-    </a>
-    <a class="lists button" href="{{pathFor 'lists'}}">
-      <div class="icon"><i class="ion-android-list"></i></div>Lists
-    </a>
-    <a class="settings button" href="{{pathFor 'settings'}}">
-      <div class="icon"><i class="ion-android-settings"></i></div>Settings
-    </a>
-    <a class="help button" href="{{pathFor 'help'}}">
-      <div class="icon"><i class="ion-help-circled"></i></div>Help
-    </a>
+    <div class="wrapper">
+      <div class="title">Inkstone</div>
+      {{> button icon="paintbrush" label="Write" route="teach"}}
+      {{> button icon="android-list" label="Lists" route="lists"}}
+      {{> button icon="android-settings" label="Settings" route="settings"}}
+      {{> button icon="help-circled" label="Help" route="help"}}
+    </div>
   </div>
+</template>
+
+<template name="button">
+  <a class="{{route}} button" href="{{pathFor route}}">
+    <div class="icon"><i class="ion-{{icon}}"></i></div>{{label}}
+  </a>
 </template>
 
 <template name="help"></template>
