@@ -1,5 +1,11 @@
 // TODO(skishore): Do some kind of smoothing to avoid giving users hints based
 // off of the straight segments where strokes intersects.
+import {lookupCharacter} from '../lib/character';
+import {recognize} from '../lib/recognizer';
+import {findCorners} from './corners';
+import {Shortstraw} from './external/shortstraw';
+import {Handwriting} from './handwriting';
+
 const character = new ReactiveVar(null, () => false);
 const definition = new ReactiveVar();
 const pinyin = new ReactiveVar();
@@ -14,8 +20,6 @@ const item = {mistakes: 0, penalties: 0, steps: []};
 const list = {characters: [], definitions: {}, offset: -1};
 
 // A couple small utility functions for Euclidean geometry.
-
-const findCorners = (median) => makemeahanzi.findCorners([median])[0];
 
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
@@ -32,7 +36,7 @@ const match = (stroke, expected) => {
   for (let i = 0; i < item.steps.length; i++) {
     const median = item.steps[i].median;
     const offset = i - expected;
-    const result = makemeahanzi.recognize(stroke, median, offset);
+    const result = recognize(stroke, median, offset);
     if (result.score > best_result.score) {
       best_result = result;
       best_result.index = i;
@@ -93,15 +97,14 @@ const onLoadRadicals = (data, code) => {
 const onRendered = function() {
   const element = $(this.firstNode).find('.handwriting');
   const options = {onclick: onClick, ondouble: onDouble, onstroke: onStroke};
-  handwriting = new makemeahanzi.Handwriting(element, options);
+  handwriting = new Handwriting(element, options);
 }
 
 const onStroke = (stroke) => {
   if (maybeAdvance()) return;
   const missing = _.range(item.steps.length)
                    .filter((i) => !item.steps[i].done);
-  const shortstraw = new makemeahanzi.Shortstraw;
-  const result = match(shortstraw.run(stroke), missing[0]);
+  const result = match((new Shortstraw).run(stroke), missing[0]);
   const index = result.index;
 
   // The user's input does not match any of the character's strokes.
@@ -145,7 +148,7 @@ const onStroke = (stroke) => {
 }
 
 const updateCharacter = () => {
-  makemeahanzi.lookupCharacter(character.get(), (row, error) => {
+  lookupCharacter(character.get(), (row, error) => {
     if (error) {
       console.error(error);
       Meteor.setTimeout(advance);
@@ -158,7 +161,7 @@ const updateCharacter = () => {
       item.penalties = 0;
       item.steps = _.range(row.strokes.length).map((i) => ({
         done: false,
-        median: findCorners(row.medians[i]),
+        median: findCorners([row.medians[i]])[0],
         stroke: row.strokes[i],
       }));
     }

@@ -1,5 +1,7 @@
 // This module defines one public method, findCorners, which takes a list of
 // medians and returns a list of corners for each one.
+import {match} from '../lib/recognizer';
+import {Shortstraw} from './external/shortstraw';
 
 const kMinFirstSegmentFraction = 0.1;
 const kMinLastSegmentFraction = 0.05;
@@ -31,7 +33,7 @@ const fixShuWanGou = (median) => {
   if (median.length === 2) return median;
   const indices_to_drop = {};
   for (let shape of kShuWanGouShapes) {
-    if (makemeahanzi.match(median, shape)) {
+    if (match(median, shape)) {
       indices_to_drop[shape.length - 2] = true;
     }
   }
@@ -41,6 +43,16 @@ const fixShuWanGou = (median) => {
 const distance = (point1, point2) => {
   const diff = [point1[0] - point2[0], point1[1] - point2[1]];
   return Math.sqrt(diff[0] * diff[0] + diff[1] * diff[1]);
+}
+
+const findCorners = (medians) => {
+  const shortstraw = new Shortstraw;
+  return medians.map(fixMedianCoordinates)
+                .map((x) => truncate(x, kTruncation))
+                .map((x) => scale(x, 1 / kFontSize))
+                .map(shortstraw.run.bind(shortstraw))
+                .map(dropDanglingHooks)
+                .map(fixShuWanGou);
 }
 
 const pathLength = (median) => {
@@ -84,12 +96,4 @@ const truncate = (median, truncation) => {
   return refined = refine(median, n).slice(index, n - index);
 }
 
-this.makemeahanzi.findCorners = (medians) => {
-  const shortstraw = new makemeahanzi.Shortstraw;
-  return medians.map(fixMedianCoordinates)
-                .map((x) => truncate(x, kTruncation))
-                .map((x) => scale(x, 1 / kFontSize))
-                .map(shortstraw.run.bind(shortstraw))
-                .map(dropDanglingHooks)
-                .map(fixShuWanGou);
-}
+export {findCorners};

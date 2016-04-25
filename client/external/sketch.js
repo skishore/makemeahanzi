@@ -17,6 +17,7 @@
 
         // Browser global
         root.Sketch = factory( root, root.document );
+        console.log(root, root.Sketch);
     }
 
 }( typeof window !== "undefined" ? window : this, function ( window, document ) {

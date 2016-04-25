@@ -1,3 +1,7 @@
+import {Animation} from '../lib/animation';
+import {lookupCharacter} from '../lib/character';
+import {Decomposition} from '../lib/decomposition';
+
 const animations = new ReactiveVar();
 const character = new ReactiveVar();
 const metadata = new ReactiveVar();
@@ -14,7 +18,7 @@ const short = new ReactiveVar(false);
 const augmentTreeWithLabels = (node, dependencies) => {
   const value = node.value;
   if (node.type === 'compound') {
-    node.label = lower(makemeahanzi.Decomposition.ids_data[value].label);
+    node.label = lower(Decomposition.ids_data[value].label);
     node.children.map((child) => augmentTreeWithLabels(child, dependencies));
   } else {
     node.label = dependencies[node.value] || '(unknown)';
@@ -25,8 +29,7 @@ const augmentTreeWithLabels = (node, dependencies) => {
 }
 
 const constructTree = (row) => {
-  const util = makemeahanzi.Decomposition;
-  const tree = util.convertDecompositionToTree(row.decomposition);
+  const tree = Decomposition.convertDecompositionToTree(row.decomposition);
   augmentTreeWithLabels(tree, row.dependencies);
   return tree;
 }
@@ -58,7 +61,7 @@ const lower = (string) => {
 
 const refreshMetadata = (row) => {
   const options = {delay: 0.3, speed: 0.02};
-  animation = new makemeahanzi.Animation(options, row.strokes, row.medians);
+  animation = new Animation(options, row.strokes, row.medians);
   animate(advanceAnimation);
   metadata.set([
     {label: 'Definition:', value: row.definition},
@@ -76,7 +79,7 @@ const refreshMetadata = (row) => {
 }
 
 const updateCharacter = () => {
-  makemeahanzi.lookupCharacter(character.get(), (row) => {
+  lookupCharacter(character.get(), (row) => {
       if (row.character === character.get()) refreshMetadata(row); });
 }
 

@@ -12,9 +12,8 @@
 //
 // Released under MIT license: http://www.opensource.org/licenses/mit-license.php
 "use strict";
-this.makemeahanzi = this.makemeahanzi || {};
 
-this.makemeahanzi.Shortstraw = class Shortstraw {
+class Shortstraw {
   constructor() {
     this.DIAGONAL_INTERVAL = 100;
     this.STRAW_WINDOW = 3;
@@ -193,3 +192,5 @@ this.makemeahanzi.Shortstraw = class Shortstraw {
     return resampled;
   }
 }
+
+export {Shortstraw};

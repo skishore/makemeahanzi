@@ -1,4 +1,4 @@
-// Helper methods used by the handwriting class.
+import Sketch from './external/sketch';
 
 const kCanvasSize = 512;
 const kDoubleClickTimeout = 300;
@@ -15,6 +15,8 @@ const kStrokeColor  = '#000000';
 const kSuccessColor = '#4dc84d';
 
 let ticker = null;
+
+// Helper methods used by the handwriting class.
 
 const angle = (xs) => Math.atan2(xs[1][1] - xs[0][1], xs[1][0] - xs[0][0]);
 
@@ -189,7 +191,7 @@ const Layer = {
   ALL: 7,
 };
 
-this.makemeahanzi.Handwriting = class Handwriting {
+class Handwriting {
   constructor(element, options) {
     this._onclick = options.onclick;
     this._ondouble = options.ondouble;
@@ -361,3 +363,5 @@ this.makemeahanzi.Handwriting = class Handwriting {
     this._stage.update();
   }
 }
+
+export {Handwriting};

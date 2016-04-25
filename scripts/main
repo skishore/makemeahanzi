@@ -33,7 +33,8 @@ const encode = (matcher, row) => {
     result.push(median.length);
     median.map((x) => result.push(x));
   });
-  result.map((x) => { if (!(0 <= x && x < 256)) throw preprocessed; });
+  result.map((x) => { if (!(0 <= x && x < 256 && x === Math.floor(x)))
+                      throw preprocessed; });
   return new Buffer(result);
 }
 
@@ -59,7 +60,7 @@ const callback = () => {
   const input = fs.createReadStream('makemeahanzi.txt');
   const reader = readline.createInterface({input: input});
   const writer = fs.createWriteStream('public/medians.bin');
-  const matcher = new match.makemeahanzi.Matcher([]);
+  const matcher = new match.Matcher([]);
   const parts = {};
   const rows = {};
   reader.on('line', (line) => {
