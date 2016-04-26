@@ -73,7 +73,7 @@ body {
 
   > .foreground {
     pointer-events: none;
-    z-index: 3;
+    z-index: 9999999999;
   }
 }
 
@@ -236,7 +236,7 @@ body {
   @include full-size;
 
   > .wrapper {
-    transform: translateY(-50%);
+    margin-top: -50%;
     @include full-size;
     bottom: auto;
     top: 50%;
@@ -296,9 +296,10 @@ body {
 
     > .control {
       color: $fade-color;
+      font-size: $font-size;
       left: 0;
+      padding: 3% 4%;
       position: absolute;
-      width: $font-size;
       @include buttonlike;
 
       &:hover {
@@ -311,7 +312,7 @@ body {
       }
     }
 
-    > .control, .pinyin, .definition {
+    > .pinyin, > .definition {
       font-size: $font-size;
       margin: 3%;
     }
