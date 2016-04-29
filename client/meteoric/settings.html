@@ -10,24 +10,18 @@
       {{#ionItem class="item-divider"}}
         Graphics
       {{/ionItem}}
-      {{> ionToggle checked="checked" label="Paper Filter"}}
+      {{> ionToggle variable="settings.paper_filter" label="Paper Filter"}}
       {{#ionItem class="item-divider"}}
         Writing
       {{/ionItem}}
-      {{> ionToggle checked="checked" label="Snap Strokes"}}
-      {{#ionItem class="item-select"}}
-        Reveal Mode
-        <select>
-          <option value="guide" selected>Guide</option>
-          <option value="show">Show</option>
-          <option value="fade">Fade</option>
-        </select>
-      {{/ionItem}}
+      {{> ionToggle variable="settings.snap_strokes" label="Snap Strokes"}}
+      {{> ionSelect variable="settings.reveal_mode" label="Reveal Mode"
+                    options=getRevealModes}}
       {{#ionItem class="item-divider"}}
         Double-tap Speed
       {{/ionItem}}
-      {{> ionRange min="0" max="1000" step="100" value="500"
-                   left="Fast" right="Slow"}}
+      {{> ionRange min="0" max="1000" step="100" left="Fast" right="Slow"
+                   variable="settings.double_tap_speed"}}
     {{/ionList}}
   {{/ionic}}
 </template>

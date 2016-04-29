@@ -15,8 +15,21 @@
   <div class='item range'>
     {{left}}
     <input type="range" min="{{min}}" max="{{max}}"
-           step="{{step}}" value="{{value}}">
+           step="{{step}}" value="{{get variable}}">
     {{right}}
+  </div>
+</template>
+
+<template name="ionSelect">
+  <div class='item item-select'>
+    {{label}}
+    <select>
+      {{#each options}}
+        <option value="{{value}}" selected="{{get ../variable value}}">
+          {{label}}
+        </option>
+      {{/each}}
+    </select>
   </div>
 </template>
 
@@ -24,7 +37,7 @@
   <div class='item item-toggle'>
     {{label}}
     <label class="toggle toggle-dark">
-      <input type="checkbox" {{checked}} />
+      <input type="checkbox" checked="{{get variable}}">
       <div class='track'>
         <div class='handle'></div>
       </div>
