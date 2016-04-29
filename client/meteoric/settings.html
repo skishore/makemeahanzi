@@ -1,48 +1,33 @@
-<template name="ionic">
-  {{#ionBody}}
-    {{#ionSideMenuContainer}}
-      {{#ionSideMenuContent}}
-        {{> ionNavBar class="bar-dark"}}
-        {{#ionNavView}}
-          {{#ionView}}
-            {{#ionContent}}
-              {{> Template.dynamic template=template}}
-            {{/ionContent}}
-          {{/ionView}}
-        {{/ionNavView}}
-      {{/ionSideMenuContent}}
-    {{/ionSideMenuContainer}}
-  {{/ionBody}}
-</template>
-
 <template name="settings">
-  {{> ionic template="settings_content"}}
-</template>
-
-<template name="settings_content">
-  {{#contentFor "headerButtonLeft"}}
-    {{> ionNavBackButton path="index"}}
-  {{/contentFor}}
-  {{#contentFor "headerTitle"}}
-    <h1 class="title">Settings</h1>
-  {{/contentFor}}
-  {{#ionList}}
-    <div class='item item-toggle'>
-      Advanced Writing
-      <label class="toggle toggle-dark">
-        <input type="checkbox" checked="checked" />
-        <div class='track'>
-          <div class='handle'></div>
-        </div>
-      </label>
-    </div>
-    {{#ionItem iconRight=true}}
-      Paper Filter
-      {{> ionIcon icon="ios-arrow-right"}}
-    {{/ionItem}}
-    {{#ionItem iconRight=true}}
-      Reveal Options
-      {{> ionIcon icon="ios-arrow-right"}}
-    {{/ionItem}}
-  {{/ionList}}
+  {{#ionic}}
+    {{#contentFor "headerButtonLeft"}}
+      {{> ionNavBackButton}}
+    {{/contentFor}}
+    {{#contentFor "headerTitle"}}
+      <h1 class="title">Settings</h1>
+    {{/contentFor}}
+    {{#ionList}}
+      {{#ionItem class="item-divider"}}
+        Graphics
+      {{/ionItem}}
+      {{> ionToggle checked="checked" label="Paper Filter"}}
+      {{#ionItem class="item-divider"}}
+        Writing
+      {{/ionItem}}
+      {{> ionToggle checked="checked" label="Snap Strokes"}}
+      {{#ionItem class="item-select"}}
+        Reveal Mode
+        <select>
+          <option value="guide" selected>Guide</option>
+          <option value="show">Show</option>
+          <option value="fade">Fade</option>
+        </select>
+      {{/ionItem}}
+      {{#ionItem class="item-divider"}}
+        Double-tap Speed
+      {{/ionItem}}
+      {{> ionRange min="0" max="1000" step="100" value="500"
+                   left="Fast" right="Slow"}}
+    {{/ionList}}
+  {{/ionic}}
 </template>

@@ -1,6 +1,21 @@
+$base-background-color: #e4e4e4;
+
 @import '_variables';
 @import '.meteor/local/build/programs/server/assets/packages/meteoric_ionic-sass/_ionic';
 
-.item-toggle .toggle {
-  top: 11px;
+.ionic-body {
+  .view {
+    background-color: $base-background-color;
+
+    .item {
+      &.item-divider {
+        background-color: $base-background-color;
+        color: $dark;
+      }
+
+      &.item-toggle > .toggle {
+        top: 11px;
+      }
+    }
+  }
 }

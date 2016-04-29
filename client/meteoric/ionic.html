@@ -1,0 +1,33 @@
+<template name="ionic">
+  {{#ionBody}}
+    {{> ionNavBar class="bar-dark"}}
+    {{#ionNavView}}
+      {{#ionView}}
+        {{#ionContent}}
+          {{> UI.contentBlock}}
+        {{/ionContent}}
+      {{/ionView}}
+    {{/ionNavView}}
+  {{/ionBody}}
+</template>
+
+<template name="ionRange">
+  <div class='item range'>
+    {{left}}
+    <input type="range" min="{{min}}" max="{{max}}"
+           step="{{step}}" value="{{value}}">
+    {{right}}
+  </div>
+</template>
+
+<template name="ionToggle">
+  <div class='item item-toggle'>
+    {{label}}
+    <label class="toggle toggle-dark">
+      <input type="checkbox" {{checked}} />
+      <div class='track'>
+        <div class='handle'></div>
+      </div>
+    </label>
+  </div>
+</template>
