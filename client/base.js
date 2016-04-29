@@ -25,6 +25,6 @@ Transitioner.default({in: 'transition.fadeIn', out: 'transition.fadeOut'});
 Platform.isAndroid = () => false;
 Platform.isIOS = () => true;
 
-Session.setDefault('theme', 'textured');
-
-Template.registerHelper('theme', () => Session.get('theme'));
+Template.layout.helpers({
+  theme: () => Session.get('settings.paper_filter') ? 'textured' : 'painterly',
+});

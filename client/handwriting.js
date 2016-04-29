@@ -1,7 +1,6 @@
 import Sketch from './external/sketch';
 
 const kCanvasSize = 512;
-const kDoubleClickTimeout = 300;
 
 const kCrossWidth = 1 / 256;
 const kMinDistance = 1 / 32;
@@ -307,7 +306,8 @@ class Handwriting {
   }
   _click() {
     const timestamp = new Date().getTime();
-    const cutoff = (this._last_click_timestamp || 0) + kDoubleClickTimeout;
+    const double_tap_speed = Session.get('settings.double_tap_speed');
+    const cutoff = (this._last_click_timestamp || 0) + double_tap_speed;
     const handler = timestamp < cutoff ? this._ondouble : this._onclick;
     this._last_click_timestamp = timestamp;
     handler && handler();
