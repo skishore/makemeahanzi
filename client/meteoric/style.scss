@@ -4,6 +4,17 @@ $base-background-color: #e4e4e4;
 @import '.meteor/local/build/programs/server/assets/packages/meteoric_ionic-sass/_ionic';
 
 .ionic-body {
+  .bar .back-button {
+    &:hover {
+      color: #00c0ff;
+    }
+
+    .back-text {
+      font-size: $font-size-base;
+      vertical-align: top;
+    }
+  }
+
   .view {
     background-color: $base-background-color;
 

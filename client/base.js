@@ -22,6 +22,9 @@ Transitioner.default({in: 'transition.fadeIn', out: 'transition.fadeOut'});
 
 // Set up global template helpers.
 
+Platform.isAndroid = () => false;
+Platform.isIOS = () => true;
+
 Session.setDefault('theme', 'textured');
 
 Template.registerHelper('theme', () => Session.get('theme'));
