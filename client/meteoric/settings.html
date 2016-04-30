@@ -7,21 +7,27 @@
       <h1 class="title">Settings</h1>
     {{/contentFor}}
     {{#ionList}}
-      {{#ionItem class="item-divider"}}
-        Graphics
-      {{/ionItem}}
-      {{> ionToggle variable="settings.paper_filter" label="Paper Filter"}}
-      {{#ionItem class="item-divider"}}
-        Writing
-      {{/ionItem}}
-      {{> ionToggle variable="settings.snap_strokes" label="Snap Strokes"}}
-      {{> ionSelect variable="settings.reveal_mode" label="Reveal Mode"
-                    options=getRevealModes}}
-      {{#ionItem class="item-divider"}}
-        Double-tap Speed
-      {{/ionItem}}
-      {{> ionRange min="0" max="1000" step="100" left="Fast" right="Slow"
-                   variable="settings.double_tap_speed"}}
+      <div class="block">
+        {{#ionItem class="item-divider"}}
+          Graphics
+        {{/ionItem}}
+        {{> ionToggle variable="settings.paper_filter" label="Paper Filter"}}
+      </div>
+      <div class="block">
+        {{#ionItem class="item-divider"}}
+          Writing
+        {{/ionItem}}
+        {{> ionToggle variable="settings.snap_strokes" label="Snap Strokes"}}
+        {{> ionSelect variable="settings.reveal_mode" label="Reveal Mode"
+                      options=getRevealModes}}
+      </div>
+      <div class="block">
+        {{#ionItem class="item-divider"}}
+          Double-tap Speed
+        {{/ionItem}}
+        {{> ionRange min="0" max="1000" step="100" left="Fast" right="Slow"
+                     variable="settings.double_tap_speed"}}
+      </div>
     {{/ionList}}
   {{/ionic}}
 </template>

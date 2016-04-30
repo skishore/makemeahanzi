@@ -1,31 +1,65 @@
 $base-background-color: #e4e4e4;
+$box-shadow-size: 4px 4px 16px;
 
-@import '_variables';
+$font-family-base:                Georgia, serif !default;
+$font-size-base:                  20px !default;
+$font-size-large:                 24px !default;
+$font-size-small:                 16px !default;
+
+$button-height:                   52px !default;
+
+$bar-height:                      54px !default;
+$bar-title-font-size:             24px !default;
+
+$item-font-size:                  20px !default;
+$item-padding:                    12px !default;
+$item-button-font-size:           20px !default;
+
+$toggle-width:                    52px !default;
+$toggle-height:                   31px !default;
+
 @import '.meteor/local/build/programs/server/assets/packages/meteoric_ionic-sass/_ionic';
 
 .ionic-body {
-  .bar .back-button {
-    &:hover {
-      color: #00c0ff;
-    }
+  .bar {
+    box-shadow: $box-shadow-size rgba(0, 0, 0, 0.2);
 
-    .back-text {
-      font-size: $font-size-base;
-      vertical-align: top;
+    .back-button {
+      &:hover {
+        color: #00c0ff;
+      }
+
+      .back-text {
+        font-size: $font-size-base;
+        vertical-align: top;
+      }
     }
   }
 
   .view {
     background-color: $base-background-color;
 
-    .item {
-      &.item-divider {
-        background-color: $base-background-color;
-        color: $dark;
-      }
+    .block {
+      box-shadow: $box-shadow-size rgba(0, 0, 0, 0.1);
+      margin: 27px 0;
 
-      &.item-toggle > .toggle {
-        top: 11px;
+      > .item {
+        &.item-divider {
+          border-width: 1px 0 0 0;
+          background-color: white;
+          color: $dark;
+          font-weight: bold;
+          margin: 0;
+          padding: 8px 12px;
+
+          &:first-child {
+            border-width: 0;
+          }
+        }
+
+        &.item-toggle > .toggle {
+          top: 10px;
+        }
       }
     }
   }
