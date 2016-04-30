@@ -296,7 +296,7 @@ body {
 
     > .control {
       color: $fade-color;
-      font-size: $font-size;
+      font-size: 8 * $font-size / 7;
       left: 0;
       padding: 3% 4%;
       position: absolute;
