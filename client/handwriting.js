@@ -181,13 +181,14 @@ class BasicBrush {
 
 const Layer = {
   CROSS: 0,
-  WATERMARK: 1,
-  HIGHLIGHT: 2,
-  COMPLETE: 3,
-  HINT: 4,
-  STROKE: 5,
-  WARNING: 6,
-  ALL: 7,
+  FADE: 1,
+  WATERMARK: 2,
+  HIGHLIGHT: 3,
+  COMPLETE: 4,
+  HINT: 5,
+  STROKE: 6,
+  WARNING: 7,
+  ALL: 8,
 };
 
 class Handwriting {
@@ -197,7 +198,7 @@ class Handwriting {
     this._onstroke = options.onstroke;
 
     this._settings = {};
-    ['double_tap_speed', 'snap_strokes'].map(
+    ['double_tap_speed', 'reveal_mode', 'snap_strokes'].map(
         (x) => this._settings[x] = Session.get(`settings.${x}`));
 
     this._zoom = createSketch(element, this);
@@ -259,7 +260,10 @@ class Handwriting {
     }
   }
   highlight(path) {
-    if (this._layers[Layer.WATERMARK].children.length === 0) return;
+    if (this._layers[Layer.WATERMARK].children.length === 0 ||
+        this._settings.reveal_mode !== 'guide') {
+      return;
+    }
     const layer = this._layers[Layer.HIGHLIGHT];
     for (let child of layer.children) {
       this._animate(child, {alpha: 0}, 150, () => layer.removeChild(child));
@@ -349,6 +353,14 @@ class Handwriting {
     handler();
     this._reset();
   }
+  _fadeWatermark() {
+    const children = this._layers[Layer.WATERMARK].children;
+    if (children.length === 0) return;
+    const child = children.pop();
+    this._layers[Layer.FADE].addChild(child);
+    this._animate(child, {alpha: 0}, 1500,
+                  () => child.parent && child.parent.removeChild(child));
+  }
   _maybePushPoint(point) {
     if (this._stroke.length === 0) {
       this._pushPoint(point);
@@ -363,6 +375,9 @@ class Handwriting {
   _refresh() {
     if (this._stroke.length < 2) {
       return;
+    }
+    if (this._settings.reveal_mode === 'fade') {
+      this._fadeWatermark();
     }
     const n = this._stroke.length;
     if (!this._brush) {
