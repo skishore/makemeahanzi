@@ -129,8 +129,8 @@ const onStroke = (stroke) => {
   // The user's input matches one of the remaining strokes.
   item.steps[index].done = true;
   const rotate = item.steps[index].median.length === 2;
-  handwriting.emplace(item.steps[index].stroke, rotate,
-                      result.source, result.target);
+  handwriting.emplace([item.steps[index].stroke, rotate,
+                       result.source, result.target]);
   if (result.warning) {
     // TODO(skishore): Maybe penalize on certain warnings.
     handwriting.warn(result.warning);

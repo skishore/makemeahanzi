@@ -196,6 +196,10 @@ class Handwriting {
     this._ondouble = options.ondouble;
     this._onstroke = options.onstroke;
 
+    this._settings = {};
+    ['double_tap_speed', 'snap_strokes'].map(
+        (x) => this._settings[x] = Session.get(`settings.${x}`));
+
     this._zoom = createSketch(element, this);
     this._stage = new createjs.Stage(element.find('canvas')[0]);
     this._size = this._stage.canvas.width;
@@ -208,6 +212,7 @@ class Handwriting {
     }
     renderCross(this._size, this._layers[Layer.CROSS]);
 
+    this._emplacements = [];
     this._pending_animations = 0;
     this._running_animations = 0;
     this._reset();
@@ -221,16 +226,17 @@ class Handwriting {
     for (let layer of this._layers) {
       layer.removeAllChildren();
     }
+    this._emplacements = [];
     this._pending_animations = 0;
     this._running_animations = 0;
     this._reset();
   }
-  emplace(path, rotate, source, target) {
-    const child = pathToShape(path, this._size, kStrokeColor);
-    const endpoint = animate(child, this._size, rotate, source, target);
-    this._layers[Layer.STROKE].children.pop();
-    this._layers[Layer.COMPLETE].addChild(child);
-    this._animate(child, endpoint, 150);
+  emplace(args) {
+    if (this._settings.snap_strokes) {
+      this._emplace(args);
+    } else {
+      this._emplacements.push(args);
+    }
   }
   fade() {
     const stroke = this._layers[Layer.STROKE];
@@ -245,6 +251,8 @@ class Handwriting {
                   () => child.parent.removeChild(child));
   }
   glow(success) {
+    this._emplacements.map((args) => this._emplace(args));
+    this._emplacements = [];
     const color = success ? kSuccessColor : kFailureColor;
     for (let child of this._layers[Layer.COMPLETE].children) {
       convertShapeStyles(child, kStrokeColor, color);
@@ -306,7 +314,7 @@ class Handwriting {
   }
   _click() {
     const timestamp = new Date().getTime();
-    const double_tap_speed = Session.get('settings.double_tap_speed');
+    const double_tap_speed = this._settings.double_tap_speed;
     const cutoff = (this._last_click_timestamp || 0) + double_tap_speed;
     const handler = timestamp < cutoff ? this._ondouble : this._onclick;
     this._last_click_timestamp = timestamp;
@@ -316,6 +324,14 @@ class Handwriting {
     const diagonal = 2 * this._size * this._size;
     const diff = [point1[0] - point2[0], point1[1] - point2[1]];
     return (diff[0] * diff[0] + diff[1] * diff[1]) / diagonal;
+  }
+  _emplace(args) {
+    [path, rotate, source, target] = args;
+    const child = pathToShape(path, this._size, kStrokeColor);
+    const endpoint = animate(child, this._size, rotate, source, target);
+    this._layers[Layer.STROKE].children.pop();
+    this._layers[Layer.COMPLETE].addChild(child);
+    this._animate(child, endpoint, 150);
   }
   _endStroke() {
     let handler = () => this._click();
