@@ -4,6 +4,12 @@ $font-color: #222;
 $font-size: 5.6vw;
 $link-color: #00c0ff;
 
+
+@font-face {
+  font-family: anke-calligraphic;
+  src: url("fonts/anke-calligraphic-2.00.ttf") format("truetype");
+}
+
 @mixin buttonlike {
   cursor: pointer;
   user-select: none;
@@ -242,10 +248,10 @@ body {
     top: 50%;
 
     > .title {
-      font-family: fantasy;
-      font-size: 3 * $font-size;
-      margin-bottom: 16%;
-      transform: translateY($font-size);
+      font-family: anke-calligraphic;
+      font-size: 4 * $font-size;
+      line-height: 4 * $font-size;
+      margin-bottom: 8%;
     }
 
     > .option {
@@ -259,7 +265,7 @@ body {
       padding: 2% 4%;
       text-align: left;
       text-decoration: none;
-      width: 75%;
+      width: 60%;
       @include buttonlike;
 
       &:hover {
