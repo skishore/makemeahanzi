@@ -198,7 +198,7 @@ class Handwriting {
     this._onstroke = options.onstroke;
 
     this._settings = {};
-    ['double_tap_speed', 'reveal_mode', 'snap_strokes'].map(
+    ['double_tap_speed', 'reveal_order', 'snap_strokes'].map(
         (x) => this._settings[x] = Session.get(`settings.${x}`));
 
     this._zoom = createSketch(element, this);
@@ -261,7 +261,7 @@ class Handwriting {
   }
   highlight(path) {
     if (this._layers[Layer.WATERMARK].children.length === 0 ||
-        this._settings.reveal_mode !== 'guide') {
+        !this._settings.reveal_order) {
       return;
     }
     const layer = this._layers[Layer.HIGHLIGHT];
@@ -376,7 +376,7 @@ class Handwriting {
     if (this._stroke.length < 2) {
       return;
     }
-    if (this._settings.reveal_mode === 'fade') {
+    if (!this._settings.reveal_order) {
       this._fadeWatermark();
     }
     const n = this._stroke.length;

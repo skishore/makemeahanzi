@@ -17,9 +17,8 @@
         {{#ionItem class="item-divider"}}
           Writing
         {{/ionItem}}
+        {{> ionToggle variable="settings.reveal_order" label="Reveal Order"}}
         {{> ionToggle variable="settings.snap_strokes" label="Snap Strokes"}}
-        {{> ionSelect variable="settings.reveal_mode" label="Reveal Mode"
-                      options=getRevealModes}}
       </div>
       <div class="block">
         {{#ionItem class="item-divider"}}
