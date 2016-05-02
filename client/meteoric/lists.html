@@ -1,0 +1,22 @@
+<template name="lists">
+  {{#ionic}}
+    {{#contentFor "headerButtonLeft"}}
+      {{> ionNavBackButton text="Done"}}
+    {{/contentFor}}
+    {{#contentFor "headerTitle"}}
+      <h1 class="title">Lists</h1>
+    {{/contentFor}}
+    {{#ionList}}
+      {{#each groups}}
+        <div class="block">
+          {{#ionItem class="item-divider"}}
+            {{label}}
+          {{/ionItem}}
+          {{#each lists}}
+            {{> ionToggle label=label variable=variable}}
+          {{/each}}
+        </div>
+      {{/each}}
+    {{/ionList}}
+  {{/ionic}}
+</template>
