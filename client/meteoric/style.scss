@@ -20,6 +20,14 @@ $toggle-height:                   31px !default;
 
 @import '.meteor/local/build/programs/server/assets/packages/meteoric_ionic-sass/_ionic';
 
+.platform-ios.platform-cordova:not(.fullscreen) {
+  .has-header { top: 54px }
+  .bar-header:not(.bar-subheader) {
+    height: 54px;
+    > * { margin-top: 0px; }
+  }
+}
+
 .ionic-body {
   .bar {
     box-shadow: $box-shadow-size rgba(0, 0, 0, 0.2);
