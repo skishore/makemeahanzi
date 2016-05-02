@@ -1,0 +1,60 @@
+#!/usr/bin/python
+import sys
+
+from collections import defaultdict
+from xml.etree import ElementTree
+
+global vocabulary
+vocabulary = {}
+
+def convertPlecoDictToLists(pleco):
+    result = defaultdict(list)
+    cards = find(pleco, 'cards')
+    for card in cards.getchildren():
+        assert(card.get('language') == 'chinese')
+        catassign = find(card, 'catassign')
+        category = catassign.get('category')
+        assert(category)
+
+        entry = find(card, 'entry')
+        defn = find(entry, 'defn')
+        pron = find(entry, 'pron')
+        assert(pron.get('tones') == 'marks')
+        definition = unicode(defn.text)
+        pinyin = unicode(pron.text.replace(' ', ''))
+        assert(definition and pinyin)
+
+        for headword in entry.findall('headword'):
+            charset = headword.get('charset')
+            if charset and charset != 'sc':
+                continue
+            word = headword.text
+            assert(word)
+            item = validate((word, pinyin, definition))
+            result[category].append(item)
+            break
+    return result
+
+def find(element, child):
+    result = element.find(child)
+    assert(result is not None), 'Element has no child called %s:\n%s' % (
+        child, ElementTree.dump(element))
+    return result
+
+def validate(item):
+    assert(all(type(x) == unicode for x in item)), item
+    assert(all('\n' not in x and '\t' not in x for x in item)), item
+    if item[0] in vocabulary:
+        print 'Duplicate item: %s' % ('\t'.join(item),)
+    else:
+        vocabulary[item[0]] = item
+    return item
+
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print 'Usage: ./scripts/list <source> <target>'
+        sys.exit(-1)
+    source = ElementTree.parse(sys.argv[1]).getroot()
+    lists = convertPlecoDictToLists(source)
+    for (name, vocab) in sorted(lists.iteritems()):
+        print '%s (%d items)' % (name, len(vocab))
