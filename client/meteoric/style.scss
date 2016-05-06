@@ -42,6 +42,10 @@ $toggle-height:                   31px !default;
         vertical-align: top;
       }
     }
+
+    .title {
+      transition-property: none;
+    }
   }
 
   .view {
