@@ -127,3 +127,17 @@ rely on the fact that the two files will always come in the same order.
   paths above. These medians can be used to produce a rough stroke-order
   animation, although it is a bit tricky. Each median is a list of pairs
   of integers. This list will be as long as the strokes list.
+
+### TODOs and Future Work
+
+- Right now, all stroke order information is based on the People's Republic
+  of China (PRC) stroke order. Some characters are written with a different
+  stroke order in Japan, Taiwan, and other countries. We should include data
+  for these orders as well.
+
+- It's possible to encode animated SVGs. We can run the animation code used
+  on the demo site in an offline way to generate these animations as another
+  build artifact to help clients who just want the animations.
+
+These TODOs will be addressed based on prospective clients' needs, so if you
+want something done, please let me know!
