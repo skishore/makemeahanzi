@@ -5,38 +5,7 @@ const child_process = require('child_process');
 const fs = require('fs');
 const readline = require('readline');
 
-const match = require('./../lib/matcher');
-
 const delimiter = 'BREAK';
-
-const util = {
-  add: (point1, point2) => [point1[0] + point2[0], point1[1] + point2[1]],
-  subtract: (point1, point2) => [point1[0] - point2[0], point1[1] - point2[1]],
-};
-
-const mapToSquare = (median) => {
-  return median.map((x) => [x[0], 900 - x[1]]);
-}
-
-const encode = (matcher, row) => {
-  const result = [];
-  // TODO(skishore): Figure out how to properly decode UTF-8 or -16 in
-  // Javascript and then use one of those encodings here instead of this hack.
-  const codepoint = row.character.charCodeAt(0);
-  result.push(codepoint & 0xff);
-  result.push(codepoint >> 8);
-  // Push the medians into the binary representation.
-  const medians = row.medians.map(mapToSquare);
-  const preprocessed = matcher.preprocess(medians);
-  result.push(preprocessed.length);
-  preprocessed.map((median) => {
-    result.push(median.length);
-    median.map((x) => result.push(x));
-  });
-  result.map((x) => { if (!(0 <= x && x < 256 && x === Math.floor(x)))
-                      throw preprocessed; });
-  return new Buffer(result);
-}
 
 const dumpParts = (parts, rows) => {
   for (const part in parts) {
@@ -59,8 +28,6 @@ const dumpParts = (parts, rows) => {
 const callback = () => {
   const input = fs.createReadStream('makemeahanzi.txt');
   const reader = readline.createInterface({input: input});
-  const writer = fs.createWriteStream('public/medians.bin');
-  const matcher = new match.Matcher([]);
   const parts = {};
   const rows = {};
   reader.on('line', (line) => {
@@ -73,14 +40,12 @@ const callback = () => {
     }
     delete row.normalized_medians;
 
-    writer.write(encode(matcher, row));
     const part = Math.floor(row.character.charCodeAt(0) / 256);
     parts[part] = parts[part] || [];
     parts[part].push(row);
     rows[row.character] = row;
   });
   reader.on('close', () => {
-    writer.end();
     dumpParts(parts, rows);
     child_process.exec('rm makemeahanzi.txt', () => 0);
   });
