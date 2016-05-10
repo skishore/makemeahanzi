@@ -1,6 +1,6 @@
 import {Animation} from '../lib/animation';
-import {lookupCharacter} from '../lib/character';
 import {Decomposition} from '../lib/decomposition';
+import {lookupCharacter} from './lookup';
 
 const animations = new ReactiveVar();
 const character = new ReactiveVar();

@@ -5,7 +5,7 @@ const child_process = require('child_process');
 const fs = require('fs');
 const readline = require('readline');
 
-const delimiter = 'BREAK';
+const kDelimiter = 'BREAK';
 
 const dumpParts = (parts, rows) => {
   for (const part in parts) {
@@ -19,48 +19,59 @@ const dumpParts = (parts, rows) => {
         }
       });
     });
-    const writer = fs.createWriteStream(`public/characters/part-${part}.txt`);
-    writer.write(JSON.stringify(parts[part]));
-    writer.end();
+    const data = JSON.stringify(parts[part]);
+    fs.writeFileSync(`public/characters/part-${part}.txt`, data);
   }
 }
 
-const callback = () => {
+const parseLine = (line, delimiter) => {
+  const pieces = line.trim().split(delimiter)
+  if (pieces.length !== 2) throw new Error(line);
+  const row = JSON.parse(pieces[0]);
+  const row2 = JSON.parse(pieces[1]);
+  for (let key in row2) {
+    row[key] = row2[key];
+  }
+  delete row.normalized_medians;
+  return row;
+}
+
+const main = () => {
+  // TODO(skishore): This whole function is a terrible hack! Clean it up.
+
+  // Combine each line of the dictionary.txt and graphics.txt files.
+  const spacers = [];
+  Array.from(kDelimiter).slice(1).map((x) => spacers.push('/dev/null'));
+  const spacer = spacers.join(' ');
+  console.log('Preparing...');
+  child_process.execSync(
+      `paste -d ${kDelimiter} makemeahanzi/dictionary.txt ` +
+      `${spacer} makemeahanzi/graphics.txt > makemeahanzi.txt`);
+
+  // Read in the combined-file line-by-line into memory.
+  console.log('Reading...');
   const input = fs.createReadStream('makemeahanzi.txt');
   const reader = readline.createInterface({input: input});
   const parts = {};
   const rows = {};
   reader.on('line', (line) => {
-    const pieces = line.trim().split(delimiter)
-    if (pieces.length !== 2) throw new Error(line);
-    const row = JSON.parse(pieces[0]);
-    const row2 = JSON.parse(pieces[1]);
-    for (let key in row2) {
-      row[key] = row2[key];
-    }
-    delete row.normalized_medians;
-
+    const row = parseLine(line, kDelimiter);
     const part = Math.floor(row.character.charCodeAt(0) / 256);
     parts[part] = parts[part] || [];
     parts[part].push(row);
     rows[row.character] = row;
   });
-  reader.on('close', () => {
-    dumpParts(parts, rows);
-    child_process.exec('rm makemeahanzi.txt', () => 0);
-  });
-}
 
-const main = () => {
-  // TODO(skishore): This whole function is a terrible hack!
-  const spacers = [];
-  Array.from(delimiter).slice(1).map((x) => spacers.push('/dev/null'));
-  const spacer = spacers.join(' ');
-  child_process.exec(`paste -d ${delimiter} makemeahanzi/dictionary.txt ` +
-                     `${spacer} makemeahanzi/graphics.txt > makemeahanzi.txt`,
-                     (error, stdout, stderr) => {
-    if (error != null) throw new Error(error);
-    callback();
+  // Dump each part into a characters/part-xxx file, then compress them all.
+  reader.on('close', () => {
+    console.log('Dumping...');
+    dumpParts(parts, rows);
+    console.log('Compressing...');
+    child_process.execSync('rm -f public/characters/*.gz');
+    child_process.execSync('gzip --best public/characters/*', () => 0);
+    console.log('Cleaning up...');
+    child_process.execSync('rm makemeahanzi.txt', () => 0);
+    console.log('Done!');
   });
 }
 

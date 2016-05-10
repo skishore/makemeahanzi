@@ -1,10 +1,10 @@
 // TODO(skishore): Do some kind of smoothing to avoid giving users hints based
 // off of the straight segments where strokes intersects.
-import {lookupCharacter} from '../lib/character';
 import {recognize} from '../lib/recognizer';
 import {findCorners} from './corners';
 import {Shortstraw} from './external/shortstraw';
 import {Handwriting} from './handwriting';
+import {lookupCharacter} from './lookup';
 
 const character = new ReactiveVar(null, () => false);
 const definition = new ReactiveVar();
