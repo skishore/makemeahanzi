@@ -1,4 +1,5 @@
 // Simple helpers for interacting with reactive variables.
+import {Settings} from '../model/settings';
 
 ReactiveVar.prototype.pop = function() {
   const value = this.get();
@@ -26,5 +27,6 @@ Platform.isAndroid = () => false;
 Platform.isIOS = () => true;
 
 Template.layout.helpers({
-  theme: () => Session.get('settings.paper_filter') ? 'textured' : 'painterly',
+  theme: () => Settings.get('settings.paper_filter') ?
+      'textured' : 'painterly',
 });

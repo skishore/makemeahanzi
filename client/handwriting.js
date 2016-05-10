@@ -1,3 +1,4 @@
+import {Settings} from '../model/settings';
 import Sketch from './external/sketch';
 
 const kCanvasSize = 512;
@@ -199,7 +200,7 @@ class Handwriting {
 
     this._settings = {};
     ['double_tap_speed', 'reveal_order', 'snap_strokes'].map(
-        (x) => this._settings[x] = Session.get(`settings.${x}`));
+        (x) => this._settings[x] = Settings.get(`settings.${x}`));
 
     this._zoom = createSketch(element, this);
     this._stage = new createjs.Stage(element.find('canvas')[0]);
