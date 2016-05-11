@@ -102,9 +102,9 @@
       <div class="entry" style="background-color: {{background}};
                                 border-color: {{color}};">
         <a class="reverse">Reverse</a>
-        <div class="small">{{>glyph glyph}}</div>
+        <div class="small">{{> glyph glyph}}</div>
         <div class="clear"></div>
-        <div class="character">{{>glyph glyph}}</div>
+        <div class="character">{{> glyph glyph}}</div>
       </div>
     {{/sortable}}
   </div>
@@ -125,6 +125,47 @@
       {{/each}}
       {{#each lines}}
         <line x1="{{x1}}" y1="{{y1}}" x2="{{x2}}" y2="{{y2}}"></line>
+      {{/each}}
+    </g>
+  </svg>
+</template>
+
+<template name="verified_stage">
+  {{> animation data}}
+</template>
+
+<template name="animation">
+  <svg viewBox="0 0 1024 1024">
+    <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1"
+       transform="scale(4, 4)">
+      <line x1="0" y1="0" x2="256" y2="256"></line>
+      <line x1="256" y1="0" x2="0" y2="256"></line>
+      <line x1="128" y1="0" x2="128" y2="256"></line>
+      <line x1="0" y1="128" x2="256" y2="128"></line>
+    </g>
+    <g transform="scale(1, -1) translate(0, -900)">
+      {{#each strokes}}
+        <path class="base {{class}}" d="{{d}}"></path>
+      {{/each}}
+      <style type="text/css">
+        {{#each animations}}
+          @keyframes {{keyframes}} {
+            from { stroke-dashoffset: {{offset}}; }
+            to { stroke-dashoffset: 0; }
+          }
+          #animation{{index}} {
+            animation: {{keyframes}} {{duration}} both;
+            animation-delay: {{delay}};
+          }
+        {{/each}}
+      </style>
+      {{#each animations}}
+        <clipPath id="clip{{index}}">
+          <path d="{{stroke}}"></path>
+        </clipPath>
+        <path class="animation {{class}}" clip-path="url(#clip{{index}})"
+              d="{{d}}" id="animation{{index}}"
+              stroke-dasharray="{{length}} {{spacing}}"></path>
       {{/each}}
     </g>
   </svg>
