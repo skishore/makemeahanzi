@@ -15,8 +15,11 @@ information and updates on the project.
 Make Me a Hanzi data is split into two data files,
 [dictionary.txt](https://github.com/skishore/makemeahanzi/blob/master/dictionary.txt)
 and [graphics.txt](https://github.com/skishore/makemeahanzi/blob/master/graphics.txt),
-because the sources that the two data sets are derived from have different
-licenses. See the Sources section and the
+because the sources that the files are derived from have different licenses.
+In addition, we provide an experimental tarball of animated SVGs,
+[svgs.tar.gz](https://github.com/skishore/makemeahanzi/blob/master/svgs.tar.gz)
+that is licensed the same way as graphics.txt.
+See the Sources section and the
 [COPYING](https://github.com/skishore/makemeahanzi/blob/master/COPYING)
 file for more information.
 
@@ -26,7 +29,7 @@ file for more information.
   [Unihan](http://unicode.org/charts/unihan.html)
   and [CJKlib](https://github.com/cburgmer/cjklib).
 
-- graphics.txt is derived from two free fonts:
+- graphics.txt and svgs.tar.gz are derived from two free fonts:
   [Arphic PL KaitiM GB](https://apps.ubuntu.com/cat/applications/precise/fonts-arphic-gkai00mp/)
   and [Arphic PL UKai](https://apps.ubuntu.com/cat/applications/fonts-arphic-ukai/).
 
@@ -59,7 +62,7 @@ rely on the fact that the two files will always come in the same order.
 - __decomposition:__ An [Ideograph Description Sequence](https://en.wikipedia.org/wiki/Chinese_character_description_languages#Ideographic_Description_Sequences)
   decomposition of the character. Required, but invalid if it starts with a
   full-width question mark '？'.
-  
+
     Note that even if the first character is a
     proper IDS symbol, any component within the decomposition may be a wide
     question mark as well. For example, if we have a decomposition of a
@@ -86,17 +89,17 @@ rely on the fact that the two files will always come in the same order.
   components, as indexed in its decomposition tree. Any given entry in
   this list may be null. If an entry is not null, it will be a list of
   indices corresponding to a path down the decomposition tree.
-   
+
   This schema is a little tricky to explain without an example. Suppose
   that the character '俢' has the decomposition: '⿰亻⿱夂彡'
-  
+
   The third stroke in that character belongs to the radical '夂'.
   Its match would be [1, 0]. That is, if you think of the decomposition as
   a tree, it has '⿰' at its root with two children '亻' and '⿱', and
   '⿱' further has two children '夂' and '彡'. The path down the tree
   to '夂' is to take the second child of '⿰' and the first of '⿱',
   hence, [1, 0].
-   
+
   This field can be used to generate visualizations marking each component
   within a given character, or potentially for more exotic purposes.
 
@@ -135,9 +138,17 @@ rely on the fact that the two files will always come in the same order.
   stroke order in Japan, Taiwan, and other countries. We should include data
   for these orders as well.
 
-- It's possible to encode animated SVGs. We can run the animation code used
-  on the demo site in an offline way to generate these animations as another
-  build artifact to help clients who just want the animations.
+- As an experimental next step, we have produced a tarball containing an
+  animated SVG for each character we have data for. It's easy to embed these
+  SVGs in a website. A minimal example is as follows:
+
+      <body><embed src="31119.svg" width="200px" height="200px"/></body>
+
+  This feature is experimental because it is still tricky to work with these
+  images beyond this basic example. For instance, it's not clear how to
+  embed two of these images side-by-side and have the second start animating
+  when the first is complete. However, the images are still the easiest way
+  to make use of this data..
 
 These TODOs will be addressed based on prospective clients' needs, so if you
 want something done, please let me know!
