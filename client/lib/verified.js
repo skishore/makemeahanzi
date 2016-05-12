@@ -6,8 +6,7 @@ stages.verified = class VerifiedStage extends stages.AbstractStage {
     const strokes = glyph.stages.order.map(
         (x) => glyph.stages.strokes[x.stroke]);
     const medians = glyph.stages.order.map((x) => x.median);
-    const options = {delay: 0.3, speed: 0.02};
-    this.data = getAnimationData(strokes, medians, options);
+    this.data = getAnimationData(strokes, medians);
   }
   refreshUI() {
     Session.set('stage.status',
