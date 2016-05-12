@@ -154,6 +154,23 @@ const dumpToNewSchemaJSON = () => {
   }));
 }
 
+const exportSVGs = () => {
+  const fs = Npm.require('fs');
+  const path = Npm.require('path');
+  const pwd = getPWD();
+  const directory = path.join(pwd, '.svgs');
+  fs.mkdirSync(directory);
+  runMigration((glyph) => {
+    const codepoint = glyph.character.codePointAt(0);
+    const medians = glyph.stages.order.map((x) => x.median);
+    const strokes = glyph.stages.order.map(
+        (x) => glyph.stages.strokes[x.stroke]);
+    const raw = SSR.render('animation', getAnimationData(strokes, medians));
+    const svg = raw.replace(/\n  /g, '\n').split('\n').slice(1, -2).join('\n');
+    fs.writeFileSync(path.join(directory, `${codepoint}.svg`), svg);
+  }, () => {});
+}
+
 const loadFromOldSchemaJSON = (filename) => {
   const fs = Npm.require('fs');
   const path = Npm.require('path');
@@ -215,6 +232,7 @@ Meteor.methods({
     cjklib.promise.then(Meteor.bindEnvironment(dumpToNewSchemaJSON))
                   .catch(console.error.bind(console));
   },
+  'exportSVGs': exportSVGs,
   'loadFromOldSchemaJSON': (filename) => {
     cjklib.promise.then(
         Meteor.bindEnvironment(() => loadFromOldSchemaJSON(filename)))
@@ -223,6 +241,7 @@ Meteor.methods({
 });
 
 Meteor.startup(() => {
+  SSR.compileTemplate('animation', Assets.getText('animation.html'));
   const completion_callback = undefined;
   const per_glyph_callback = undefined;
   if (!per_glyph_callback && !completion_callback) {
