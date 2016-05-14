@@ -219,7 +219,7 @@ class Handwriting {
     this._running_animations = 0;
     this._reset();
 
-    createjs.Ticker.setFPS(60);
+    createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.removeEventListener('tick', ticker);
     ticker = createjs.Ticker.addEventListener('tick', this.tick.bind(this));
   }
