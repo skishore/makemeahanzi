@@ -7,6 +7,7 @@
 //  - next: Unix timestamp when the word is next due
 //  - attempts: number of times the user has seen the word
 //  - successes: number of times the user has gotten the word right
+//  - failed: true if this item should be shown again in the failures deck
 //
 // The "correct" and "update" model methods take a "result" argument which
 // can be anything in the set {0, 1, 2, 3}, with higher numbers indicating
@@ -15,15 +16,10 @@ import {getNextInterval} from './external/interval_quantifier';
 
 const vocabulary = new Ground.Collection('vocabulary', {connection: null});
 
-const kIntervalFactors = [3.5, 2.2, 1.2, 0.25];
-const kMaxInterval = [3, 2.2, 1.2, 0.25];
-const kMinInterval = [3.5, 2.2, 1.2, 0.25];
-
 const getTimestamp = () => Math.floor(new Date().getTime() / 1000);
 
 class Vocabulary {
   static add(word, entry) {
-    const last = getTimestamp();
     const update = {
       $addToSet: {entries: entry},
       $setOnInsert: {word: word, attempts: 0, successes: 0},
@@ -33,26 +29,36 @@ class Vocabulary {
   static drop(list) {
     vocabulary.update({}, {$pull: {entries: {list: list}}}, {multi: true});
   }
-  static getNextDue() {
+  static getFailuresInRange(start, end) {
+    const query = {
+      entries: {$ne: []},
+      last: {$exists: true, $gte: start, $lt: end},
+      failed: true,
+    };
+    return vocabulary.find(query, {$sort: {next: 1}});
   }
-  static getNextNew() {
+  static getItemsDueBy(last, next) {
+    const query = {
+      entries: {$ne: []},
+      last: {$exists: true, $lt: last},
+      next: {$exists: true, $lt: next},
+    };
+    return vocabulary.find(query, {$sort: {next: 1}});
+  }
+  static getNewItems() {
+    return vocabulary.find({entries: {$ne: []}, last: {$exists: false}});
   }
   static update(vocab, result, correction) {
     const last = getTimestamp();
     const next = last + getNextInterval(vocab, result, last);
     const success = result < 3;
     const update = {
-      $set: {last: last, next: next},
+      $set: {last: last, next: next, failed: !success},
       $inc: {attempts: 1, successes: (success ? 1 : 0)},
     };
     attempts = vocab.attempts + (correction ? 1 : 0);
     vocabulary.update({word: vocab.word, attempts: attempts}, update);
   }
-}
-
-if (Meteor.isClient) {
-  window.vocabulary = vocabulary;
-  window.Vocabulary = Vocabulary;
 }
 
 export {Vocabulary};
