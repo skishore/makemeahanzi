@@ -1,3 +1,6 @@
+// Schema: settings is a key-value store with records containing:
+//  - key: string
+//  - value: any
 const settings = new Ground.Collection('settings', {connection: null});
 
 class Settings {
