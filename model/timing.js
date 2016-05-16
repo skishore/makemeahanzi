@@ -4,9 +4,7 @@
 //  - What is the next flash card?
 import {Vocabulary} from './vocabulary';
 
-const kEpochDuration = 5;
-const kMaxAdds = 50;
-const kMaxReviews = 100;
+const kEpochDuration = 24 * 60 * 60;
 
 const autorun = (callback) =>
     Meteor.startup(() => Tracker.autorun(() =>
@@ -33,7 +31,7 @@ const updateEpoch = () => {
     handle = setTimeout(updateEpoch, 1000 * wait);
   } else {
     mEpoch.upsert({}, {timestamp: now});
-    mCounters.upsert({}, newCounters());
+    mCounts.upsert({}, newCounts());
     clearInterval(handle);
     handle = setTimeout(updateEpoch, 1000 * kEpochDuration);
   }
@@ -44,32 +42,57 @@ autorun(() => Meteor.setTimeout(updateEpoch));
 // Timing state tier 2: a Ground collection storing a single record that
 // tracks counters for the user's current session.
 
-const mCounters = new Ground.Collection('counters', {connection: null});
+const mCounts = new Ground.Collection('counts', {connection: null});
 
+const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
 
-const newCounters = () => ({adds: 0, reviews: 0});
+const newCounts = () => ({adds: 0, failures: 0, reviews: 0});
+
+const draw = (deck) => deck.sort({next: 1}).limit(1).fetch()[0];
+
+const mapDict = (dict, callback) => {
+  const result = {};
+  for (key in dict) {
+    result[key] = callback(key, dict[key]);
+  }
+  return result;
+}
 
 autorun(() => {
   const epoch = mEpoch.findOne();
-  const counters = mCounters.findOne();
-  if (!epoch || !counters) return;
+  const counts = mCounts.findOne();
+  if (!epoch || !counts) return;
   const ts = epoch.timestamp;
 
-  const adds = Vocabulary.getNewItems();
-  const failures = Vocabulary.getFailuresInRange(ts, ts + kEpochDuration);
-  const reviews = Vocabulary.getItemsDueBy(ts, ts);
+  const decks = {
+    adds: Vocabulary.getNewItems(),
+    failures: Vocabulary.getFailuresInRange(ts, ts + kEpochDuration),
+    reviews: Vocabulary.getItemsDueBy(ts, ts),
+  };
+  // const maxes = mapDict(decks, (k, v) => Settings.get(`settings.max_${k}`);
+  const maxes = {adds: 50, failures: Infinity, reviews: 100};
+  const sizes = mapDict(decks, (k, v) => v.count());
+  const left = mapDict(sizes, (k, v) => clamp(maxes[k] - counts[k], 0, v));
 
-  const num_adds = adds.count();
-  const num_reviews = reviews.count();
+  let next = null;
+  if (left.adds + left.reviews > 0) {
+    const index = Math.random() * (left.adds + left.reviews);
+    const deck = index < left.adds ? 'adds' : 'reviews';
+    next = {card: draw(decks[deck]), deck: deck};
+  } else if (left.failures > 0) {
+    next = {card: draw(decks.failures), deck: 'failures'};
+  } else {
+    let error = "You're done for the day!";
+    const extra = Vocabulary.getItemsDueBy(ts, Infinity);
+    const count = extra.count();
+    if (count > 0) {
+      const bound = Math.min(count, Math.ceil(maxes.reviews / 2));
+      error += ` Do you want to add ${bound} cards to today's deck?`;
+    }
+    next = {card: {error: error, type: 'error'}, deck: 'errors'};
+  }
 
-  const adds_left = clamp(kMaxAdds - counters.adds, 0, num_adds);
-  const reviews_left = clamp(kMaxReviews - counters.reviews, 0, num_reviews);
-
-  remainder.set({
-    adds: adds_left,
-    failures: failures.count(),
-    reviews: reviews_left,
-  });
-  console.log(remainder.get());
+  next_card.set(next);
+  remainder.set(left);
 });

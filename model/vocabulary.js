@@ -28,22 +28,21 @@ class Vocabulary {
   }
   static drop(list) {
     vocabulary.update({}, {$pull: {entries: {list: list}}}, {multi: true});
+    vocabulary.remove({entries: {$eq: []}, last: {$exists: false}});
   }
   static getFailuresInRange(start, end) {
-    const query = {
+    return vocabulary.find({
       entries: {$ne: []},
       last: {$exists: true, $gte: start, $lt: end},
       failed: true,
-    };
-    return vocabulary.find(query, {$sort: {next: 1}});
+    });
   }
   static getItemsDueBy(last, next) {
-    const query = {
+    return vocabulary.find({
       entries: {$ne: []},
       last: {$exists: true, $lt: last},
       next: {$exists: true, $lt: next},
-    };
-    return vocabulary.find(query, {$sort: {next: 1}});
+    });
   }
   static getNewItems() {
     return vocabulary.find({entries: {$ne: []}, last: {$exists: false}});
