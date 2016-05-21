@@ -4,7 +4,7 @@
 //  - What is the next flash card?
 import {Vocabulary} from './vocabulary';
 
-const kEpochDuration = 24 * 60 * 60;
+const kSessionDuration = 20 * 60 * 60;
 
 const autorun = (callback) =>
     Meteor.startup(() => Tracker.autorun(() =>
@@ -15,39 +15,37 @@ const clamp = (x, min, max) => Math.max(Math.min(x, max), min);
 const getTimestamp = () => Math.floor(new Date().getTime() / 1000);
 
 // Timing state tier 1: a Ground collection storing a single record with raw
-// counts for this session.
-
-const mEpoch = new Ground.Collection('epoch', {connection: null});
-
-let handle = null;
-
-const updateEpoch = () => {
-  // WARNING: Meteor.setTimeout in dispatch:kernel sometimes drops callbacks.
-  const now = getTimestamp();
-  const record = mEpoch.findOne() || {timestamp: -Infinity};
-  const wait = record.timestamp + kEpochDuration - now;
-  if (wait > 0) {
-    clearInterval(handle);
-    handle = setTimeout(updateEpoch, 1000 * wait);
-  } else {
-    mEpoch.upsert({}, {timestamp: now});
-    mCounts.upsert({}, newCounts());
-    clearInterval(handle);
-    handle = setTimeout(updateEpoch, 1000 * kEpochDuration);
-  }
-}
-
-autorun(() => Meteor.setTimeout(updateEpoch));
-
-// Timing state tier 2: a Ground collection storing a single record that
-// tracks counters for the user's current session.
+// counts for usage in this session and a timestamp of when the session began.
 
 const mCounts = new Ground.Collection('counts', {connection: null});
 
+const newCounts = (ts) => ({adds: 0, failures: 0, reviews: 0, ts: ts});
+
+let handle = null;
+
+const updateTimestamp = () => {
+  // WARNING: Meteor.setTimeout in dispatch:kernel sometimes drops callbacks.
+  const now = getTimestamp();
+  const counts = mCounts.findOne() || {ts: -Infinity};
+  const wait = counts.ts + kSessionDuration - now;
+  if (wait > 0) {
+    clearInterval(handle);
+    handle = setTimeout(updateTimestamp, 1000 * wait);
+  } else {
+    clearInterval(handle);
+    handle = setTimeout(updateTimestamp, 1000 * kSessionDuration);
+    mCounts.upsert({}, newCounts(now));
+  }
+}
+
+autorun(() => Meteor.setTimeout(updateTimestamp));
+
+// Timing state tier 2: reactive variables built on top of the session counts
+// that track what the next card is and how many cards of different classes
+// are left in this session.
+
 const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
-
-const newCounts = () => ({adds: 0, failures: 0, reviews: 0});
 
 const draw = (deck) => deck.sort({next: 1}).limit(1).fetch()[0];
 
@@ -60,14 +58,13 @@ const mapDict = (dict, callback) => {
 }
 
 autorun(() => {
-  const epoch = mEpoch.findOne();
   const counts = mCounts.findOne();
-  if (!epoch || !counts) return;
-  const ts = epoch.timestamp;
+  if (!counts) return;
+  const ts = counts.ts;
 
   const decks = {
     adds: Vocabulary.getNewItems(),
-    failures: Vocabulary.getFailuresInRange(ts, ts + kEpochDuration),
+    failures: Vocabulary.getFailuresInRange(ts, ts + kSessionDuration),
     reviews: Vocabulary.getItemsDueBy(ts, ts),
   };
   // const maxes = mapDict(decks, (k, v) => Settings.get(`settings.max_${k}`);
