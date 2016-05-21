@@ -47,7 +47,16 @@ autorun(() => Meteor.setTimeout(updateTimestamp));
 const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
 
-const draw = (deck) => deck.sort({next: 1}).limit(1).fetch()[0];
+const draw = (deck) => {
+  let result = null;
+  deck.forEach((card) => {
+    if (!result || (card.next || 0) < result.next) {
+      result = card;
+    }
+  });
+  if (!result) throw new Error(`Drew from empty deck: ${deck}`);
+  return result;
+}
 
 const mapDict = (dict, callback) => {
   const result = {};
