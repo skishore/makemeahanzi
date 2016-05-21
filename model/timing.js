@@ -48,6 +48,7 @@ const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
 
 const draw = (deck) => {
+  // TODO(skishore): We may want to randomize the when we draw from it.
   let result = null;
   deck.forEach((card) => {
     if (!result || (card.next || 0) < result.next) {
@@ -76,7 +77,8 @@ autorun(() => {
     failures: Vocabulary.getFailuresInRange(ts, ts + kSessionDuration),
     reviews: Vocabulary.getItemsDueBy(ts, ts),
   };
-  // const maxes = mapDict(decks, (k, v) => Settings.get(`settings.max_${k}`);
+  // TODO(skishore): Make the maxes configurable:
+  //const maxes = mapDict(decks, (k, v) => Settings.get(`settings.max_${k}`);
   const maxes = {adds: 50, failures: Infinity, reviews: 100};
   const sizes = mapDict(decks, (k, v) => v.count());
   const left = mapDict(sizes, (k, v) => clamp(maxes[k] - counts[k], 0, v));
@@ -89,6 +91,7 @@ autorun(() => {
   } else if (left.failures > 0) {
     next = {card: draw(decks.failures), deck: 'failures'};
   } else {
+    // TODO(skishore): Implement adding extra cards.
     let error = "You're done for the day!";
     const extra = Vocabulary.getItemsDueBy(ts, Infinity);
     const count = extra.count();
@@ -102,3 +105,12 @@ autorun(() => {
   next_card.set(next);
   remainder.set(left);
 });
+
+// Timing interface: reactive getters for next_card and remainder.
+
+class Timing {
+  static getNextCard() { return next_card.get(); }
+  static getRemainder() { return remainder.get(); }
+}
+
+export {Timing}
