@@ -18,14 +18,16 @@ const vocabulary = new Ground.Collection('vocabulary', {connection: null});
 const getTimestamp = () => Math.floor(new Date().getTime() / 1000);
 
 class Vocabulary {
-  static add(word, list) {
+  static addItem(word, list) {
+    // TODO(skishore): This method runs in time O(n) because of the upsert.
+    // Implement a batch addList method that does not suffer this penalty.
     const update = {
       $addToSet: {lists: list},
       $setOnInsert: {word: word, attempts: 0, successes: 0},
     };
     vocabulary.upsert({word: word}, update);
   }
-  static drop(list) {
+  static dropList(list) {
     vocabulary.update({}, {$pull: {lists: list}}, {multi: true});
     vocabulary.remove({lists: [], last: {$exists: false}});
   }
