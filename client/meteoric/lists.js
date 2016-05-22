@@ -1,3 +1,10 @@
+// TODO(skishore): The list logic should go in the model, not here.
+import {Settings} from '../../model/settings';
+import {Vocabulary} from '../../model/vocabulary';
+import {Backdrop} from './backdrop';
+
+const kBackdropTimeout = 500;
+
 const characters = {};
 
 const groups = [
@@ -14,9 +21,42 @@ const groups = [
   },
 ];
 
+groups.map((x) => x.lists.map((y) => y.variable = `lists.${y.list}`));
+
+const enableList = (list, callback) => {
+  Backdrop.show();
+  $.get(`lists/${list}.list`, (data, code) => {
+    if (code !== 'success') {
+      Backdrop.hide(kBackdropTimeout);
+      throw new Error(code);
+    }
+    data.split('\n').map((row) => {
+      const columns = row.split('\t');
+      if (columns.length !== 5) return;
+      if (columns[0].length !== 1) return;
+      Vocabulary.addItem(columns[0], list);
+    });
+    callback();
+    Backdrop.hide(kBackdropTimeout);
+  });
+}
+
+const toggleListState = (list) => {
+  const key = `lists.${list}`;
+  const state = Settings.get(key);
+  if (state) {
+    Vocabulary.dropList(list);
+    Settings.set(key, false);
+  } else {
+    enableList(list, () => Settings.set(key, true));
+  }
+}
+
 $.get('characters/all.txt', (data, code) => {
   if (code !== 'success') throw new Error(code);
   for (let character of data) characters[character] = true;
 });
 
 Template.lists.helpers({groups: () => groups});
+
+export {toggleListState};

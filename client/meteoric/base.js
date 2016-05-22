@@ -1,4 +1,5 @@
 import {Settings} from '../../model/settings';
+import {toggleListState} from './lists';
 
 Template.ionRange.events({
   'change input[type="range"]': function(event) {
@@ -25,7 +26,12 @@ Template.ionSelect.helpers({
 
 Template.ionToggle.events({
   'change input[type="checkbox"]': function(event) {
-    Settings.set(this.variable, event.target.checked);
+    const prefix = 'lists.';
+    if (this.variable.startsWith(prefix)) {
+      toggleListState(this.variable.substr(prefix.length));
+    } else {
+      Settings.set(this.variable, event.target.checked);
+    }
   }
 });
 

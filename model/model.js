@@ -2,6 +2,7 @@
 // The most important methods here are autorun and startup, which have the
 // same contract as Tracker.autorun and Meteor.startup but wait for the
 // database to be ready before executing.
+const collections = {};
 
 class Model {
   static autorun(callback) {
@@ -9,7 +10,8 @@ class Model {
         Meteor.isClient && Ground.ready() && callback()));
   }
   static collection(name) {
-    return new Ground.Collection(name, {connection: null});
+    collections[name] = new Ground.Collection(name, {connection: null});
+    return collections[name];
   }
   static startup(callback) {
     this.autorun(() => Meteor.setTimeout(() => callback()));
@@ -18,5 +20,8 @@ class Model {
     return Math.floor(new Date().getTime() / 1000);
   }
 }
+
+// Expose the collections for easy debugging.
+if (Meteor.isClient) window.collections = collections;
 
 export {Model}
