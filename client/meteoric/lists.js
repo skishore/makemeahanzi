@@ -1,3 +1,5 @@
+const allCharacters = {};
+
 const groups = [
   {
     label: 'Hanyu Shuiping Kaoshi',
@@ -22,3 +24,8 @@ for (let group of groups) {
 }
 
 Template.lists.helpers({groups: () => groups});
+
+$.get('characters/all.txt', (data, code) => {
+  if (code !== 'success') throw new Error(code);
+  for (let character of data) allCharacters[character] = true;
+});

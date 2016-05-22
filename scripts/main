@@ -54,23 +54,27 @@ const main = () => {
   const reader = readline.createInterface({input: input});
   const parts = {};
   const rows = {};
+  const all = [];
   reader.on('line', (line) => {
     const row = parseLine(line, kDelimiter);
     const part = Math.floor(row.character.charCodeAt(0) / 256);
     parts[part] = parts[part] || [];
     parts[part].push(row);
     rows[row.character] = row;
+    all.push(row.character);
   });
 
   // Dump each part into a characters/part-xxx file, then compress them all.
   reader.on('close', () => {
     console.log('Dumping...');
     dumpParts(parts, rows);
+    fs.writeFileSync('all.txt', all.join(''));
     console.log('Compressing...');
     child_process.execSync('rm -f public/characters/*.gz');
     child_process.execSync('gzip --best public/characters/*', () => 0);
     console.log('Cleaning up...');
     child_process.execSync('rm makemeahanzi.txt', () => 0);
+    child_process.execSync('mv all.txt public/characters/all.txt', () => 0);
     console.log('Done!');
   });
 }
