@@ -25,6 +25,7 @@ $link-color: #00c0ff;
 }
 
 body {
+  background-color: $base-color;
   color: $font-color;
   font-family: Georgia, serif;
   margin: 0;
@@ -166,7 +167,9 @@ body {
 
     > .pinyin, > .definition {
       font-size: $font-size;
+      line-height: 5 * $font-size / 4;
       margin: 3%;
+      min-height: 5 * $font-size / 4;
     }
   }
 
