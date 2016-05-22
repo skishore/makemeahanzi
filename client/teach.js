@@ -14,10 +14,8 @@ let handwriting = null;
 
 const kMaxMistakes = 3;
 const kMaxPenalties  = 4;
-const kNumCharacters = 300;
 
 const item = {mistakes: 0, penalties: 0, steps: []};
-const list = {characters: [], definitions: {}, offset: -1};
 
 // A couple small utility functions for Euclidean geometry.
 
@@ -72,26 +70,6 @@ const onDouble = () => {
                    .filter((i) => !item.steps[i].done);
   handwriting.reveal(item.steps.map((x) => x.stroke));
   handwriting.highlight(item.steps[missing[0]].stroke);
-}
-
-const onLoadFrequency = (data, code) => {
-  for (let line of data.split('\n')) {
-    if (line.length === 0 || line[0] === '#') continue;
-    const terms = line.split('\t');
-    if (terms.length < 2) continue;
-    if (parseInt(terms[0], 10) > kNumCharacters) continue;
-    list.characters.push(terms[1]);
-  }
-}
-
-const onLoadRadicals = (data, code) => {
-  for (let line of data.split('\n')) {
-    const terms = line.split('\t');
-    if (terms.length < 4) continue;
-    const character = terms[0][0];
-    list.characters.push(character);
-    list.definitions[character] = terms[3];
-  }
 }
 
 const onRendered = function() {
@@ -170,16 +148,9 @@ const updateCharacter = () => {
 
 // Meteor template bindings.
 
-$.get('frequency.tsv', (data, code) => {
-  if (code !== 'success') throw new Error(code);
-  onLoadFrequency(data);
-  advance();
-});
-
 Template.teach.helpers({
   definition: () => definition.get(),
   pinyin: () => pinyin.get(),
-  solution: () => solution.get(),
 });
 
 Template.teach.onRendered(onRendered);
