@@ -56,7 +56,7 @@ body {
 
   &.theme-painterly, &.theme-textured {
     > .background {
-      background-image: url("background-optimized.jpg");
+      background-image: url("background.jpg");
       background-position-y: -100px;
       background-size: cover;
     }
@@ -71,7 +71,7 @@ body {
 
   &.theme-textured {
     > .foreground {
-      background-image: url("foreground-optimized.jpg");
+      background-image: url("foreground.jpg");
       background-size: cover;
       mix-blend-mode: difference;
     }
