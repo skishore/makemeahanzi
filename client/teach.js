@@ -1,12 +1,12 @@
 // TODO(skishore): Do some kind of smoothing to avoid giving users hints based
 // off of the straight segments where strokes intersects.
 import {recognize} from '../lib/recognizer';
+import {Timing} from '../model/timing';
 import {findCorners} from './corners';
 import {Shortstraw} from './external/shortstraw';
 import {Handwriting} from './handwriting';
 import {lookupCharacter} from './lookup';
 
-const character = new ReactiveVar(null, () => false);
 const definition = new ReactiveVar();
 const pinyin = new ReactiveVar();
 
@@ -22,11 +22,7 @@ const item = {mistakes: 0, penalties: 0, steps: []};
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
 const advance = () => {
-  list.offset = (list.offset + 1) % list.characters.length;
-  if (list.offset === 0) {
-    list.characters = _.shuffle(list.characters);
-  }
-  character.set(list.characters[list.offset]);
+  Timing.shuffle();
 }
 
 const match = (stroke, expected) => {
@@ -126,14 +122,16 @@ const onStroke = (stroke) => {
 }
 
 const updateCharacter = () => {
-  lookupCharacter(character.get(), (row, error) => {
+  const card = Timing.getNextCard();
+  lookupCharacter((card && card.data.word), (row, error) => {
     if (error) {
       console.error(error);
       Meteor.setTimeout(advance);
       return;
     }
-    if (row.character === character.get()) {
-      definition.set(list.definitions[row.character] || row.definition);
+    const card = Timing.getNextCard();
+    if (card && row.character === card.data.word) {
+      definition.set(row.definition);
       pinyin.set(row.pinyin.join(', '));
       item.mistakes = 0;
       item.penalties = 0;

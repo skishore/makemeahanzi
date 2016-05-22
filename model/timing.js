@@ -93,9 +93,9 @@ const updateCounts = () => {
   if (left.adds + left.reviews > 0) {
     const index = Math.random() * (left.adds + left.reviews);
     const deck = index < left.adds ? 'adds' : 'reviews';
-    next = {card: draw(decks[deck]), deck: deck};
+    next = {data: draw(decks[deck]), deck: deck};
   } else if (left.failures > 0) {
-    next = {card: draw(decks.failures), deck: 'failures'};
+    next = {data: draw(decks.failures), deck: 'failures'};
   } else {
     // TODO(skishore): Implement adding extra cards.
     let error = "You're done for the day!";
@@ -105,7 +105,7 @@ const updateCounts = () => {
       const bound = Math.min(count, Math.ceil(maxes.reviews / 2));
       error += ` Do you want to add ${bound} cards to today's deck?`;
     }
-    next = {card: {error: error, type: 'error'}, deck: 'errors'};
+    next = {data: {error: error, type: 'error'}, deck: 'errors'};
   }
 
   next_card.set(next);

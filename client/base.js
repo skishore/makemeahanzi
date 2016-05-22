@@ -1,5 +1,6 @@
 // Simple helpers for interacting with reactive variables.
 import {Settings} from '../model/settings';
+import {Timing} from '../model/timing';
 
 ReactiveVar.prototype.pop = function() {
   const value = this.get();
@@ -17,7 +18,8 @@ ReactiveVar.prototype.push = function(element) {
 
 Router.configure({layoutTemplate: 'layout'});
 Router.route('index', {path: '/'});
-['help', 'lists', 'settings', 'teach'].map((x) => Router.route(x));
+Router.route('teach', {onStop() { Timing.shuffle(); }});
+['help', 'lists', 'settings'].map((x) => Router.route(x));
 
 Transitioner.default({in: 'transition.fadeIn', out: 'transition.fadeOut'});
 
