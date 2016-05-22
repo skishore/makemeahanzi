@@ -48,14 +48,22 @@ const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
 
 const draw = (deck) => {
-  // TODO(skishore): We may want to randomize the when we draw from it.
+  let count = 0;
   let result = null;
   deck.forEach((card) => {
     if (!result || (card.next || 0) < result.next) {
+      count = 1;
       result = card;
+    } else if (card.next === result.next) {
+      count += 1;
+      if (count * Math.random() < 1) {
+        result = card;
+      }
     }
   });
-  if (!result) throw new Error(`Drew from empty deck: ${deck}`);
+  if (!result) {
+    throw new Error(`Drew from empty deck: ${deck}`);
+  }
   return result;
 }
 
@@ -67,7 +75,7 @@ const mapDict = (dict, callback) => {
   return result;
 }
 
-autorun(() => {
+const updateCounts = () => {
   const counts = mCounts.findOne();
   if (!counts) return;
   const ts = counts.ts;
@@ -104,13 +112,16 @@ autorun(() => {
 
   next_card.set(next);
   remainder.set(left);
-});
+}
+
+autorun(updateCounts);
 
 // Timing interface: reactive getters for next_card and remainder.
 
 class Timing {
   static getNextCard() { return next_card.get(); }
   static getRemainder() { return remainder.get(); }
+  static shuffle() { updateCounts(); }
 }
 
 export {Timing}
