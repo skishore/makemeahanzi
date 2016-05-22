@@ -2,20 +2,15 @@
 // Inkstone session and supports queries like:
 //  - How many flash cards are left in this session?
 //  - What is the next flash card?
+import {Model} from './model';
 import {Vocabulary} from './vocabulary';
-
-const kSessionDuration = 20 * 60 * 60;
-
-const autorun = (callback) =>
-    Meteor.startup(() => Tracker.autorun(() =>
-        Meteor.isClient && Ground.ready() && callback()));
-
-const getTimestamp = () => Math.floor(new Date().getTime() / 1000);
 
 // Timing state tier 1: a Ground collection storing a single record with raw
 // counts for usage in this session and a timestamp of when the session began.
 
-const mCounts = new Ground.Collection('counts', {connection: null});
+const kSessionDuration = 20 * 60 * 60;
+
+const mCounts = Model.collection('counts');
 
 const newCounts = (ts) => ({adds: 0, failures: 0, reviews: 0, ts: ts});
 
@@ -28,7 +23,7 @@ const queueNextUpdate = (() => {
 })();
 
 const updateTimestamp = () => {
-  const now = getTimestamp();
+  const now = Model.timestamp();
   const counts = mCounts.findOne() || {ts: -Infinity};
   const wait = counts.ts + kSessionDuration - now;
   if (wait > 0) {
@@ -39,7 +34,7 @@ const updateTimestamp = () => {
   }
 }
 
-autorun(() => Meteor.setTimeout(updateTimestamp));
+Model.startup(updateTimestamp);
 
 // Timing state tier 2: reactive variables built on top of the session counts
 // that track what the next card is and how many cards of different classes
@@ -117,7 +112,7 @@ const updateCounts = () => {
   remainder.set(left);
 }
 
-autorun(updateCounts);
+Model.autorun(updateCounts);
 
 // Timing interface: reactive getters for next_card and remainder.
 

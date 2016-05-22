@@ -12,10 +12,9 @@
 // can be anything in the set {0, 1, 2, 3}, with higher numbers indicating
 // that the user made more errors.
 import {getNextInterval} from './external/interval_quantifier';
+import {Model} from './model';
 
-const vocabulary = new Ground.Collection('vocabulary', {connection: null});
-
-const getTimestamp = () => Math.floor(new Date().getTime() / 1000);
+const vocabulary = Model.collection('vocabulary');
 
 class Vocabulary {
   static addItem(word, list) {
@@ -49,7 +48,7 @@ class Vocabulary {
     return vocabulary.find({lists: {$ne: []}, last: {$exists: false}});
   }
   static update(vocab, result, correction) {
-    const last = getTimestamp();
+    const last = Model.timestamp();
     const next = last + getNextInterval(vocab, result, last);
     const success = result < 3;
     const update = {
