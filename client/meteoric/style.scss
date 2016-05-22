@@ -1,5 +1,6 @@
 $base-background-color: #e4e4e4;
 $box-shadow-size: 4px 4px 16px;
+$loading-icon-size: 80px;
 
 $font-family-base:                Georgia, serif !default;
 $font-size-base:                  20px !default;
@@ -19,6 +20,15 @@ $toggle-width:                    52px !default;
 $toggle-height:                   31px !default;
 
 @import '.meteor/local/build/programs/server/assets/packages/meteoric_ionic-sass/_ionic';
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+}
 
 .platform-ios.platform-cordova:not(.fullscreen) {
   .has-header { top: 54px }
@@ -74,5 +84,17 @@ $toggle-height:                   31px !default;
         }
       }
     }
+  }
+}
+
+.ion-loading-d {
+  &::before{
+    animation: spin 1s infinite linear;
+    content: "\f29c";
+    display: inline-block;
+    font-family: "Ionicons";
+    font-size: $loading-icon-size;
+    line-height: $loading-icon-size;
+    width: $loading-icon-size;
   }
 }

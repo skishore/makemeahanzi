@@ -6,6 +6,7 @@ class Backdrop {
     holds -= 1;
     if (holds === 0) {
       Meteor.setTimeout(() => {
+        IonLoading.hide();
         Blaze.remove(view);
       }, timeout);
     }
@@ -17,6 +18,7 @@ class Backdrop {
           Template.ionBackdrop, {}, $('.ionic-body').get(0));
       const element = $(view.firstNode());
       element.addClass('active visible');
+      IonLoading.show();
     }
   }
 }
