@@ -10,8 +10,6 @@ const autorun = (callback) =>
     Meteor.startup(() => Tracker.autorun(() =>
         Meteor.isClient && Ground.ready() && callback()));
 
-const clamp = (x, min, max) => Math.max(Math.min(x, max), min);
-
 const getTimestamp = () => Math.floor(new Date().getTime() / 1000);
 
 // Timing state tier 1: a Ground collection storing a single record with raw
@@ -21,20 +19,23 @@ const mCounts = new Ground.Collection('counts', {connection: null});
 
 const newCounts = (ts) => ({adds: 0, failures: 0, reviews: 0, ts: ts});
 
-let handle = null;
+const queueNextUpdate = (() => {
+  let handle = null;
+  return (time) => {
+    clearInterval(handle);
+    handle = setTimeout(updateTimestamp, 1000 * time);
+  };
+})();
 
 const updateTimestamp = () => {
-  // WARNING: Meteor.setTimeout in dispatch:kernel sometimes drops callbacks.
   const now = getTimestamp();
   const counts = mCounts.findOne() || {ts: -Infinity};
   const wait = counts.ts + kSessionDuration - now;
   if (wait > 0) {
-    clearInterval(handle);
-    handle = setTimeout(updateTimestamp, 1000 * wait);
+    queueNextUpdate(wait);
   } else {
-    clearInterval(handle);
-    handle = setTimeout(updateTimestamp, 1000 * kSessionDuration);
     mCounts.upsert({}, newCounts(now));
+    queueNextUpdate(kSessionDuration);
   }
 }
 
@@ -46,6 +47,8 @@ autorun(() => Meteor.setTimeout(updateTimestamp));
 
 const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
+
+const clamp = (x, min, max) => Math.max(Math.min(x, max), min);
 
 const draw = (deck) => {
   let count = 0;
