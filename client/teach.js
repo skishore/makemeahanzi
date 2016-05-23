@@ -121,6 +121,8 @@ const onStroke = (stroke) => {
 }
 
 const updateCharacter = () => {
+  // TODO(skishore): Handle error cards and non-writing cards.
+  // TODO(skishore): Allow the user to correct our grading of them.
   const card = Timing.getNextCard();
   lookupCharacter((card && card.data.word), (row, error) => {
     if (error) {

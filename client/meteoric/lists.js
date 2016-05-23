@@ -38,6 +38,7 @@ const enableList = (list, callback) => {
       const columns = row.split('\t');
       if (columns.length !== 5) return;
       const word = columns[0];
+      // TODO(skishore): Get multiple-character words working.
       if (word.length !== 1) return;
       if (!_.all(word, (x) => characters[x])) return;
       Vocabulary.addItem(word, list);
