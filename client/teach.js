@@ -125,13 +125,14 @@ const updateCharacter = () => {
   lookupCharacter((card && card.data.word), (row, error) => {
     if (error) {
       console.error(error);
-      Meteor.setTimeout(advance);
+      Meteor.setTimeout(Timing.shuffle);
       return;
     }
     const card = Timing.getNextCard();
     if (card && row.character === card.data.word) {
       definition.set(row.definition);
       pinyin.set(row.pinyin.join(', '));
+      handwriting && handwriting.clear();
       item.card = card;
       item.mistakes = 0;
       item.penalties = 0;
