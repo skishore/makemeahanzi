@@ -116,10 +116,18 @@ Model.autorun(updateCounts);
 
 // Timing interface: reactive getters for next_card and remainder.
 
+const make = (k, v) => { const x = {}; x[k] = v; return x; }
+
 class Timing {
   static completeCard(card, result) {
-    console.log('Completed card:', card, 'with result:', result);
-    this.shuffle();
+    const selector = make(card.deck, {$exists: true});
+    const update = {$inc: make(card.deck, 1)};
+    if (mCounts.update(selector, update)) {
+      Vocabulary.updateItem(card.data, result, false /* correction */);
+    } else {
+      console.error('Failed to update card:', card, 'with result:', result);
+      Timing.shuffle();
+    }
   }
   static getNextCard() {
     return next_card.get();

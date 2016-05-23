@@ -47,16 +47,18 @@ class Vocabulary {
   static getNewItems() {
     return vocabulary.find({lists: {$ne: []}, last: {$exists: false}});
   }
-  static update(vocab, result, correction) {
+  static updateItem(vocab, result, correction) {
     const last = Model.timestamp();
     const next = last + getNextInterval(vocab, result, last);
     const success = result < 3;
     const update = {
-      last: last,
-      next: next,
-      attempts: vocab.attempts + 1,
-      successes: vocab.successes + (success ? 1 : 0),
-      failed: !success,
+      $set: {
+        last: last,
+        next: next,
+        attempts: vocab.attempts + 1,
+        successes: vocab.successes + (success ? 1 : 0),
+        failed: !success,
+      },
     };
     attempts = vocab.attempts + (correction ? 1 : 0);
     vocabulary.update({word: vocab.word, attempts: attempts}, update);
