@@ -158,11 +158,17 @@ body {
       &:hover {
         color: $link-color;
       }
+    }
 
-      &.right {
-        left: auto;
-        right: 0;
-      }
+    > .status {
+      color: #666;
+      font-family: sans-serif;
+      font-size: 5 * $font-size / 7;
+      left: auto;
+      padding: 3% 4%;
+      position: absolute;
+      right: 0;
+      word-spacing: -$font-size / 14;
     }
 
     > .pinyin, > .definition {
