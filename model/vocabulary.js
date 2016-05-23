@@ -26,6 +26,9 @@ class Vocabulary {
     };
     vocabulary.upsert({word: word}, update);
   }
+  static clearFailed(vocab) {
+    vocabulary.update({word: vocab.word}, {$set: {failed: false}});
+  }
   static dropList(list) {
     vocabulary.update({}, {$pull: {lists: list}}, {multi: true});
     vocabulary.remove({lists: [], last: {$exists: false}});

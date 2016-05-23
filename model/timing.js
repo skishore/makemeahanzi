@@ -123,7 +123,11 @@ class Timing {
     const selector = make(card.deck, {$exists: true});
     const update = {$inc: make(card.deck, 1)};
     if (mCounts.update(selector, update)) {
-      Vocabulary.updateItem(card.data, result, false /* correction */);
+      if (card.deck === 'failures') {
+        Vocabulary.clearFailed(card.data);
+      } else {
+        Vocabulary.updateItem(card.data, result, false /* correction */);
+      }
     } else {
       console.error('Failed to update card:', card, 'with result:', result);
       Timing.shuffle();
