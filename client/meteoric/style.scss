@@ -63,7 +63,8 @@ $toggle-height:                   31px !default;
 
     .block {
       box-shadow: $box-shadow-size rgba(0, 0, 0, 0.1);
-      margin: 27px 0;
+      margin: 5% auto;
+      width: 90%;
 
       > .item {
         &.item-divider {
