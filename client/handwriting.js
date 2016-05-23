@@ -8,11 +8,12 @@ const kMinDistance = 1 / 32;
 const kStrokeWidth = 1 / 32;
 
 const kBrushColor   = '#888888';
-const kFailureColor = '#ff4d4d';
 const kHintColor    = '#00c0ff';
 const kRevealColor  = '#cccccc';
 const kStrokeColor  = '#000000';
-const kSuccessColor = '#4dc84d';
+
+// Colors for EXCELLENT, GOOD, FAIR, and POOR result values.
+const kResultColors = ['#00c0ff', '#88c874', '#c0c080', '#e87878'];
 
 let ticker = null;
 
@@ -252,12 +253,11 @@ class Handwriting {
     this._animate(child, {alpha: 0}, 750,
                   () => child.parent.removeChild(child));
   }
-  glow(success) {
+  glow(result) {
     this._emplacements.map((args) => this._emplace(args));
     this._emplacements = [];
-    const color = success ? kSuccessColor : kFailureColor;
     for (let child of this._layers[Layer.COMPLETE].children) {
-      convertShapeStyles(child, kStrokeColor, color);
+      convertShapeStyles(child, kStrokeColor, kResultColors[result]);
     }
   }
   highlight(path) {

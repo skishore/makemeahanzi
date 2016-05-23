@@ -117,9 +117,19 @@ Model.autorun(updateCounts);
 // Timing interface: reactive getters for next_card and remainder.
 
 class Timing {
-  static getNextCard() { return next_card.get(); }
-  static getRemainder() { return remainder.get(); }
-  static shuffle() { updateCounts(); }
+  static completeCard(card, result) {
+    console.log('Completed card:', card, 'with result:', result);
+    this.shuffle();
+  }
+  static getNextCard() {
+    return next_card.get();
+  }
+  static getRemainder() {
+    return remainder.get();
+  }
+  static shuffle() {
+    updateCounts();
+  }
 }
 
 export {Timing}

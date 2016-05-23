@@ -15,15 +15,13 @@ let handwriting = null;
 const kMaxMistakes = 3;
 const kMaxPenalties  = 4;
 
-const item = {mistakes: 0, penalties: 0, steps: []};
+const item = {card: null, mistakes: 0, penalties: 0, result: null, steps: []};
 
 // A couple small utility functions for Euclidean geometry.
 
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
-const advance = () => {
-  Timing.shuffle();
-}
+const getResult = (x) => Math.min(Math.floor(2 * x / kMaxPenalties) + 1, 3);
 
 const match = (stroke, expected) => {
   let best_result = {index: -1, score: -Infinity};
@@ -44,7 +42,7 @@ const maybeAdvance = () => {
                    .filter((i) => !item.steps[i].done);
   if (missing.length === 0) {
     handwriting.clear();
-    advance();
+    Timing.completeCard(item.card, item.result);
     return true;
   }
   return false;
@@ -110,7 +108,8 @@ const onStroke = (stroke) => {
     handwriting.warn(result.warning);
   }
   if (missing.length === 1) {
-    handwriting.glow(item.penalties < kMaxPenalties);
+    item.result = getResult(item.penalties);
+    handwriting.glow(item.result);
     handwriting.highlight();
   } else if (missing[0] < index) {
     item.penalties += 2 * (index - missing[0]);
@@ -133,8 +132,10 @@ const updateCharacter = () => {
     if (card && row.character === card.data.word) {
       definition.set(row.definition);
       pinyin.set(row.pinyin.join(', '));
+      item.card = card;
       item.mistakes = 0;
       item.penalties = 0;
+      item.result = null;
       item.steps = _.range(row.strokes.length).map((i) => ({
         done: false,
         median: findCorners([row.medians[i]])[0],
