@@ -9,6 +9,12 @@ const characters = {};
 
 const groups = [
   {
+    label: 'General',
+    lists: [
+      {label: '100 Common Radicals', list: '100cr'},
+    ],
+  },
+  {
     label: 'Hanyu Shuiping Kaoshi',
     lists: [
       {label: 'HSK Level 1', list: 'nhsk1'},
@@ -21,8 +27,6 @@ const groups = [
   },
 ];
 
-groups.map((x) => x.lists.map((y) => y.variable = `lists.${y.list}`));
-
 const enableList = (list, callback) => {
   Backdrop.show();
   $.get(`lists/${list}.list`, (data, code) => {
@@ -33,8 +37,10 @@ const enableList = (list, callback) => {
     data.split('\n').map((row) => {
       const columns = row.split('\t');
       if (columns.length !== 5) return;
-      if (columns[0].length !== 1) return;
-      Vocabulary.addItem(columns[0], list);
+      const word = columns[0];
+      if (word.length !== 1) return;
+      if (!_.all(word, (x) => characters[x])) return;
+      Vocabulary.addItem(word, list);
     });
     callback();
     Backdrop.hide(kBackdropTimeout);
@@ -52,10 +58,14 @@ const toggleListState = (list) => {
   }
 }
 
+// Meteor template helpers and one-time functions to prepare data follow.
+
 $.get('characters/all.txt', (data, code) => {
   if (code !== 'success') throw new Error(code);
   for (let character of data) characters[character] = true;
 });
+
+groups.map((x) => x.lists.map((y) => y.variable = `lists.${y.list}`));
 
 Template.lists.helpers({groups: () => groups});
 
