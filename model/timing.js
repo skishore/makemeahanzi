@@ -14,24 +14,17 @@ const mCounts = Model.collection('counts');
 
 const newCounts = (ts) => ({adds: 0, failures: 0, reviews: 0, ts: ts});
 
-const queueNextUpdate = (() => {
-  let handle = null;
-  return (time) => {
-    clearInterval(handle);
-    handle = setTimeout(updateTimestamp, 1000 * time);
-  };
-})();
-
 const updateTimestamp = () => {
   const now = Model.timestamp();
   const counts = mCounts.findOne() || {ts: -Infinity};
   const wait = counts.ts + kSessionDuration - now;
   if (wait > 0) {
-    queueNextUpdate(wait);
+    time_left.set(wait);
   } else {
     mCounts.upsert({}, newCounts(now));
-    queueNextUpdate(kSessionDuration);
+    time_left.set(kSessionDuration);
   }
+  requestAnimationFrame(updateTimestamp);
 }
 
 Model.startup(updateTimestamp);
@@ -42,6 +35,7 @@ Model.startup(updateTimestamp);
 
 const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
+const time_left = new ReactiveVar();
 
 const clamp = (x, min, max) => Math.max(Math.min(x, max), min);
 
@@ -138,6 +132,9 @@ class Timing {
   }
   static getRemainder() {
     return remainder.get();
+  }
+  static getTimeLeft() {
+    return time_left.get();
   }
   static shuffle() {
     updateCounts();

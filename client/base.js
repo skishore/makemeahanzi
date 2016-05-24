@@ -29,6 +29,19 @@ Platform.isAndroid = () => false;
 Platform.isIOS = () => true;
 
 Template.layout.helpers({
-  theme: () => Settings.get('settings.paper_filter') ?
-      'textured' : 'painterly',
+  remainder: () => {
+    const x = Timing.getRemainder();
+    return x ? `${x.adds + x.reviews} + ${x.failures}` : '? + ?';
+  },
+  theme: () => {
+    return Settings.get('settings.paper_filter') ? 'textured' : 'painterly';
+  },
+  time: () => {
+    const time = Timing.getTimeLeft();
+    const pad = (value) => value.length < 2 ? '0' + value : value;
+    return [
+      Math.floor(time / 3600),
+      pad('' + (Math.floor(time / 60) % 60)),
+    ].join(':');
+  }
 });

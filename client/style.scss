@@ -2,6 +2,7 @@ $base-color: #444;
 $fade-color: #aaa;
 $font-color: #222;
 $font-size: 5.6vw;
+$header-height: 4 * $font-size / 3;
 $link-color: #00c0ff;
 
 @font-face {
@@ -37,7 +38,25 @@ body {
   }
 }
 
+#header {
+  background-color: $font-color;
+  height: $header-height;
+  line-height: $header-height;
+
+  > .info {
+    color: white;
+    font-family: sans-serif;
+    font-size: $header-height / 2;
+    margin: 0 $header-height / 4;
+
+    &.left { float: left; }
+    &.right { float: right; }
+  }
+}
+
 #layout {
+  top: $header-height !important;
+
   &, > .background, > .foreground {
     @include full-size;
   }
@@ -102,7 +121,7 @@ body {
     }
 
     > .option {
-      background-color: #222;
+      background-color: $font-color;
       border: 1px solid white;
       border-radius: 0.25 * $font-size;
       color: white;
@@ -158,17 +177,11 @@ body {
       &:hover {
         color: $link-color;
       }
-    }
 
-    > .status {
-      color: #666;
-      font-family: sans-serif;
-      font-size: 5 * $font-size / 7;
-      left: auto;
-      padding: 3% 4%;
-      position: absolute;
-      right: 0;
-      word-spacing: -$font-size / 14;
+      &.right {
+        left: auto;
+        right: 0;
+      }
     }
 
     > .pinyin, > .definition {

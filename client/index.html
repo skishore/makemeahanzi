@@ -5,6 +5,10 @@
 </head>
 
 <template name="layout">
+  <div id="header">
+    <div class="info left">{{time}}</div>
+    <div class="info right">{{remainder}}</div>
+  </div>
   <div id="layout" class="theme-{{theme}}">
     <div class="background"></div>
     {{#transitioner}}

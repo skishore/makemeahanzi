@@ -153,10 +153,6 @@ const updateCharacter = () => {
 Template.teach.helpers({
   definition: () => definition.get(),
   pinyin: () => pinyin.get(),
-  remainder: () => {
-    const x = Timing.getRemainder();
-    return x ? `${x.adds + x.reviews} + ${x.failures}` : '? + ?';
-  },
 });
 
 Template.teach.onRendered(onRendered);

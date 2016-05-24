@@ -1,10 +1,12 @@
 <template name="teach">
   <div id="teach">
     <div class="prompt">
-      <a class="control" href="{{pathFor 'index'}}">
+      <a class="control left" href="{{pathFor 'index'}}">
         <i class="ion-android-home"></i>
       </a>
-      <div class="status">{{remainder}}</div>
+      <a class="control right">
+        <i class="ion-university"></i>
+      </a>
       <div class="pinyin">{{pinyin}}</div>
       <div class="definition">{{definition}}</div>
     </div>
