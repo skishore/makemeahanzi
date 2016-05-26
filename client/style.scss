@@ -120,40 +120,24 @@ body {
       margin-bottom: 8%;
     }
 
-    > .option {
-      background-color: $font-color;
-      border: 1px solid white;
-      border-radius: 0.25 * $font-size;
-      color: white;
-      display: block;
-      font-size: $font-size;
-      margin: 8% auto;
-      padding: 2% 4%;
-      text-align: left;
+    > .teach {
+      background-image: url("swash.png");
+      background-position-x: -2.6vw;
+      background-repeat: no-repeat;
+      background-size: contain;
+      color: $base-color;
+      display: inline-block;
+      font-size: 9.2vw;
+      font-weight: bold;
+      height: 30vw;
+      padding: 9.2vw;
+      text-align: center;
       text-decoration: none;
-      width: 60%;
+      width: 75%;
       @include buttonlike;
 
       &:hover {
-        background-color: #013;
-        border: 1px solid $link-color;
-        color: $link-color;
-      }
-
-      &.teach {
-        background-color: white;
-        color: $font-color;
-
-        &:hover {
-          background-color: $link-color;
-        }
-      }
-
-      > .icon {
-        display: inline-block;
-        margin-right: 4%;
-        text-align: center;
-        width: $font-size;
+        background-image: url("swash-active.png");
       }
     }
   }

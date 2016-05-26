@@ -22,18 +22,9 @@
   <div id="index">
     <div class="wrapper">
       <div class="title">Inkstone</div>
-      {{> option icon="paintbrush" label="Write" route="teach"}}
-      {{> option icon="android-list" label="Lists" route="lists"}}
-      {{> option icon="android-settings" label="Settings" route="settings"}}
-      {{> option icon="help-circled" label="Help" route="help"}}
+      <a class="teach" href="{{pathFor 'teach'}}">Write</a>
     </div>
   </div>
-</template>
-
-<template name="option">
-  <a class="{{route}} option" href="{{pathFor route}}">
-    <div class="icon"><i class="ion-{{icon}}"></i></div>{{label}}
-  </a>
 </template>
 
 <template name="help"></template>
