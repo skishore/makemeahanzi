@@ -23,8 +23,23 @@
     <div class="wrapper">
       <div class="title">Inkstone</div>
       <a class="teach" href="{{pathFor 'teach'}}">Write</a>
+      <div class="options">
+        {{> option icon="android-list" label="Lists" route="lists"}}
+        {{> option icon="android-settings" label="Settings" route="settings"}}
+        {{> option icon="help-circled" label="Help" route="help"}}
+      </div>
     </div>
   </div>
 </template>
 
+<template name="option">
+  <a class="option {{route}}" href="{{pathFor route}}">
+    <div class="icon"><i class="ion-{{icon}}"></i></div>{{label}}
+  </a>
+</template>
+
+<template name="credits"></template>
+
 <template name="help"></template>
+
+<template name="stats"></template>

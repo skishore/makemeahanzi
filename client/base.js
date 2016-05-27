@@ -19,7 +19,7 @@ ReactiveVar.prototype.push = function(element) {
 Router.configure({layoutTemplate: 'layout'});
 Router.route('index', {path: '/'});
 Router.route('teach', {onStop() { Timing.shuffle(); }});
-['help', 'lists', 'settings'].map((x) => Router.route(x));
+['credits', 'help', 'lists', 'settings', 'stats'].map((x) => Router.route(x));
 
 Transitioner.default({in: 'transition.fadeIn', out: 'transition.fadeOut'});
 

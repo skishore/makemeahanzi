@@ -2,10 +2,10 @@ $base-color: #444;
 $fade-color: #aaa;
 $font-color: #222;
 $font-size: 5.6vw;
-$header-height: 4 * $font-size / 3;
+$header-height: 8 * $font-size / 7;
 $link-color: #00c0ff;
-$swash-ratio: 163 / 534;
-$swash-width: 68vw;
+$swash-height: 18vw;
+$swash-width: 63vw;
 
 @font-face {
   font-family: anke-calligraphic;
@@ -110,36 +110,56 @@ body {
   @include full-size;
 
   > .wrapper {
-    margin-top: -50%;
     @include full-size;
     bottom: auto;
     top: 50%;
+    transform: translateY(-50%);
 
     > .title {
       font-family: anke-calligraphic;
       font-size: 4 * $font-size;
       line-height: 4 * $font-size;
-      margin-bottom: 8%;
+      margin-bottom: 20%;
+    }
+
+    > .teach, > .options > .option {
+      text-decoration: none;
+      @include buttonlike;
     }
 
     > .teach {
       background-image: url("swash.png");
-      background-position: (-0.036 * $swash-width) (-0.016 * $swash-width);
+      background-position-x: 0.05 * $swash-width;
+      background-position-y: 0.025 * $swash-height;
       background-repeat: no-repeat;
-      background-size: cover;
+      background-size: 100% 100%;
       color: $base-color;
       display: inline-block;
-      font-size: 0.14 * $swash-width;
+      font-size: 2 * $swash-height / 3;
       font-weight: bold;
-      height: $swash-ratio * $swash-width;
-      line-height: $swash-ratio * $swash-width;
-      text-align: center;
-      text-decoration: none;
+      height: $swash-height;
+      line-height: $swash-height;
+      margin-bottom: 10%;
       width: $swash-width;
-      @include buttonlike;
 
       &:hover {
         background-image: url("swash-active.png");
+      }
+    }
+
+    > .options > .option {
+      color: white;
+      display: inline-block;
+      font-size: 0.8 * $font-size;
+      margin: 4%;
+      width: 20%;
+
+      &:hover {
+        color: $link-color;
+      }
+
+      > .icon {
+        font-size: 2 * $font-size;
       }
     }
   }
