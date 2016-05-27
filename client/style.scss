@@ -4,6 +4,8 @@ $font-color: #222;
 $font-size: 5.6vw;
 $header-height: 4 * $font-size / 3;
 $link-color: #00c0ff;
+$swash-ratio: 163 / 534;
+$swash-width: 68vw;
 
 @font-face {
   font-family: anke-calligraphic;
@@ -122,18 +124,18 @@ body {
 
     > .teach {
       background-image: url("swash.png");
-      background-position-x: -2.6vw;
+      background-position: (-0.036 * $swash-width) (-0.016 * $swash-width);
       background-repeat: no-repeat;
-      background-size: contain;
+      background-size: cover;
       color: $base-color;
       display: inline-block;
-      font-size: 9.2vw;
+      font-size: 0.14 * $swash-width;
       font-weight: bold;
-      height: 30vw;
-      padding: 9.2vw;
+      height: $swash-ratio * $swash-width;
+      line-height: $swash-ratio * $swash-width;
       text-align: center;
       text-decoration: none;
-      width: 75%;
+      width: $swash-width;
       @include buttonlike;
 
       &:hover {
