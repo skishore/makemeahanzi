@@ -31,7 +31,11 @@ Platform.isIOS = () => true;
 Template.layout.helpers({
   remainder: () => {
     const x = Timing.getRemainder();
-    return x ? `${x.adds + x.reviews} + ${x.failures}` : '? + ?';
+    let left = '' + (x ? x.adds + x.reviews : '?');
+    if (Settings.get('settings.revisit_failures')) {
+      left += ' + ' + (x ? x.failures : '?');
+    }
+    return left;
   },
   theme: () => {
     return Settings.get('settings.paper_filter') ? 'textured' : 'painterly';

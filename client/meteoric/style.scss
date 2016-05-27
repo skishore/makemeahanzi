@@ -78,6 +78,10 @@ $toggle-height:                   31px !default;
           &:first-child {
             border-width: 0;
           }
+
+          > .right {
+            float: right;
+          }
         }
 
         &.item-toggle > .toggle {

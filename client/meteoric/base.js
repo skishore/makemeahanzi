@@ -2,7 +2,7 @@ import {Settings} from '../../model/settings';
 import {toggleListState} from './lists';
 
 Template.ionRange.events({
-  'change input[type="range"]': function(event) {
+  'change, input input[type="range"]': function(event) {
     Settings.set(this.variable, parseInt(event.target.value, 10));
   },
 });

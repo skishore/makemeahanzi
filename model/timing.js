@@ -3,6 +3,7 @@
 //  - How many flash cards are left in this session?
 //  - What is the next flash card?
 import {Model} from './model';
+import {Settings} from './settings';
 import {Vocabulary} from './vocabulary';
 
 // Timing state tier 1: a Ground collection storing a single record with raw
@@ -77,9 +78,8 @@ const updateCounts = () => {
     failures: Vocabulary.getFailuresInRange(ts, ts + kSessionDuration),
     reviews: Vocabulary.getItemsDueBy(ts, ts),
   };
-  // TODO(skishore): Make the maxes configurable:
-  //const maxes = mapDict(decks, (k, v) => Settings.get(`settings.max_${k}`);
-  const maxes = {adds: 50, failures: Infinity, reviews: 100};
+  const maxes = mapDict(decks, (k, v) => Settings.get(`settings.max_${k}`));
+  maxes.failures = Settings.get('settings.revisit_failures') ? Infinity : 0;
   const sizes = mapDict(decks, (k, v) => v.count());
   const left = mapDict(sizes, (k, v) => clamp(maxes[k] - counts[k], 0, v));
 

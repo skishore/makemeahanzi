@@ -19,6 +19,24 @@
         {{/ionItem}}
         {{> ionToggle variable="settings.reveal_order" label="Reveal Order"}}
         {{> ionToggle variable="settings.snap_strokes" label="Snap Strokes"}}
+        {{> ionToggle variable="settings.revisit_failures"
+                      label="Revisit Failures"}}
+      </div>
+      <div class="block">
+        {{#ionItem class="item-divider"}}
+          Reviews Per Day
+          <div class="right">{{max_reviews}}</div>
+        {{/ionItem}}
+        {{> ionRange min="0" max="500" step="25"
+                     variable="settings.max_reviews"}}
+      </div>
+      <div class="block">
+        {{#ionItem class="item-divider"}}
+          New Cards Per Day
+          <div class="right">{{max_adds}}</div>
+        {{/ionItem}}
+        {{> ionRange min="0" max="500" step="25"
+                     variable="settings.max_adds"}}
       </div>
       <div class="block">
         {{#ionItem class="item-divider"}}

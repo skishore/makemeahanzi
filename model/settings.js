@@ -7,8 +7,11 @@ const settings = Model.collection('settings');
 
 const defaults = {
   'settings.double_tap_speed': 500,
+  'settings.max_adds': 50,
+  'settings.max_reviews': 100,
   'settings.paper_filter': true,
   'settings.reveal_order': true,
+  'settings.revisit_failures': true,
   'settings.snap_strokes': true,
 };
 
