@@ -128,11 +128,12 @@ body {
     }
 
     > .teach {
-      background-image: url("swash.png");
-      background-position-x: 0.05 * $swash-width;
-      background-position-y: 0.025 * $swash-height;
-      background-repeat: no-repeat;
-      background-size: 100% 100%;
+      -webkit-mask-image: url("swash.svg");
+      -webkit-mask-position-x: 0.025 * $swash-width;
+      -webkit-mask-position-y: 0.025 * $swash-height;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-size: $swash-width $swash-height;
+      background-color: white;
       color: $base-color;
       display: inline-block;
       font-size: 2 * $swash-height / 3;
@@ -143,7 +144,7 @@ body {
       width: $swash-width;
 
       &:hover {
-        background-image: url("swash-active.png");
+        background-color: $link-color;
       }
     }
 
