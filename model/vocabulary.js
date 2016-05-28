@@ -26,8 +26,8 @@ class Vocabulary {
     };
     vocabulary.upsert({word: word}, update);
   }
-  static clearFailed(vocab) {
-    vocabulary.update({word: vocab.word}, {$set: {failed: false}});
+  static clearFailed(item) {
+    vocabulary.update({word: item.word}, {$set: {failed: false}});
   }
   static dropList(list) {
     vocabulary.update({}, {$pull: {lists: list}}, {multi: true});
@@ -50,21 +50,21 @@ class Vocabulary {
   static getNewItems() {
     return vocabulary.find({lists: {$ne: []}, last: {$exists: false}});
   }
-  static updateItem(vocab, result, correction) {
+  static updateItem(item, result, correction) {
     const last = Model.timestamp();
-    const next = last + getNextInterval(vocab, result, last);
+    const next = last + getNextInterval(item, result, last);
     const success = result < 3;
     const update = {
       $set: {
         last: last,
         next: next,
-        attempts: vocab.attempts + 1,
-        successes: vocab.successes + (success ? 1 : 0),
+        attempts: item.attempts + 1,
+        successes: item.successes + (success ? 1 : 0),
         failed: !success,
       },
     };
-    attempts = vocab.attempts + (correction ? 1 : 0);
-    vocabulary.update({word: vocab.word, attempts: attempts}, update);
+    attempts = item.attempts + (correction ? 1 : 0);
+    vocabulary.update({word: item.word, attempts: attempts}, update);
   }
 }
 
