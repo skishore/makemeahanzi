@@ -1,9 +1,5 @@
-// Written in 2015 by Shaunak Kishore (kshaunak@gmail.com).
-//
-// To the extent possible under law, the author(s) have dedicated all copyright
-// and related and neighboring rights to this software to the public domain
-// worldwide. This software is distributed without any warranty.
 import {ungzip} from './external/pako_inflate';
+import {loadList} from './meteoric/lists';
 
 const loadBinaryData = (url) => {
   return new Promise((resolve, reject) => {
@@ -18,19 +14,31 @@ const loadBinaryData = (url) => {
   });
 }
 
-const lookupCharacter = (character, callback) => {
-  if (!character) return;
+const loadCharacter = (character) => {
   const part = Math.floor(character.charCodeAt(0) / 256);
-  loadBinaryData(`characters/part-${part}.txt.gz`).then((response) => {
+  return loadBinaryData(`characters/part-${part}.txt.gz`).then((response) => {
     response = ungzip(response, {to: 'string'});
     const data = JSON.parse(response);
     for (let row of data) {
       if (row.character === character) {
-        return callback(row);
+        return row;
       }
     }
     throw new Error(`Character not found: ${character}`);
+  });
+}
+
+const lookupItem = (item, callback) => {
+  if (!item || !item.word || item.lists.length === 0) return;
+  Promise.all([
+    loadList(item.lists[0]),
+    Promise.all(Array.from(item.word).map(loadCharacter)),
+  ]).then((data) => {
+    const entry = data[0].filter((x) => x.word === item.word);
+    if (entry.length === 0) throw new Error(`Entry not found: ${item.word}`);
+    entry[0].characters = data[1];
+    callback(entry[0], undefined);
   }).catch((error) => callback(undefined, error));
 }
 
-export {lookupCharacter};
+export {lookupItem};

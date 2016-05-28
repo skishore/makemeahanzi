@@ -5,7 +5,7 @@ import {Timing} from '../model/timing';
 import {findCorners} from './corners';
 import {Shortstraw} from './external/shortstraw';
 import {Handwriting} from './handwriting';
-import {lookupCharacter} from './lookup';
+import {lookupItem} from './lookup';
 
 const definition = new ReactiveVar();
 const pinyin = new ReactiveVar();
@@ -124,16 +124,17 @@ const updateCharacter = () => {
   // TODO(skishore): Handle error cards and non-writing cards.
   // TODO(skishore): Allow the user to correct our grading of them.
   const card = Timing.getNextCard();
-  lookupCharacter((card && card.data.word), (row, error) => {
+  lookupItem((card && card.data), (data, error) => {
     if (error) {
       console.error(error);
       Meteor.setTimeout(Timing.shuffle);
       return;
     }
     const card = Timing.getNextCard();
-    if (card && row.character === card.data.word) {
-      definition.set(row.definition);
-      pinyin.set(row.pinyin.join(', '));
+    const row = data.characters[0];
+    if (card && data.word === card.data.word) {
+      definition.set(data.definition);
+      pinyin.set(data.pinyin);
       handwriting && handwriting.clear();
       item.card = card;
       item.mistakes = 0;

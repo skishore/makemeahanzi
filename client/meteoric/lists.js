@@ -4,6 +4,7 @@ import {Vocabulary} from '../../model/vocabulary';
 import {Backdrop} from './backdrop';
 
 const kBackdropTimeout = 500;
+const kListColumns = ['word', '', '', 'pinyin', 'definition'];
 
 const characters = {};
 
@@ -29,22 +30,37 @@ const groups = [
 
 const enableList = (list, callback) => {
   Backdrop.show();
-  $.get(`lists/${list}.list`, (data, code) => {
-    if (code !== 'success') {
-      Backdrop.hide(kBackdropTimeout);
-      throw new Error(code);
-    }
-    data.split('\n').map((row) => {
-      const columns = row.split('\t');
-      if (columns.length !== 5) return;
-      const word = columns[0];
+  loadList(list).then((rows) => {
+    rows.map((row) => {
       // TODO(skishore): Get multiple-character words working.
-      if (word.length !== 1) return;
-      if (!_.all(word, (x) => characters[x])) return;
-      Vocabulary.addItem(word, list);
+      if (row.word.length !== 1) return;
+      if (!_.all(row.word, (x) => characters[x])) return;
+      Vocabulary.addItem(row.word, list);
     });
-    callback();
     Backdrop.hide(kBackdropTimeout);
+    callback();
+  }).catch((error) => {
+    Backdrop.hide(kBackdropTimeout);
+    console.error(error);
+  });
+}
+
+const loadList = (list) => {
+  return new Promise((resolve, reject) => {
+    $.get(`lists/${list}.list`, (data, code) => {
+      if (code !== 'success') throw new Error(code);
+      const result = [];
+      data.split('\n').map((line) => {
+        const values = line.split('\t');
+        if (values.length != kListColumns.length) return;
+        const row = {};
+        kListColumns.map((column, i) => {
+          if (column !== '') row[column] = values[i];
+        });
+        result.push(row);
+      });
+      resolve(result);
+    });
   });
 }
 
@@ -70,4 +86,4 @@ groups.map((x) => x.lists.map((y) => y.variable = `lists.${y.list}`));
 
 Template.lists.helpers({groups: () => groups});
 
-export {toggleListState};
+export {loadList, toggleListState};
