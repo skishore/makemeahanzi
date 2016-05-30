@@ -2,7 +2,7 @@ $base-color: #444;
 $fade-color: #aaa;
 $font-color: #222;
 $font-size: 5.6vw;
-$header-height: 8 * $font-size / 7;
+$header-height: 5 * $font-size / 4;
 $link-color: #00c0ff;
 $swash-height: 18vw;
 $swash-width: 63vw;
@@ -41,7 +41,7 @@ body {
 }
 
 #header {
-  background-color: $font-color;
+  background-color: #666;
   height: $header-height;
   line-height: $header-height;
 
