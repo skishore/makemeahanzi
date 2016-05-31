@@ -1,28 +1,30 @@
 let holds = 0;
-let view = null;
+let views = [];
+
+const render = (template) => {
+  const view = Blaze.renderWithData(template, {}, $('.ionic-body').get(0));
+  const element = $(view.firstNode());
+  element.addClass('active visible');
+  return view;
+}
 
 class Backdrop {
   static hide(timeout) {
     holds -= 1;
     if (holds === 0) {
       Meteor.setTimeout(() => {
-        IonLoading.hide();
-        Blaze.remove(view);
+        views.map(Blaze.remove);
+        views.length = 0;
       }, timeout);
     }
   }
   static show() {
     holds += 1;
     if (holds === 1) {
-      view = Blaze.renderWithData(
-          Template.ionBackdrop, {}, $('.ionic-body').get(0));
-      const element = $(view.firstNode());
-      element.addClass('active visible');
-      IonLoading.show();
+      views.push(render(Template.ionBackdrop));
+      views.push(render(Template.ionLoading));
     }
   }
 }
-
-window.Backdrop = Backdrop;
 
 export {Backdrop};
