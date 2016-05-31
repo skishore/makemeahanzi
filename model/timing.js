@@ -34,16 +34,22 @@ Model.startup(updateTimestamp);
 // that track what the next card is and how many cards of different classes
 // are left in this session.
 
+const available = {
+  adds: new ReactiveVar(0),
+  failures: new ReactiveVar(0),
+  reviews: new ReactiveVar(0),
+};
+const maxes = new ReactiveVar();
 const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
 const time_left = new ReactiveVar();
 
 const clamp = (x, min, max) => Math.max(Math.min(x, max), min);
 
-const draw = (deck) => {
+const draw = (deck, ts) => {
   let count = 0;
   let result = null;
-  deck.forEach((card) => {
+  getters[deck](ts).forEach((card) => {
     if (!result || (card.next || 0) < result.next) {
       count = 1;
       result = card;
@@ -57,8 +63,14 @@ const draw = (deck) => {
   if (!result) {
     throw new Error(`Drew from empty deck: ${deck}`);
   }
-  return result;
+  return {data: result, deck: deck};
 }
+
+const getters = {
+  adds: (ts) => Vocabulary.getNewItems(),
+  failures: (ts) => Vocabulary.getFailuresInRange(ts, ts + kSessionDuration),
+  reviews: (ts) => Vocabulary.getItemsDueBy(ts, ts),
+};
 
 const mapDict = (dict, callback) => {
   const result = {};
@@ -68,45 +80,49 @@ const mapDict = (dict, callback) => {
   return result;
 }
 
-const updateCounts = () => {
+const shuffle = () => {
   const counts = mCounts.findOne();
-  if (!counts) return;
-  const ts = counts.ts;
-
-  const decks = {
-    adds: Vocabulary.getNewItems(),
-    failures: Vocabulary.getFailuresInRange(ts, ts + kSessionDuration),
-    reviews: Vocabulary.getItemsDueBy(ts, ts),
-  };
-  const maxes = mapDict(decks, (k, v) => Settings.get(`settings.max_${k}`));
-  maxes.failures = Settings.get('settings.revisit_failures') ? Infinity : 0;
-  const sizes = mapDict(decks, (k, v) => v.count());
-  const left = mapDict(sizes, (k, v) => clamp(maxes[k] - counts[k], 0, v));
+  const left = remainder.get();
+  if (!counts || !left) return;
 
   let next = null;
   if (left.adds + left.reviews > 0) {
     const index = Math.random() * (left.adds + left.reviews);
     const deck = index < left.adds ? 'adds' : 'reviews';
-    next = {data: draw(decks[deck]), deck: deck};
+    next = draw(deck, counts.ts);
   } else if (left.failures > 0) {
-    next = {data: draw(decks.failures), deck: 'failures'};
-  } else {
+    next = draw('failures', counts.ts);
+  }
+
+  if (!next) {
     // TODO(skishore): Implement adding extra cards.
     let error = "You're done for the day!";
-    const extra = Vocabulary.getItemsDueBy(ts, Infinity);
-    const count = extra.count();
-    if (count > 0) {
-      const bound = Math.min(count, Math.ceil(maxes.reviews / 2));
-      error += ` Do you want to add ${bound} cards to today's deck?`;
-    }
     next = {data: {error: error, type: 'error'}, deck: 'errors'};
   }
 
   next_card.set(next);
-  remainder.set(left);
 }
 
-Model.autorun(updateCounts);
+Model.autorun(() => {
+  const value = mapDict(getters, (k, v) => Settings.get(`settings.max_${k}`));
+  value.failures = Settings.get('settings.revisit_failures') ? Infinity : 0;
+  maxes.set(value);
+});
+
+mapDict(getters, (k, v) => Model.autorun(() => {
+  const counts = mCounts.findOne();
+  if (!counts) return;
+  available[k].set(v(counts.ts).count());
+}));
+
+Model.autorun(() => {
+  const counts = mCounts.findOne();
+  if (!counts || !maxes.get()) return;
+  remainder.set(mapDict(
+      available, (k, v) => clamp(maxes.get()[k] - counts[k], 0, v.get())));
+});
+
+Model.autorun(shuffle);
 
 // Timing interface: reactive getters for next_card and remainder.
 
@@ -137,7 +153,7 @@ class Timing {
     return time_left.get();
   }
   static shuffle() {
-    updateCounts();
+    shuffle();
   }
 }
 
