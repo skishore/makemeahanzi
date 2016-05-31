@@ -10,6 +10,7 @@ import {lookupItem} from './lookup';
 const definition = new ReactiveVar();
 const pinyin = new ReactiveVar();
 
+let element = null;
 let handwriting = null;
 
 const kMaxMistakes = 3;
@@ -41,11 +42,22 @@ const maybeAdvance = () => {
   const missing = _.range(item.steps.length)
                    .filter((i) => !item.steps[i].done);
   if (missing.length === 0) {
+    transition();
     handwriting.clear();
     Timing.completeCard(item.card, item.result);
     return true;
   }
   return false;
+}
+
+const transition = () => {
+  const clone = element.clone();
+  const wrapper = element.parent();
+  clone.css({transform: 'translate(-100vw, -150%)'});
+  clone.find('canvas')[0].getContext('2d').drawImage(
+      element.find('canvas')[0], 0, 0);
+  wrapper.children().slice(1).remove();
+  wrapper.append(clone).velocity({left: '100%'}, 0).velocity({left: 0}, 300);
 }
 
 // Event handlers which will be bound to various Meteor-dispatched events.
@@ -67,8 +79,8 @@ const onDouble = () => {
 }
 
 const onRendered = function() {
-  const element = $(this.firstNode).find('.handwriting');
   const options = {onclick: onClick, ondouble: onDouble, onstroke: onStroke};
+  element = $(this.firstNode).find('.handwriting');
   handwriting = new Handwriting(element, options);
 }
 
