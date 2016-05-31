@@ -68,16 +68,9 @@ const main = () => {
   reader.on('close', () => {
     console.log('Dumping...');
     dumpParts(parts, rows);
-    fs.writeFileSync('all.txt', all.join(''));
-    console.log('Compressing...');
-    child_process.execSync('rm -f public/characters/*.gz');
-    child_process.execSync('gzip --best public/characters/*', () => 0);
-    child_process.execSync(
-        'for f in public/characters/*.txt.gz; do mv $f ${f}.asset; done',
-        () => 0);
+    fs.writeFileSync('public/characters/all.txt', all.join(''));
     console.log('Cleaning up...');
     child_process.execSync('rm makemeahanzi.txt', () => 0);
-    child_process.execSync('mv all.txt public/characters/all.txt', () => 0);
     console.log('Done!');
   });
 }

@@ -1,31 +1,16 @@
-import {ungzip} from './external/pako_inflate';
 import {loadList} from './meteoric/lists';
-
-const loadBinaryData = (url) => {
-  return new Promise((resolve, reject) => {
-    const request = new XMLHttpRequest();
-    request.open('GET', url, true);
-    request.responseType = 'arraybuffer';
-    request.onload = (event) => {
-      if (request.status != 200) throw request;
-      resolve(new Uint8Array(request.response));
-    }
-    request.send(null);
-  });
-}
 
 const loadCharacter = (character) => {
   const part = Math.floor(character.charCodeAt(0) / 256);
-  return loadBinaryData(`characters/part-${part}.txt.gz.asset`)
-                       .then((response) => {
-    response = ungzip(response, {to: 'string'});
-    const data = JSON.parse(response);
-    for (let row of data) {
-      if (row.character === character) {
-        return row;
+  return new Promise((resolve, reject) => {
+    $.get(`characters/part-${part}.txt`, (data, error) => {
+      for (let row of JSON.parse(data)) {
+        if (row.character === character) {
+          resolve(row);
+        }
       }
-    }
-    throw new Error(`Character not found: ${character}`);
+      reject(new Error(`Character not found: ${character}`));
+    });
   });
 }
 
