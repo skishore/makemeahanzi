@@ -34,17 +34,10 @@ Model.startup(updateTimestamp);
 // that track what the next card is and how many cards of different classes
 // are left in this session.
 
-const available = {
-  adds: new ReactiveVar(0),
-  failures: new ReactiveVar(0),
-  reviews: new ReactiveVar(0),
-};
 const maxes = new ReactiveVar();
 const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
 const time_left = new ReactiveVar();
-
-const clamp = (x, min, max) => Math.max(Math.min(x, max), min);
 
 const draw = (deck, ts) => {
   let count = 0;
@@ -109,17 +102,16 @@ Model.autorun(() => {
   maxes.set(value);
 });
 
-mapDict(getters, (k, v) => Model.autorun(() => {
-  const counts = mCounts.findOne();
-  if (!counts) return;
-  available[k].set(v(counts.ts).count());
-}));
-
 Model.autorun(() => {
   const counts = mCounts.findOne();
   if (!counts || !maxes.get()) return;
-  remainder.set(mapDict(
-      available, (k, v) => clamp(maxes.get()[k] - counts[k], 0, v.get())));
+  remainder.set(mapDict(getters, (k, v) => {
+    const limit = maxes.get()[k] - counts[k];
+    if (limit <= 0) return limit;
+    const cursor = v(counts.ts);
+    cursor.limit = limit;
+    return Math.min(cursor.count(), limit);
+  }));
 });
 
 Model.autorun(shuffle);
