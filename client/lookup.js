@@ -7,7 +7,7 @@ const loadBinaryData = (url) => {
     request.open('GET', url, true);
     request.responseType = 'arraybuffer';
     request.onload = (event) => {
-      if (request.status != 200) throw req;
+      if (request.status != 200) throw request;
       resolve(new Uint8Array(request.response));
     }
     request.send(null);
@@ -16,7 +16,8 @@ const loadBinaryData = (url) => {
 
 const loadCharacter = (character) => {
   const part = Math.floor(character.charCodeAt(0) / 256);
-  return loadBinaryData(`characters/part-${part}.txt.gz`).then((response) => {
+  return loadBinaryData(`characters/part-${part}.txt.gz.asset`)
+                       .then((response) => {
     response = ungzip(response, {to: 'string'});
     const data = JSON.parse(response);
     for (let row of data) {

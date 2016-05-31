@@ -1,0 +1,4 @@
+#!/bin/bash
+meteor remove-platform android
+meteor add-platform android
+meteor run android-device --mobile-server localhost:3000

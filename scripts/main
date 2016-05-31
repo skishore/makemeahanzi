@@ -72,6 +72,9 @@ const main = () => {
     console.log('Compressing...');
     child_process.execSync('rm -f public/characters/*.gz');
     child_process.execSync('gzip --best public/characters/*', () => 0);
+    child_process.execSync(
+        'for f in public/characters/*.txt.gz; do mv $f ${f}.asset; done',
+        () => 0);
     console.log('Cleaning up...');
     child_process.execSync('rm makemeahanzi.txt', () => 0);
     child_process.execSync('mv all.txt public/characters/all.txt', () => 0);
