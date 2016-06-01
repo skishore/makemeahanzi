@@ -18,7 +18,9 @@ const kMaxPenalties  = 4;
 
 const item = {card: null, mistakes: 0, penalties: 0, result: null, steps: []};
 
-// A couple small utility functions for Euclidean geometry.
+// A couple small utility functions used by the logic below.
+
+const defer = (callback) => Meteor.setTimeout(callback, 20);
 
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
@@ -44,7 +46,7 @@ const maybeAdvance = () => {
   if (missing.length === 0) {
     transition();
     handwriting.clear();
-    Timing.completeCard(item.card, item.result);
+    defer(() => Timing.completeCard(item.card, item.result));
     return true;
   }
   return false;
@@ -136,10 +138,10 @@ const updateCharacter = () => {
   // TODO(skishore): Handle error cards and non-writing cards.
   // TODO(skishore): Allow the user to correct our grading of them.
   const card = Timing.getNextCard();
-  lookupItem((card && card.data), (data, error) => {
+  defer(() => lookupItem((card && card.data), (data, error) => {
     if (error) {
       console.error(error);
-      Meteor.setTimeout(Timing.shuffle);
+      defer(Timing.shuffle);
       return;
     }
     const card = Timing.getNextCard();
@@ -158,7 +160,7 @@ const updateCharacter = () => {
         stroke: row.strokes[i],
       }));
     }
-  });
+  }));
 }
 
 // Meteor template bindings.
@@ -170,4 +172,4 @@ Template.teach.helpers({
 
 Template.teach.onRendered(onRendered);
 
-Meteor.startup(() => Deps.autorun(updateCharacter));
+Tracker.autorun(updateCharacter);
