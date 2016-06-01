@@ -116,37 +116,33 @@ Model.autorun(() => {
 
 Model.autorun(shuffle);
 
-// Timing interface: reactive getters for next_card and remainder.
+// Timing state tier 3: code executed when a user completes a given flashcard.
 
-const make = (k, v) => { const x = {}; x[k] = v; return x; }
+const build = (k, v) => { const x = {}; x[k] = v; return x; }
 
-class Timing {
-  static completeCard(card, result) {
-    const selector = make(card.deck, {$exists: true});
-    const update = {$inc: make(card.deck, 1)};
-    if (mCounts.update(selector, update)) {
-      if (card.deck === 'failures') {
-        Vocabulary.clearFailed(card.data);
-      } else {
-        Vocabulary.updateItem(card.data, result, false /* correction */);
-      }
+const completeCard = (card, result) => {
+  const selector = build(card.deck, {$exists: true});
+  const update = {$inc: build(card.deck, 1)};
+  if (mCounts.update(selector, update)) {
+    if (card.deck === 'failures') {
+      Vocabulary.clearFailed(card.data);
     } else {
-      console.error('Failed to update card:', card, 'with result:', result);
-      Timing.shuffle();
+      Vocabulary.updateItem(card.data, result, false /* correction */);
     }
-  }
-  static getNextCard() {
-    return next_card.get();
-  }
-  static getRemainder() {
-    return remainder.get();
-  }
-  static getTimeLeft() {
-    return time_left.get();
-  }
-  static shuffle() {
+  } else {
+    console.error('Failed to update card:', card, 'with result:', result);
     shuffle();
   }
+}
+
+// Timing interface: reactive getters for next_card and remainder.
+
+class Timing {
+  static completeCard(card, result) { completeCard(card, result); }
+  static getNextCard() { return next_card.get(); }
+  static getRemainder() { return remainder.get(); }
+  static getTimeLeft() { return time_left.get(); }
+  static shuffle() { shuffle(); }
 }
 
 export {Timing}
