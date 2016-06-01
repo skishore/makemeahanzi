@@ -42,6 +42,7 @@ Template.layout.helpers({
   },
   time: () => {
     const time = Timing.getTimeLeft();
+    if (time === undefined) return '?:?';
     const pad = (value) => value.length < 2 ? '0' + value : value;
     return [
       Math.floor(time / 3600),
