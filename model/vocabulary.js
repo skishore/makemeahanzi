@@ -19,9 +19,8 @@ const kColumns = 'word last next lists attempts successes failed'.split(' ');
 const kIndices = {};
 kColumns.forEach((x, i) => kIndices[x] = i);
 
-const entries = {active: [], all: []};
-const index = {};
 const sentinel = new ReactiveVar();
+const vocabulary = {active: [], all: [], index: {}};
 
 const dirty = () => sentinel.set(sentinel.get() + 1);
 
@@ -34,7 +33,7 @@ const materialize = (entry) => {
 class Cursor {
   constructor(filter) {
     sentinel.get();
-    this._list = entries.active.filter(filter);
+    this._list = vocabulary.active.filter(filter);
   }
   count() {
     return this._list.length;
@@ -49,39 +48,39 @@ class Cursor {
 
 class Vocabulary {
   static addItem(word, list) {
-    if (!index[word]) {
+    if (!vocabulary.index[word]) {
       const entry = [word, null, null, [], 0, 0, false];
       if (entry.length !== kColumns.length) throw new Error(entry);
-      index[word] = entry;
-      entries.all.push(entry);
+      vocabulary.all.push(entry);
+      vocabulary.index[word] = entry;
     }
-    const entry = index[word];
+    const entry = vocabulary.index[word];
     const lists = entry[kIndices.lists];
     if (lists.indexOf(list) < 0) {
       lists.push(list);
-      if (lists.length === 1) entries.active.push(entry);
+      if (lists.length === 1) vocabulary.active.push(entry);
     }
     dirty();
   }
   static clearFailed(item) {
-    const entry = index[item.word];
+    const entry = vocabulary.index[item.word];
     if (entry) entry[kIndices.failed] = false;
     dirty();
   }
   static dropList(list) {
     const updated = {active: [], all: []};
-    entries.all.forEach((entry) => {
+    vocabulary.all.forEach((entry) => {
       const lists = entry[kIndices.lists].filter((x) => x !== list);
       if (lists.length + entry[kIndices.attempts] > 0) {
         entry[kIndices.lists] = lists;
         updated.all.push(entry);
         if (lists.length > 0) updated.active.push(entry);
       } else {
-        delete index[entry[kIndices.word]];
+        delete vocabulary.index[entry[kIndices.word]];
       }
     });
-    entries.active = updated.active;
-    entries.all = updated.all;
+    vocabulary.active = updated.active;
+    vocabulary.all = updated.all;
     dirty();
   }
   static getFailuresInRange(start, end) {
@@ -101,7 +100,7 @@ class Vocabulary {
     return new Cursor((entry) => entry[kIndices.attempts] === 0);
   }
   static updateItem(item, result, correction) {
-    const entry = index[item.word];
+    const entry = vocabulary.index[item.word];
     const expected = item.attempts + (correction ? 1 : 0);
     if (!entry || entry[kIndices.attempts] !== expected) return;
 
@@ -121,17 +120,17 @@ if (Meteor.isClient) {
   Meteor.startup(() => {
     const value = localStorage.getItem(kLocalStorageKey);
     if (value) {
-      entries.all = JSON.parse(value);
-      entries.all.forEach((entry) => {
-        if (entry[kIndices.lists].length > 0) entries.active.push(entry);
-        index[entry[kIndices.word]] = entry;
+      vocabulary.all = JSON.parse(value);
+      vocabulary.all.forEach((entry) => {
+        vocabulary.index[entry[kIndices.word]] = entry;
+        if (entry[kIndices.lists].length > 0) vocabulary.active.push(entry);
       });
       dirty();
     }
     Meteor.autorun(() => {
       sentinel.get();
       Meteor.setTimeout(() => localStorage.setItem(
-          kLocalStorageKey, JSON.stringify(entries.all)));
+          kLocalStorageKey, JSON.stringify(vocabulary.all)));
     });
   });
 }
