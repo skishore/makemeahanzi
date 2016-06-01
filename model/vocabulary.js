@@ -14,9 +14,10 @@
 import {getNextInterval} from './external/interval_quantifier';
 import {Model} from './model';
 
+const kLocalStorageKey = 'bespoke.vocabulary';
 const kColumns = 'word last next lists attempts successes failed'.split(' ');
 const kIndices = {};
-kColumns.map((x, i) => kIndices[x] = i);
+kColumns.forEach((x, i) => kIndices[x] = i);
 
 const entries = {active: [], all: []};
 const index = {};
@@ -26,7 +27,7 @@ const dirty = () => sentinel.set(sentinel.get() + 1);
 
 const materialize = (entry) => {
   const result = {};
-  kColumns.map((x, i) => result[x] = entry[i]);
+  kColumns.forEach((x, i) => result[x] = entry[i]);
   return result;
 }
 
@@ -117,10 +118,22 @@ class Vocabulary {
 }
 
 if (Meteor.isClient) {
-  window.entries = entries;
-  window.index = index;
-  window.sentinel = sentinel;
-  window.Vocabulary = Vocabulary;
+  Meteor.startup(() => {
+    const value = localStorage.getItem(kLocalStorageKey);
+    if (value) {
+      entries.all = JSON.parse(value);
+      entries.all.forEach((entry) => {
+        if (entry[kIndices.lists].length > 0) entries.active.push(entry);
+        index[entry[kIndices.word]] = entry;
+      });
+      dirty();
+    }
+    Meteor.autorun(() => {
+      sentinel.get();
+      Meteor.setTimeout(() => localStorage.setItem(
+          kLocalStorageKey, JSON.stringify(entries.all)));
+    });
+  });
 }
 
 export {Vocabulary};
