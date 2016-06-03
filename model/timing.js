@@ -9,7 +9,7 @@ import {Vocabulary} from './vocabulary';
 // Timing state tier 1: a Ground collection storing a single record with raw
 // counts for usage in this session and a timestamp of when the session began.
 
-const kSessionDuration = 20 * 60 * 60;
+const kSessionDuration = 12 * 60 * 60;
 
 const mCounts = Model.collection('counts');
 

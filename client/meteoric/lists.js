@@ -1,4 +1,3 @@
-// TODO(skishore): The list logic should go in the model, not here.
 import {Settings} from '../../model/settings';
 import {Vocabulary} from '../../model/vocabulary';
 import {Backdrop} from './backdrop';
@@ -8,6 +7,7 @@ const kListColumns = ['word', '', '', 'pinyin', 'definition'];
 
 const characters = {};
 
+// TODO(skishore): The list metadata should go in the model, not here.
 const groups = [
   {
     label: 'General',
