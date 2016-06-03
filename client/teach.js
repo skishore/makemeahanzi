@@ -16,7 +16,7 @@ let handwriting = null;
 const kMaxMistakes = 3;
 const kMaxPenalties  = 4;
 
-const item = {card: null, mistakes: 0, penalties: 0, result: null, steps: []};
+const task = {card: null, mistakes: 0, penalties: 0, result: null, steps: []};
 
 // A couple small utility functions used by the logic below.
 
@@ -28,8 +28,8 @@ const getResult = (x) => Math.min(Math.floor(2 * x / kMaxPenalties) + 1, 3);
 
 const match = (stroke, expected) => {
   let best_result = {index: -1, score: -Infinity};
-  for (let i = 0; i < item.steps.length; i++) {
-    const median = item.steps[i].median;
+  for (let i = 0; i < task.steps.length; i++) {
+    const median = task.steps[i].median;
     const offset = i - expected;
     const result = recognize(stroke, median, offset);
     if (result.score > best_result.score) {
@@ -41,12 +41,12 @@ const match = (stroke, expected) => {
 }
 
 const maybeAdvance = () => {
-  const missing = _.range(item.steps.length)
-                   .filter((i) => !item.steps[i].done);
+  const missing = _.range(task.steps.length)
+                   .filter((i) => !task.steps[i].done);
   if (missing.length === 0) {
     transition();
     handwriting.clear();
-    defer(() => Timing.completeCard(item.card, item.result));
+    defer(() => Timing.completeCard(task.card, task.result));
     return true;
   }
   return false;
@@ -66,18 +66,18 @@ const transition = () => {
 
 const onClick = () => {
   if (maybeAdvance()) return;
-  const missing = _.range(item.steps.length)
-                   .filter((i) => !item.steps[i].done);
-  item.penalties += kMaxPenalties;
-  handwriting.flash(item.steps[missing[0]].stroke);
+  const missing = _.range(task.steps.length)
+                   .filter((i) => !task.steps[i].done);
+  task.penalties += kMaxPenalties;
+  handwriting.flash(task.steps[missing[0]].stroke);
 }
 
 const onDouble = () => {
   if (maybeAdvance()) return;
-  const missing = _.range(item.steps.length)
-                   .filter((i) => !item.steps[i].done);
-  handwriting.reveal(item.steps.map((x) => x.stroke));
-  handwriting.highlight(item.steps[missing[0]].stroke);
+  const missing = _.range(task.steps.length)
+                   .filter((i) => !task.steps[i].done);
+  handwriting.reveal(task.steps.map((x) => x.stroke));
+  handwriting.highlight(task.steps[missing[0]].stroke);
 }
 
 const onRendered = function() {
@@ -88,49 +88,49 @@ const onRendered = function() {
 
 const onStroke = (stroke) => {
   if (maybeAdvance()) return;
-  const missing = _.range(item.steps.length)
-                   .filter((i) => !item.steps[i].done);
+  const missing = _.range(task.steps.length)
+                   .filter((i) => !task.steps[i].done);
   const result = match((new Shortstraw).run(stroke), missing[0]);
   const index = result.index;
 
   // The user's input does not match any of the character's strokes.
   if (index < 0) {
-    item.mistakes += 1;
+    task.mistakes += 1;
     handwriting.fade();
-    if (item.mistakes >= kMaxMistakes) {
-      item.penalties += kMaxPenalties;
-      handwriting.flash(item.steps[missing[0]].stroke);
+    if (task.mistakes >= kMaxMistakes) {
+      task.penalties += kMaxPenalties;
+      handwriting.flash(task.steps[missing[0]].stroke);
     }
     return;
   }
 
   // The user's input matches a stroke that was already drawn.
-  if (item.steps[index].done) {
-    item.penalties += 1;
+  if (task.steps[index].done) {
+    task.penalties += 1;
     handwriting.undo();
-    handwriting.flash(item.steps[index].stroke);
+    handwriting.flash(task.steps[index].stroke);
     return;
   }
 
   // The user's input matches one of the remaining strokes.
-  item.steps[index].done = true;
-  const rotate = item.steps[index].median.length === 2;
-  handwriting.emplace([item.steps[index].stroke, rotate,
+  task.steps[index].done = true;
+  const rotate = task.steps[index].median.length === 2;
+  handwriting.emplace([task.steps[index].stroke, rotate,
                        result.source, result.target]);
   if (result.warning) {
     // TODO(skishore): Maybe penalize on certain warnings.
     handwriting.warn(result.warning);
   }
   if (missing.length === 1) {
-    item.result = getResult(item.penalties);
-    handwriting.glow(item.result);
+    task.result = getResult(task.penalties);
+    handwriting.glow(task.result);
     handwriting.highlight();
   } else if (missing[0] < index) {
-    item.penalties += 2 * (index - missing[0]);
-    handwriting.flash(item.steps[missing[0]].stroke);
+    task.penalties += 2 * (index - missing[0]);
+    handwriting.flash(task.steps[missing[0]].stroke);
   } else {
-    item.mistakes = 0;
-    handwriting.highlight(item.steps[missing[1]].stroke);
+    task.mistakes = 0;
+    handwriting.highlight(task.steps[missing[1]].stroke);
   }
 }
 
@@ -150,11 +150,11 @@ const updateCharacter = () => {
       definition.set(data.definition);
       pinyin.set(data.pinyin);
       handwriting && handwriting.clear();
-      item.card = card;
-      item.mistakes = 0;
-      item.penalties = 0;
-      item.result = null;
-      item.steps = _.range(row.strokes.length).map((i) => ({
+      task.card = card;
+      task.mistakes = 0;
+      task.penalties = 0;
+      task.result = null;
+      task.steps = _.range(row.strokes.length).map((i) => ({
         done: false,
         median: findCorners([row.medians[i]])[0],
         stroke: row.strokes[i],
