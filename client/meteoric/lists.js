@@ -33,7 +33,7 @@ const enableList = (list, callback) => {
   loadList(list).then((rows) => {
     rows.map((row) => {
       // TODO(skishore): Get multiple-character words working.
-      if (row.word.length !== 1) return;
+      if (row.word.length === 1) return;
       if (!_.all(row.word, (x) => characters[x])) return;
       Vocabulary.addItem(row.word, list);
     });

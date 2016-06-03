@@ -16,7 +16,7 @@ let handwriting = null;
 const kMaxMistakes = 3;
 const kMaxPenalties  = 4;
 
-const task = {card: null, mistakes: 0, penalties: 0, result: null, steps: []};
+const item = {card: null, index: 0, tasks: []};
 
 // A couple small utility functions used by the logic below.
 
@@ -26,7 +26,7 @@ const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
 const getResult = (x) => Math.min(Math.floor(2 * x / kMaxPenalties) + 1, 3);
 
-const match = (stroke, expected) => {
+const match = (task, stroke, expected) => {
   let best_result = {index: -1, score: -Infinity};
   for (let i = 0; i < task.steps.length; i++) {
     const median = task.steps[i].median;
@@ -41,15 +41,31 @@ const match = (stroke, expected) => {
 }
 
 const maybeAdvance = () => {
-  const missing = _.range(task.steps.length)
-                   .filter((i) => !task.steps[i].done);
-  if (missing.length === 0) {
-    transition();
-    handwriting.clear();
-    defer(() => Timing.completeCard(task.card, task.result));
-    return true;
+  const done = item.index === item.tasks.length;
+  if (item.index < item.tasks.length) {
+    const task = item.tasks[item.index];
+    const missing = _.range(task.steps.length)
+                     .filter((i) => !task.steps[i].done);
+    if (missing.length > 0) {
+      return task;
+    }
+    item.index += 1;
   }
-  return false;
+  if (item.index < item.tasks.length) {
+    handwriting.clear();
+  } else if (!done) {
+    transition();
+    maybeRecordResult();
+    handwriting.clear();
+  }
+  return null;
+}
+
+const maybeRecordResult = () => {
+  if (!item.card) return;
+  const result = _.reduce(item.tasks.map((x) => x.result),
+                          (x, y) => Math.max(x, y), 0);
+  defer(() => Timing.completeCard(item.card, result));
 }
 
 const transition = () => {
@@ -65,7 +81,8 @@ const transition = () => {
 // Event handlers which will be bound to various Meteor-dispatched events.
 
 const onClick = () => {
-  if (maybeAdvance()) return;
+  const task = maybeAdvance();
+  if (!task) return;
   const missing = _.range(task.steps.length)
                    .filter((i) => !task.steps[i].done);
   task.penalties += kMaxPenalties;
@@ -73,7 +90,8 @@ const onClick = () => {
 }
 
 const onDouble = () => {
-  if (maybeAdvance()) return;
+  const task = maybeAdvance();
+  if (!task) return;
   const missing = _.range(task.steps.length)
                    .filter((i) => !task.steps[i].done);
   handwriting.reveal(task.steps.map((x) => x.stroke));
@@ -87,10 +105,11 @@ const onRendered = function() {
 }
 
 const onStroke = (stroke) => {
-  if (maybeAdvance()) return;
+  const task = maybeAdvance();
+  if (!task) return;
   const missing = _.range(task.steps.length)
                    .filter((i) => !task.steps[i].done);
-  const result = match((new Shortstraw).run(stroke), missing[0]);
+  const result = match(task, (new Shortstraw).run(stroke), missing[0]);
   const index = result.index;
 
   // The user's input does not match any of the character's strokes.
@@ -135,31 +154,40 @@ const onStroke = (stroke) => {
 }
 
 const updateCharacter = () => {
-  // TODO(skishore): Handle error cards and non-writing cards.
-  // TODO(skishore): Allow the user to correct our grading of them.
+  // TODO(skishore): Handle other types of cards like error cards.
+  // TODO(skishore): Allow the user to correct our grade for their response.
   const card = Timing.getNextCard();
   defer(() => lookupItem((card && card.data), (data, error) => {
     if (error) {
-      console.error(error);
+      console.error('Card data request error:', error);
       defer(Timing.shuffle);
       return;
     }
     const card = Timing.getNextCard();
-    const row = data.characters[0];
-    if (card && data.word === card.data.word) {
-      definition.set(data.definition);
-      pinyin.set(data.pinyin);
-      handwriting && handwriting.clear();
-      task.card = card;
-      task.mistakes = 0;
-      task.penalties = 0;
-      task.result = null;
-      task.steps = _.range(row.strokes.length).map((i) => ({
-        done: false,
-        median: findCorners([row.medians[i]])[0],
-        stroke: row.strokes[i],
-      }));
+    if (!card || data.word !== card.data.word) {
+      console.error('Moved on from card:', card);
+      return;
     }
+    definition.set(data.definition);
+    pinyin.set(data.pinyin);
+    handwriting && handwriting.clear();
+    updateItem(card, data);
+  }));
+}
+
+const updateItem = (card, data) => {
+  item.card = card;
+  item.done = false;
+  item.index = 0;
+  item.tasks = data.characters.map((row) => ({
+    mistakes: 0,
+    penalties: 0,
+    result: null,
+    steps: row.medians.map((median, i) => ({
+      done: false,
+      median: findCorners([median])[0],
+      stroke: row.strokes[i],
+    })),
   }));
 }
 
