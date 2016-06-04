@@ -212,6 +212,7 @@ body {
       > .flashcard {
         background-color: white;
         display: block;
+        overflow: hidden;
         transform: translateY(-50%);
         @include full-size;
         bottom: auto;
@@ -239,7 +240,13 @@ body {
   }
 }
 
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
 #grading {
+  animation: slideUp 0.1s;
   @include full-size;
   top: auto;
 
