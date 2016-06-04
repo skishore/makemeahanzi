@@ -71,11 +71,12 @@ const maybeRecordResult = () => {
 const transition = () => {
   const clone = element.clone();
   const wrapper = element.parent();
+  const scroller = wrapper.parent();
   clone.css({transform: 'translate(-100vw, -150%)'});
   clone.find('canvas')[0].getContext('2d').drawImage(
       element.find('canvas')[0], 0, 0);
-  wrapper.children().slice(1).remove();
-  wrapper.append(clone).velocity({left: '100%'}, 0).velocity({left: 0}, 300);
+  wrapper.empty().append(element, clone);
+  scroller.velocity({left: '100%'}, 0).velocity({left: 0}, 300);
 }
 
 // Event handlers which will be bound to various Meteor-dispatched events.

@@ -199,22 +199,26 @@ body {
     }
   }
 
-  > .wrapper {
-    margin-top: 50%;
-    padding: 0 6%;
+  > .scroller {
     width: 100%;
     @include full-size;
     right: auto;
-    top: 27%;
+    top: 37vw;
 
-    > .handwriting {
-      background-color: white;
-      display: block;
-      transform: translateY(-50%);
-      width: 100%;
+    > .wrapper {
+      padding: 0 6%;
+      transform: translateY(50%);
+      @include full-size;
 
-      > canvas {
-        vertical-align: middle;
+      > .handwriting {
+        background-color: white;
+        display: block;
+        transform: translateY(-50%);
+        width: 100%;
+
+        > canvas {
+          vertical-align: middle;
+        }
       }
     }
   }
