@@ -340,11 +340,6 @@ class Handwriting {
     this._last_click_timestamp = timestamp;
     handler && handler();
   }
-  _distance(point1, point2) {
-    const diagonal = 2 * this._size * this._size;
-    const diff = [point1[0] - point2[0], point1[1] - point2[1]];
-    return (diff[0] * diff[0] + diff[1] * diff[1]) / diagonal;
-  }
   _emplace(args) {
     [path, rotate, source, target] = args;
     const child = pathToShape(path, this._size, kStrokeColor);
@@ -374,7 +369,8 @@ class Handwriting {
     const layer = this._layers[Layer.STROKE];
     if (this._brush) {
       const stroke = this._stroke.map((x) => x.map((y) => y / this._size));
-      if (distance([stroke[0], stroke[stroke.length - 1]]) > kMinDistance) {
+      const n = stroke.length;
+      if (_.any(stroke, (x) => distance([stroke[n - 1], x]) > kMinDistance)) {
         layer.children[layer.children.length - 1].cache(
             0, 0, this._size, this._size);
         handler = () => this._onstroke && this._onstroke(stroke);
