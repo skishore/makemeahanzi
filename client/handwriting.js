@@ -229,6 +229,7 @@ class Handwriting {
       layer.removeAllChildren();
     }
     this._corner_characters = 0;
+    this._drawable = true;
     this._emplacements = [];
     this._pending_animations = 0;
     this._running_animations = 0;
@@ -260,6 +261,7 @@ class Handwriting {
       convertShapeStyles(child, kStrokeColor, kResultColors[result]);
     }
     this.highlight();
+    this._drawable = false;
   }
   highlight(path) {
     if (this._layers[Layer.WATERMARK].children.length === 0 ||
@@ -351,6 +353,22 @@ class Handwriting {
     this._layers[Layer.COMPLETE].addChild(child);
     this._animate(child, endpoint, 150);
   }
+  _drawStroke() {
+    if (this._stroke.length < 2) {
+      return;
+    }
+    if (!this._settings.reveal_order) {
+      this._fadeWatermark();
+    }
+    const n = this._stroke.length;
+    if (!this._brush) {
+      const layer = this._layers[Layer.STROKE];
+      const options = {width: this._size * kStrokeWidth};
+      this._brush = new BasicBrush(layer, this._stroke[n - 2], options);
+    }
+    this._brush.advance(this._stroke[n - 1]);
+    this._stage.update();
+  }
   _endStroke() {
     let handler = () => this._click();
     const layer = this._layers[Layer.STROKE];
@@ -383,24 +401,8 @@ class Handwriting {
   _pushPoint(point) {
     if (point[0] != null && point[1] != null) {
       this._stroke.push(point.map((x) => Math.round(x / this._zoom)));
-      this._refresh();
+      if (this._drawable) this._drawStroke();
     }
-  }
-  _refresh() {
-    if (this._stroke.length < 2) {
-      return;
-    }
-    if (!this._settings.reveal_order) {
-      this._fadeWatermark();
-    }
-    const n = this._stroke.length;
-    if (!this._brush) {
-      const layer = this._layers[Layer.STROKE];
-      const options = {width: this._size * kStrokeWidth};
-      this._brush = new BasicBrush(layer, this._stroke[n - 2], options);
-    }
-    this._brush.advance(this._stroke[n - 1]);
-    this._stage.update();
   }
   _reset() {
     this._brush = null;
