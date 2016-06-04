@@ -238,3 +238,36 @@ body {
     }
   }
 }
+
+#grading {
+  @include full-size;
+  top: auto;
+
+  > .icon {
+    float: left;
+    font-size: 3 * $font-size;
+    padding: 4% 0;
+    width: 25%;
+    -webkit-text-stroke-width: $font-size / 8;
+
+    &.result-0 {
+      color: #84b4d8;
+      -webkit-text-stroke-color: #003054;
+    }
+
+    &.result-1 {
+      color: #88c874;
+      -webkit-text-stroke-color: #183804;
+    }
+
+    &.result-2 {
+      color: #c0c080;
+      -webkit-text-stroke-color: #404000;
+    }
+
+    &.result-3 {
+      color: #e87878;
+      -webkit-text-stroke-color: #600000;
+    }
+  }
+}

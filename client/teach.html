@@ -14,8 +14,20 @@
       <div class="wrapper">
         <div class="flashcard {{get 'deck'}}">
           <div class="error">{{get 'error'}}</div>
+          {{#if get 'show_grading'}}
+            {{> grading}}
+          {{/if}}
         </div>
       </div>
     </div>
+  </div>
+</template>
+
+<template name="grading">
+  <div id="grading">
+    <div class="icon result-0"><i class="ion-android-star"></i></div>
+    <div class="icon result-1"><i class="ion-checkmark"></i></div>
+    <div class="icon result-2"><i class="ion-pause"></i></div>
+    <div class="icon result-3"><i class="ion-close"></i></div>
   </div>
 </template>

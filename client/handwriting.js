@@ -14,7 +14,7 @@ const kRevealColor  = '#cccccc';
 const kStrokeColor  = '#000000';
 
 // Colors for EXCELLENT, GOOD, FAIR, and POOR result values.
-const kResultColors = ['#00c0ff', '#88c874', '#c0c080', '#e87878'];
+const kResultColors = ['#84b4d8', '#88c874', '#c0c080', '#e87878'];
 
 let ticker = null;
 
