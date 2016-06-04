@@ -115,9 +115,8 @@ const onRegrade = (stroke) => {
 }
 
 const onStroke = (stroke) => {
-  if (onRegrade(stroke)) return;
+  if (onRegrade(stroke) || maybeAdvance()) return;
   const task = item.tasks[item.index];
-  if (!task || task.missing.length === 0) return;
   const result = match(task, (new Shortstraw).run(stroke), task.missing[0]);
   const index = result.index;
 
