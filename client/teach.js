@@ -138,7 +138,7 @@ const onStroke = (stroke) => {
   handwriting.emplace([task.steps[index].stroke, rotate,
                        result.source, result.target]);
   if (result.warning) {
-    // TODO(skishore): Maybe penalize on certain warnings.
+    task.penalties += result.penalties;
     handwriting.warn(result.warning);
   }
   if (missing.length === 1) {
