@@ -37,13 +37,13 @@ const animate = (shape, size, rotate, source, target) => {
   return {rotation: 0, scaleX: 1, scaleY: 1, x: shape.regX, y: shape.regY};
 }
 
-const convertShapeStyles = (shape, start, end) => {
+const convertShapeStyles = (shape, end) => {
   if (!shape.graphics || !shape.graphics.instructions) {
     return;
   }
   let updated = false;
   for (let instruction of shape.graphics.instructions) {
-    if (instruction.style === start) {
+    if (instruction.style) {
       instruction.style = end;
       updated = true;
     }
@@ -257,8 +257,9 @@ class Handwriting {
   glow(result) {
     this._emplacements.forEach((args) => this._emplace(args));
     this._emplacements = [];
+    const color = kResultColors[result] || kRevealColor;
     for (let child of this._layers[Layer.COMPLETE].children) {
-      convertShapeStyles(child, kStrokeColor, kResultColors[result]);
+      convertShapeStyles(child, color);
     }
     this.highlight();
     this._drawable = false;
@@ -288,8 +289,9 @@ class Handwriting {
     const endpoint = {scaleX: kCornerSize, scaleY: kCornerSize};
     endpoint.x = kCornerSize * this._size * this._corner_characters;
     this._layers[Layer.CORNER].addChild(container);
-    this._corner_characters += 1;
     this._animate(container, endpoint, 150);
+    this._corner_characters += 1;
+    this._drawable = true;
   }
   reveal(paths) {
     const layer = this._layers[Layer.WATERMARK];
@@ -366,16 +368,15 @@ class Handwriting {
   }
   _endStroke() {
     let handler = () => this._click();
-    const layer = this._layers[Layer.STROKE];
-    if (this._brush) {
+    if (this._stroke.length >= 2) {
+      const layer = this._layers[Layer.STROKE];
       const stroke = this._stroke.map((x) => x.map((y) => y / this._size));
       const n = stroke.length;
       if (_.any(stroke, (x) => distance([stroke[n - 1], x]) > kMinDistance)) {
-        layer.children[layer.children.length - 1].cache(
-            0, 0, this._size, this._size);
+        layer.children.forEach((x) => x.cache(0, 0, this._size, this._size));
         handler = () => this._onstroke && this._onstroke(stroke);
       } else {
-        layer.children.pop();
+        layer.removeAllChildren();
       }
     }
     handler();

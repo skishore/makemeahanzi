@@ -46,6 +46,8 @@ const maybeAdvance = () => {
                      .filter((i) => !task.steps[i].done);
     if (missing.length > 0) {
       return task;
+    } else if (task.result === null) {
+      return null;
     }
     item.index += 1;
   }
@@ -104,7 +106,25 @@ const onRendered = function() {
   handwriting = new Handwriting(element, options);
 }
 
+const onRegrade = (stroke) => {
+  const task = item.tasks[item.index];
+  if (!task || task.result === null) return false;
+  const missing = _.range(task.steps.length)
+                   .filter((i) => !task.steps[i].done);
+  if (missing.length > 0) return false;
+  const n = stroke.length;
+  if (stroke[0][1] - stroke[n - 1][1] <
+      Math.abs(stroke[0][0] - stroke[n - 1][0])) {
+    return false;
+  }
+  task.result = null;
+  handwriting.glow(task.result);
+  helpers.set('grading', true);
+  return true;
+}
+
 const onStroke = (stroke) => {
+  if (onRegrade(stroke)) return;
   const task = maybeAdvance();
   if (!task) return;
   const missing = _.range(task.steps.length)
@@ -180,7 +200,6 @@ const onItemData = (data, error) => {
 }
 
 const updateCard = () => {
-  // TODO(skishore): Allow the user to correct our grade for their response.
   const card = Timing.getNextCard();
   if (!card) return;
   handwriting && handwriting.clear();
@@ -207,6 +226,23 @@ const updateItem = (card, data) => {
 }
 
 // Meteor template bindings.
+
+Template.grading.events({
+  'click .icon': function(event) {
+    const result = parseInt($(event.currentTarget).data('result'), 10);
+    const task = item.tasks[item.index];
+    if (!task || task.result !== null) return false;
+    const missing = _.range(task.steps.length)
+                     .filter((i) => !task.steps[i].done);
+    if (missing.length > 0) return;
+    task.result = result;
+    handwriting.glow(task.result);
+    handwriting._stage.update();
+    helpers.set('grading', false);
+    element.find('#grading').remove();
+    maybeAdvance();
+  },
+});
 
 Template.teach.helpers({get: (key) => helpers.get(key)});
 
