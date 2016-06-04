@@ -3,6 +3,7 @@ import Sketch from './external/sketch';
 
 const kCanvasSize = 512;
 
+const kCornerSize = 1 / 8;
 const kCrossWidth = 1 / 256;
 const kMinDistance = 1 / 32;
 const kStrokeWidth = 1 / 32;
@@ -183,14 +184,15 @@ class BasicBrush {
 
 const Layer = {
   CROSS: 0,
-  FADE: 1,
-  WATERMARK: 2,
-  HIGHLIGHT: 3,
-  COMPLETE: 4,
-  HINT: 5,
-  STROKE: 6,
-  WARNING: 7,
-  ALL: 8,
+  CORNER: 1,
+  FADE: 2,
+  WATERMARK: 3,
+  HIGHLIGHT: 4,
+  COMPLETE: 5,
+  HINT: 6,
+  STROKE: 7,
+  WARNING: 8,
+  ALL: 9,
 };
 
 class Handwriting {
@@ -200,7 +202,7 @@ class Handwriting {
     this._onstroke = options.onstroke;
 
     this._settings = {};
-    ['double_tap_speed', 'reveal_order', 'snap_strokes'].map(
+    ['double_tap_speed', 'reveal_order', 'snap_strokes'].forEach(
         (x) => this._settings[x] = Settings.get(`settings.${x}`));
 
     this._zoom = createSketch(element, this);
@@ -215,20 +217,18 @@ class Handwriting {
     }
     renderCross(this._size, this._layers[Layer.CROSS]);
 
-    this._emplacements = [];
-    this._pending_animations = 0;
-    this._running_animations = 0;
-    this._reset();
-
     createjs.Ticker.timingMode = createjs.Ticker.RAF;
     createjs.Ticker.removeEventListener('tick', ticker);
     ticker = createjs.Ticker.addEventListener('tick', this.tick.bind(this));
+
+    this.clear();
   }
   clear() {
     createjs.Tween.removeAllTweens();
     for (let layer of this._layers) {
       layer.removeAllChildren();
     }
+    this._corner_characters = 0;
     this._emplacements = [];
     this._pending_animations = 0;
     this._running_animations = 0;
@@ -254,11 +254,12 @@ class Handwriting {
                   () => child.parent.removeChild(child));
   }
   glow(result) {
-    this._emplacements.map((args) => this._emplace(args));
+    this._emplacements.forEach((args) => this._emplace(args));
     this._emplacements = [];
     for (let child of this._layers[Layer.COMPLETE].children) {
       convertShapeStyles(child, kStrokeColor, kResultColors[result]);
     }
+    this.highlight();
   }
   highlight(path) {
     if (this._layers[Layer.WATERMARK].children.length === 0 ||
@@ -273,8 +274,20 @@ class Handwriting {
       const child = pathToShape(path, this._size, kHintColor);
       child.alpha = 0;
       layer.addChild(child);
-      this._animate(child, {alpha: 1}, 150, () => {});
+      this._animate(child, {alpha: 1}, 150);
     }
+  }
+  moveToCorner() {
+    const children = this._layers[Layer.COMPLETE].children.slice();
+    const container = new createjs.Container;
+    children.forEach((child) => container.addChild(child));
+    [Layer.WATERMARK, Layer.COMPLETE].forEach(
+        (layer) => this._layers[layer].removeAllChildren());
+    const endpoint = {scaleX: kCornerSize, scaleY: kCornerSize};
+    endpoint.x = kCornerSize * this._size * this._corner_characters;
+    this._layers[Layer.CORNER].addChild(container);
+    this._corner_characters += 1;
+    this._animate(container, endpoint, 150);
   }
   reveal(paths) {
     const layer = this._layers[Layer.WATERMARK];

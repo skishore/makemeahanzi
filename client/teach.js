@@ -52,7 +52,7 @@ const maybeAdvance = () => {
     item.index += 1;
   }
   if (item.index < item.tasks.length) {
-    handwriting.clear();
+    handwriting.moveToCorner();
   } else if (!done) {
     transition();
     maybeRecordResult();
@@ -144,7 +144,6 @@ const onStroke = (stroke) => {
   if (missing.length === 1) {
     task.result = getResult(task.penalties);
     handwriting.glow(task.result);
-    handwriting.highlight();
   } else if (missing[0] < index) {
     task.penalties += 2 * (index - missing[0]);
     handwriting.flash(task.steps[missing[0]].stroke);
