@@ -90,7 +90,7 @@ const shuffle = () => {
   if (!next) {
     // TODO(skishore): Implement adding extra cards.
     let error = "You're done for the day!";
-    next = {data: {error: error, type: 'error'}, deck: 'errors'};
+    next = {data: {error: error}, deck: 'errors'};
   }
 
   next_card.set(next);

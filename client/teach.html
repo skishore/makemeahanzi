@@ -7,12 +7,14 @@
       <a class="control right">
         <i class="ion-university"></i>
       </a>
-      <div class="pinyin">{{pinyin}}</div>
-      <div class="definition">{{definition}}</div>
+      <div class="pinyin">{{get 'pinyin'}}</div>
+      <div class="definition">{{get 'definition'}}</div>
     </div>
     <div class="scroller">
       <div class="wrapper">
-        <div class="handwriting"></div>
+        <div class="flashcard {{get 'deck'}}">
+          <div class="error">{{get 'error'}}</div>
+        </div>
       </div>
     </div>
   </div>

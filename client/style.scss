@@ -69,7 +69,7 @@ body {
     }
 
     #teach {
-      > .prompt, > .wrapper > .handwriting {
+      > .prompt, > .wrapper > .flashcard {
         background-color: #f5f5f5;
       }
     }
@@ -83,7 +83,7 @@ body {
     }
 
     #teach {
-      > .prompt, > .wrapper > .handwriting {
+      > .prompt, > .wrapper > .flashcard {
         box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.5);
         opacity: 0.92;
       }
@@ -206,18 +206,33 @@ body {
     top: 37vw;
 
     > .wrapper {
-      padding: 0 6%;
       transform: translateY(50%);
       @include full-size;
 
-      > .handwriting {
+      > .flashcard {
         background-color: white;
         display: block;
         transform: translateY(-50%);
-        width: 100%;
+        @include full-size;
+        bottom: auto;
+        left: 6%;
+        right: 6%;
+
+        &.errors {
+          > canvas { display: none; }
+          > .error { display: block; }
+        }
 
         > canvas {
           vertical-align: middle;
+        }
+
+        > .error {
+          display: none;
+          font-size: $font-size;
+          line-height: 5 * $font-size / 4;
+          padding: 3%;
+          min-height: 5 * $font-size / 4;
         }
       }
     }

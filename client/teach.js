@@ -7,15 +7,13 @@ import {Shortstraw} from './external/shortstraw';
 import {Handwriting} from './handwriting';
 import {lookupItem} from './lookup';
 
-const definition = new ReactiveVar();
-const pinyin = new ReactiveVar();
-
 let element = null;
 let handwriting = null;
 
 const kMaxMistakes = 3;
 const kMaxPenalties  = 4;
 
+const helpers = new ReactiveDict();
 const item = {card: null, index: 0, tasks: []};
 
 // A couple small utility functions used by the logic below.
@@ -72,14 +70,15 @@ const transition = () => {
   const clone = element.clone();
   const wrapper = element.parent();
   const scroller = wrapper.parent();
-  clone.css({transform: 'translate(-100vw, -150%)'});
+  clone.css({transform: 'translate(-100vw, -50%)'});
   clone.find('canvas')[0].getContext('2d').drawImage(
       element.find('canvas')[0], 0, 0);
-  wrapper.empty().append(element, clone);
+  wrapper.children().slice(1).remove();
+  wrapper.append(clone);
   scroller.velocity({left: '100%'}, 0).velocity({left: 0}, 300);
 }
 
-// Event handlers which will be bound to various Meteor-dispatched events.
+// Event handlers for touch interactions on the handwriting canvas.
 
 const onClick = () => {
   const task = maybeAdvance();
@@ -101,7 +100,7 @@ const onDouble = () => {
 
 const onRendered = function() {
   const options = {onclick: onClick, ondouble: onDouble, onstroke: onStroke};
-  element = $(this.firstNode).find('.handwriting');
+  element = $(this.firstNode).find('.flashcard');
   handwriting = new Handwriting(element, options);
 }
 
@@ -153,26 +152,43 @@ const onStroke = (stroke) => {
   }
 }
 
-const updateCharacter = () => {
-  // TODO(skishore): Handle other types of cards like error cards.
+// Event handlers for keeping the item, card, and tasks up-to-date.
+
+const onErrorCard = (card) => {
+  helpers.clear();
+  helpers.set('deck', card.deck);
+  helpers.set('error', card.data.error);
+  updateItem(card, {characters: []});
+}
+
+const onItemData = (data, error) => {
+  if (error) {
+    console.error('Card data request error:', error);
+    defer(Timing.shuffle);
+    return;
+  }
+  const card = Timing.getNextCard();
+  if (!card || data.word !== card.data.word) {
+    console.error('Moved on from card:', card);
+    return;
+  }
+  helpers.clear();
+  helpers.set('deck', card.deck);
+  helpers.set('definition', data.definition);
+  helpers.set('pinyin', data.pinyin);
+  updateItem(card, data);
+}
+
+const updateCard = () => {
   // TODO(skishore): Allow the user to correct our grade for their response.
   const card = Timing.getNextCard();
-  defer(() => lookupItem((card && card.data), (data, error) => {
-    if (error) {
-      console.error('Card data request error:', error);
-      defer(Timing.shuffle);
-      return;
-    }
-    const card = Timing.getNextCard();
-    if (!card || data.word !== card.data.word) {
-      console.error('Moved on from card:', card);
-      return;
-    }
-    definition.set(data.definition);
-    pinyin.set(data.pinyin);
-    handwriting && handwriting.clear();
-    updateItem(card, data);
-  }));
+  if (!card) return;
+  handwriting && handwriting.clear();
+  if (card.deck === 'errors') {
+    onErrorCard(card);
+  } else {
+    defer(() => lookupItem(card.data, onItemData));
+  }
 }
 
 const updateItem = (card, data) => {
@@ -192,11 +208,8 @@ const updateItem = (card, data) => {
 
 // Meteor template bindings.
 
-Template.teach.helpers({
-  definition: () => definition.get(),
-  pinyin: () => pinyin.get(),
-});
+Template.teach.helpers({get: (key) => helpers.get(key)});
 
 Template.teach.onRendered(onRendered);
 
-Tracker.autorun(updateCharacter);
+Tracker.autorun(updateCard);
