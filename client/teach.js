@@ -177,7 +177,6 @@ const updateCharacter = () => {
 
 const updateItem = (card, data) => {
   item.card = card;
-  item.done = false;
   item.index = 0;
   item.tasks = data.characters.map((row) => ({
     mistakes: 0,
