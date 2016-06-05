@@ -94,13 +94,24 @@ const onDouble = () => {
   handwriting.highlight(task.steps[task.missing[0]].stroke);
 }
 
+const onRegrade = (result) => {
+  const task = item.tasks[item.index];
+  if (!task || task.missing.length > 0 || task.result !== null) return;
+  task.result = result;
+  handwriting.glow(task.result);
+  handwriting._stage.update();
+  helpers.set('grading', false);
+  element.find('#grading').remove();
+  maybeAdvance();
+}
+
 const onRendered = function() {
   const options = {onclick: onClick, ondouble: onDouble, onstroke: onStroke};
   element = $(this.firstNode).find('.flashcard');
   handwriting = new Handwriting(element, options);
 }
 
-const onRegrade = (stroke) => {
+const onRequestRegrade = (stroke) => {
   const task = item.tasks[item.index];
   if (!task || task.missing.length > 0 || task.result === null) return false;
   const n = stroke.length;
@@ -115,7 +126,7 @@ const onRegrade = (stroke) => {
 }
 
 const onStroke = (stroke) => {
-  if (onRegrade(stroke) || maybeAdvance()) return;
+  if (onRequestRegrade(stroke) || maybeAdvance()) return;
   const task = item.tasks[item.index];
   const result = match(task, (new Shortstraw).run(stroke), task.missing[0]);
   const index = result.index;
@@ -218,15 +229,20 @@ const updateItem = (card, data) => {
 
 Template.grading.events({
   'click .icon': function(event) {
-    const task = item.tasks[item.index];
-    if (!task || task.missing.length > 0 || task.result !== null) return;
-    const result = parseInt($(event.currentTarget).data('result'), 10);
-    task.result = result;
-    handwriting.glow(task.result);
-    handwriting._stage.update();
-    helpers.set('grading', false);
-    element.find('#grading').remove();
-    maybeAdvance();
+    onRegrade(parseInt($(event.currentTarget).data('result'), 10));
+  },
+});
+
+Template.teach.events({
+  'click .flashcard > .error > .option': function(event) {
+    if (this.extra) {
+      transition();
+      Timing.addExtraCards(this.extra);
+    } else if (this.link) {
+      Router.go(this.link);
+    } else {
+      console.error('Unable to apply option:', this);
+    }
   },
 });
 

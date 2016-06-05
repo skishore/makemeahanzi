@@ -47,6 +47,27 @@ const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
 const time_left = new ReactiveVar();
 
+const buildErrorCard = (counts, extra) => {
+  const error = "You're done for the day!";
+  const options = [{
+    link: 'settings',
+    text: 'Change scheduling settings',
+  }];
+  if (extra > 0) {
+    const total = counts.adds + counts.extras + counts.reviews;
+    options.unshift({
+      extra: {min_cards: extra + total, ts: counts.ts},
+      text: `Add ${extra} cards to today's deck`,
+    });
+  } else {
+    options.push({
+      link: 'lists',
+      text: 'Enable another word list',
+    });
+  }
+  return {data: {error: error, options: options}, deck: 'errors'};
+}
+
 const draw = (deck, ts) => {
   let count = 0;
   let result = null;
@@ -87,31 +108,19 @@ const shuffle = () => {
   const left = remainder.get();
   if (!counts || !left) return;
 
-  let next = null;
   if (left.adds + left.reviews > 0) {
     const index = Math.random() * (left.adds + left.reviews);
     const deck = index < left.adds ? 'adds' : 'reviews';
-    next = draw(deck, counts.ts);
+    next_card.set(draw(deck, counts.ts));
   } else if (left.failures > 0) {
-    next = draw('failures', counts.ts);
+    next_card.set(draw('failures', counts.ts));
   } else if (left.extras > 0) {
-    next = draw('extras', counts.ts);
-  }
-
-  if (!next) {
-    const error = "You're done for the day!";
-    const options = ['Change scheduling settings'];
+    next_card.set(draw('extras', counts.ts));
+  } else {
     const max = maxes.get() ? maxes.get().adds : 0;
     const extra = Math.min(getters.extras(counts.ts).count(), max);
-    if (extra > 0) {
-      options.unshift(`Add ${extra} cards to today's deck`);
-    } else {
-      options.push('Enable another word list');
-    }
-    next = {data: {error: error, options: options}, deck: 'errors'};
+    next_card.set(buildErrorCard(counts, extra));
   }
-
-  next_card.set(next);
 }
 
 Model.autorun(() => {
@@ -142,6 +151,10 @@ Model.autorun(shuffle);
 
 // Timing state tier 3: code executed when a user completes a given flashcard.
 
+const addExtraCards = (extra) => {
+  mCounts.update({ts: extra.ts}, {$set: {min_cards: extra.min_cards}});
+}
+
 const build = (k, v) => { const x = {}; x[k] = v; return x; }
 
 const completeCard = (card, result) => {
@@ -162,6 +175,7 @@ const completeCard = (card, result) => {
 // Timing interface: reactive getters for next_card and remainder.
 
 class Timing {
+  static addExtraCards(extra) { addExtraCards(extra); }
   static completeCard(card, result) { completeCard(card, result); }
   static getNextCard() { return next_card.get(); }
   static getRemainder() { return remainder.get(); }

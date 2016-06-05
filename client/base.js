@@ -36,7 +36,7 @@ Platform.isIOS = () => true;
 Template.layout.helpers({
   remainder: () => {
     const x = Timing.getRemainder();
-    let left = '' + (x ? x.adds + x.reviews : '?');
+    let left = '' + (x ? x.adds + x.extras + x.reviews : '?');
     if (Settings.get('settings.revisit_failures')) {
       left += ' + ' + (x ? x.failures : '?');
     }
