@@ -166,6 +166,7 @@ const onErrorCard = (card) => {
   helpers.clear();
   helpers.set('deck', card.deck);
   helpers.set('error', card.data.error);
+  helpers.set('options', card.data.options);
   updateItem(card, {characters: []});
 }
 

@@ -100,7 +100,7 @@ const shuffle = () => {
 
   if (!next) {
     const error = "You're done for the day!";
-    const options = ['Change your scheduling settings'];
+    const options = ['Change scheduling settings'];
     const max = maxes.get() ? maxes.get().adds : 0;
     const extra = Math.min(getters.extras(counts.ts).count(), max);
     if (extra > 0) {

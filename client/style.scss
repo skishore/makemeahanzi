@@ -232,8 +232,27 @@ body {
           display: none;
           font-size: $font-size;
           line-height: 5 * $font-size / 4;
-          padding: 3%;
+          padding: 6% 0;
           min-height: 5 * $font-size / 4;
+
+          > .option {
+            background-color: $base-color;
+            color: white;
+            display: block;
+            font-size: 5 * $font-size / 6;
+            margin: 6% auto 2%;
+            padding: $font-size / 3;
+            width: 84%;
+            @include buttonlike;
+
+            &:first-child {
+              margin-top: 8%;
+            }
+
+            &:hover {
+              background-color: $link-color;
+            }
+          }
         }
       }
     }

@@ -13,7 +13,12 @@
     <div class="scroller">
       <div class="wrapper">
         <div class="flashcard {{get 'deck'}}">
-          <div class="error">{{get 'error'}}</div>
+          <div class="error">
+            {{get 'error'}}
+            {{#each get 'options'}}
+              <a class="option">{{this}}</a>
+            {{/each}}
+          </div>
           {{#if get 'grading'}}
             {{> grading}}
           {{/if}}
