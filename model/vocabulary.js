@@ -15,14 +15,35 @@ import {getNextInterval} from './external/interval_quantifier';
 import {Model} from './model';
 
 const kLocalStorageKey = 'bespoke.vocabulary';
+const kNumChunks = 16;
+
 const kColumns = 'word last next lists attempts successes failed'.split(' ');
 const kIndices = {};
 kColumns.forEach((x, i) => kIndices[x] = i);
 
 const sentinel = new ReactiveVar();
-const vocabulary = {active: [], all: [], index: {}};
+const vocabulary = {active: [], chunks: [], index: {}};
+_.range(kNumChunks).forEach(() => vocabulary.chunks.push([]));
 
-const dirty = () => sentinel.set(sentinel.get() + 1);
+const chunk = (word) => vocabulary.chunks[Math.abs(hash(word)) % kNumChunks];
+
+const dirty = (word) => {
+  if (word) {
+    chunk(word).dirty = true;
+  } else {
+    vocabulary.chunks.forEach((x) => x.dirty = true);
+  }
+  sentinel.set(sentinel.get() + 1);
+}
+
+const hash = (word) => {
+  let result = 0;
+  for (let i = 0; i < word.length; i++) {
+    result = (result << 5) - result + word.charCodeAt(i);
+    result = result & result;
+  }
+  return result;
+}
 
 const materialize = (entry) => {
   const result = {};
@@ -51,7 +72,7 @@ class Vocabulary {
     if (!vocabulary.index[word]) {
       const entry = [word, null, null, [], 0, 0, false];
       if (entry.length !== kColumns.length) throw new Error(entry);
-      vocabulary.all.push(entry);
+      chunk(word).push(entry);
       vocabulary.index[word] = entry;
     }
     const entry = vocabulary.index[word];
@@ -60,27 +81,28 @@ class Vocabulary {
       lists.push(list);
       if (lists.length === 1) vocabulary.active.push(entry);
     }
-    dirty();
+    dirty(word);
   }
   static clearFailed(item) {
     const entry = vocabulary.index[item.word];
     if (entry) entry[kIndices.failed] = false;
-    dirty();
+    dirty(item.word);
   }
   static dropList(list) {
-    const updated = {active: [], all: []};
-    vocabulary.all.forEach((entry) => {
+    const updated = {active: [], chunks: []};
+    _.range(kNumChunks).forEach(() => updated.chunks.push([]));
+    vocabulary.chunks.forEach((chunk, i) => chunk.forEach((entry) => {
       const lists = entry[kIndices.lists].filter((x) => x !== list);
       if (lists.length + entry[kIndices.attempts] > 0) {
         entry[kIndices.lists] = lists;
-        updated.all.push(entry);
+        updated.chunks[i].push(entry);
         if (lists.length > 0) updated.active.push(entry);
       } else {
         delete vocabulary.index[entry[kIndices.word]];
       }
-    });
+    }));
     vocabulary.active = updated.active;
-    vocabulary.all = updated.all;
+    vocabulary.chunks = updated.chunks;
     dirty();
   }
   static getFailuresInRange(start, end) {
@@ -112,25 +134,33 @@ class Vocabulary {
     entry[kIndices.attempts] = item.attempts + 1;
     entry[kIndices.successes] = item.successes + (success ? 1 : 0);
     entry[kIndices.failed] = !success;
-    dirty();
+    dirty(item.word);
   }
 }
 
 if (Meteor.isClient) {
   Meteor.startup(() => {
-    const value = localStorage.getItem(kLocalStorageKey);
-    if (value) {
-      vocabulary.all = JSON.parse(value);
-      vocabulary.all.forEach((entry) => {
-        vocabulary.index[entry[kIndices.word]] = entry;
-        if (entry[kIndices.lists].length > 0) vocabulary.active.push(entry);
-      });
-      dirty();
-    }
+    _.range(kNumChunks).forEach((i) => {
+      const value = localStorage.getItem(`${kLocalStorageKey}.${i}`);
+      if (value) {
+        vocabulary.chunks[i] = JSON.parse(value);
+        vocabulary.chunks[i].forEach((entry) => {
+          vocabulary.index[entry[kIndices.word]] = entry;
+          if (entry[kIndices.lists].length > 0) vocabulary.active.push(entry);
+        });
+      }
+    });
+    dirty();
     Meteor.autorun(() => {
       sentinel.get();
-      Meteor.setTimeout(() => localStorage.setItem(
-          kLocalStorageKey, JSON.stringify(vocabulary.all)));
+      Meteor.setTimeout(() => {
+        vocabulary.chunks.forEach((chunk, i) => {
+          if (!chunk.dirty) return;
+          delete chunk.dirty;
+          localStorage.setItem(`${kLocalStorageKey}.${i}`,
+                               JSON.stringify(chunk));
+        });
+      });
     });
   });
 }
