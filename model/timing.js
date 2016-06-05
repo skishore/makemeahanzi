@@ -107,10 +107,8 @@ Model.autorun(() => {
   if (!counts || !maxes.get()) return;
   remainder.set(mapDict(getters, (k, v) => {
     const limit = maxes.get()[k] - counts[k];
-    if (limit <= 0) return limit;
-    const cursor = v(counts.ts);
-    cursor.limit = limit;
-    return Math.min(cursor.count(), limit);
+    if (limit <= 0) return 0;
+    return Math.min(v(counts.ts).count(), limit);
   }));
 });
 
