@@ -13,7 +13,14 @@ const kSessionDuration = 12 * 60 * 60;
 
 const mCounts = Model.collection('counts');
 
-const newCounts = (ts) => ({adds: 0, failures: 0, reviews: 0, ts: ts});
+const newCounts = (ts) => ({
+  adds: 0,
+  extras: 0,
+  failures: 0,
+  reviews: 0,
+  min_cards: 0,
+  ts: ts,
+});
 
 const updateTimestamp = () => {
   const now = Model.timestamp();
@@ -34,6 +41,7 @@ Model.startup(updateTimestamp);
 // that track what the next card is and how many cards of different classes
 // are left in this session.
 
+const max_extras = new ReactiveVar();
 const maxes = new ReactiveVar();
 const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
@@ -43,7 +51,7 @@ const draw = (deck, ts) => {
   let count = 0;
   let result = null;
   getters[deck](ts).forEach((card) => {
-    if (!result || (card.next || 0) < result.next) {
+    if (!result || (card.next || Infinity) < result.next) {
       count = 1;
       result = card;
     } else if (card.next === result.next) {
@@ -61,6 +69,7 @@ const draw = (deck, ts) => {
 
 const getters = {
   adds: (ts) => Vocabulary.getNewItems(),
+  extras: (ts) => Vocabulary.getExtraItems(ts),
   failures: (ts) => Vocabulary.getFailuresInRange(ts, ts + kSessionDuration),
   reviews: (ts) => Vocabulary.getItemsDueBy(ts, ts),
 };
@@ -85,19 +94,36 @@ const shuffle = () => {
     next = draw(deck, counts.ts);
   } else if (left.failures > 0) {
     next = draw('failures', counts.ts);
+  } else if (left.extras > 0) {
+    next = draw('extras', counts.ts);
   }
 
   if (!next) {
-    // TODO(skishore): Implement adding extra cards.
-    let error = "You're done for the day!";
-    next = {data: {error: error}, deck: 'errors'};
+    const error = "You're done for the day!";
+    const options = ['Change your scheduling settings'];
+    const max = maxes.get() ? maxes.get().adds : 0;
+    const extra = Math.min(getters.extras(counts.ts).count(), max);
+    if (extra > 0) {
+      options.unshift(`Add ${extra} cards to today's deck`);
+    } else {
+      options.push('Enable another word list');
+    }
+    next = {data: {error: error, options: options}, deck: 'errors'};
   }
 
   next_card.set(next);
 }
 
 Model.autorun(() => {
+  const counts = mCounts.findOne();
+  if (!counts) return;
+  const total = counts.adds + counts.reviews;
+  max_extras.set(Math.max(counts.min_cards - total, 0));
+});
+
+Model.autorun(() => {
   const value = mapDict(getters, (k, v) => Settings.get(`settings.max_${k}`));
+  value.extras = max_extras.get();
   value.failures = Settings.get('settings.revisit_failures') ? Infinity : 0;
   maxes.set(value);
 });

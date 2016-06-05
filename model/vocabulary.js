@@ -105,6 +105,11 @@ class Vocabulary {
     vocabulary.chunks = updated.chunks;
     dirty();
   }
+  static getExtraItems(last) {
+    return new Cursor((entry) => {
+      return entry[kIndices.attempts] === 0 || entry[kIndices.last] < last;
+    });
+  }
   static getFailuresInRange(start, end) {
     return new Cursor((entry) => {
       if (!entry[kIndices.failed]) return false;

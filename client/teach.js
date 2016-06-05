@@ -177,7 +177,7 @@ const onItemData = (data, error) => {
   }
   const card = Timing.getNextCard();
   if (!card || data.word !== card.data.word) {
-    console.error('Moved on from card:', card);
+    console.log('Moved on from card:', card);
     return;
   }
   helpers.clear();
