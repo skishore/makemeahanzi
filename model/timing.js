@@ -15,7 +15,6 @@ const mCounts = Model.collection('counts');
 
 const newCounts = (ts) => ({
   adds: 0,
-  extras: 0,
   failures: 0,
   reviews: 0,
   min_cards: 0,
@@ -41,7 +40,6 @@ Model.startup(updateTimestamp);
 // that track what the next card is and how many cards of different classes
 // are left in this session.
 
-const max_extras = new ReactiveVar();
 const maxes = new ReactiveVar();
 const next_card = new ReactiveVar();
 const remainder = new ReactiveVar();
@@ -54,7 +52,7 @@ const buildErrorCard = (counts, extra) => {
     text: 'Change scheduling settings',
   }];
   if (extra > 0) {
-    const total = counts.adds + counts.extras + counts.reviews;
+    const total = counts.adds + counts.reviews;
     options.unshift({
       extra: {min_cards: extra + total, ts: counts.ts},
       text: `Add ${extra} cards to today's deck`,
@@ -70,12 +68,15 @@ const buildErrorCard = (counts, extra) => {
 
 const draw = (deck, ts) => {
   let count = 0;
+  let earliest = null;
   let result = null;
   getters[deck](ts).forEach((card) => {
-    if (!result || (card.next || Infinity) < result.next) {
+    const next = card.next || Infinity;
+    if (!result || next < earliest) {
       count = 1;
+      earliest = next;
       result = card;
-    } else if (card.next === result.next) {
+    } else if (next === earliest) {
       count += 1;
       if (count * Math.random() < 1) {
         result = card;
@@ -95,10 +96,11 @@ const getters = {
   reviews: (ts) => Vocabulary.getItemsDueBy(ts, ts),
 };
 
-const mapDict = (dict, callback) => {
+const mapDecks = (callback) => {
   const result = {};
-  for (key in dict) {
-    result[key] = callback(key, dict[key]);
+  for (deck in getters) {
+    if (deck === 'extras') continue;
+    result[deck] = callback(deck);
   }
   return result;
 }
@@ -115,7 +117,9 @@ const shuffle = () => {
   } else if (left.failures > 0) {
     next_card.set(draw('failures', counts.ts));
   } else if (left.extras > 0) {
-    next_card.set(draw('extras', counts.ts));
+    const card = draw('extras', counts.ts);
+    card.deck = card.data.attempts === 0 ? 'adds' : 'reviews';
+    next_card.set(card);
   } else {
     const max = maxes.get() ? maxes.get().adds : 0;
     const extra = Math.min(getters.extras(counts.ts).count(), max);
@@ -124,15 +128,7 @@ const shuffle = () => {
 }
 
 Model.autorun(() => {
-  const counts = mCounts.findOne();
-  if (!counts) return;
-  const total = counts.adds + counts.reviews;
-  max_extras.set(Math.max(counts.min_cards - total, 0));
-});
-
-Model.autorun(() => {
-  const value = mapDict(getters, (k, v) => Settings.get(`settings.max_${k}`));
-  value.extras = max_extras.get();
+  const value = mapDecks((k) => Settings.get(`settings.max_${k}`));
   value.failures = Settings.get('settings.revisit_failures') ? Infinity : 0;
   maxes.set(value);
 });
@@ -140,11 +136,20 @@ Model.autorun(() => {
 Model.autorun(() => {
   const counts = mCounts.findOne();
   if (!counts || !maxes.get()) return;
-  remainder.set(mapDict(getters, (k, v) => {
+  const value = mapDecks((k) => {
     const limit = maxes.get()[k] - counts[k];
     if (limit <= 0) return 0;
-    return Math.min(v(counts.ts).count(), limit);
-  }));
+    return Math.min(getters[k](counts.ts).count(), limit);
+  });
+  // Only count the number of available extra cards if they are needed.
+  const planned = counts.adds + counts.reviews + value.adds + value.reviews;
+  if (planned < counts.min_cards) {
+    const needed = counts.min_cards - planned;
+    value.extras = Math.min(getters.extras(counts.ts).count(), needed);
+  } else {
+    value.extras = 0;
+  }
+  remainder.set(value);
 });
 
 Model.autorun(shuffle);
