@@ -306,6 +306,16 @@ body {
   transition: transform 0.3s;
   @include full-size;
 
+  > .animation {
+    background-color: white;
+    margin: 6% auto;
+    width: 64%;
+
+    svg {
+      vertical-align: middle;
+    }
+  }
+
   > .panel {
     margin: 6% auto;
     width: 88%;
