@@ -1,5 +1,36 @@
 <template name="answer">
   <div id="answer" style="transform: {{transform}}">
-    The answer for {{character}} is 42.
+    <!--<div class="pane">{{> order}}</div>-->
+    <div class="panel">
+      <div class="panel-heading">Metadata</div>
+      <div class="panel-body">
+        {{#each metadata}}
+          <div class="field">
+            <label class="label">{{label}}</label>
+            <div class="value">{{{linkify value}}}</div>
+          </div>
+        {{/each}}
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-heading">Decomposition</div>
+      <div class="panel-body">
+        {{> decomposition tree}}
+      </div>
+    </div>
+  </div>
+</template>
+
+<template name="decomposition">
+  <div class="decomposition">
+    <div class="header {{class}}"><div class="value">{{value}}</div> -</div>
+    {{#if link}}
+      <a class="text link" href="{{link}}">{{label}}</a>
+    {{else}}
+      <div class="text">{{label}}</div>
+    {{/if}}
+    {{#each children}}
+      {{> decomposition this}}
+    {{/each}}
   </div>
 </template>
