@@ -1,21 +1,24 @@
 <template name="answer">
   <div id="answer" style="transform: {{transform}}">
-    <div class="animation">{{> animation stroke_order}}</div>
-    <div class="panel">
-      <div class="panel-heading">Metadata</div>
-      <div class="panel-body">
-        {{#each metadata}}
-          <div class="field">
-            <label class="label">{{label}}</label>
-            <div class="value">{{{linkify value}}}</div>
-          </div>
-        {{/each}}
+    <div class="header">Details for {{character}}</div>
+    <div class="body">
+      <div class="animation">{{> animation stroke_order}}</div>
+      <div class="panel">
+        <div class="panel-heading">Metadata</div>
+        <div class="panel-body">
+          {{#each metadata}}
+            <div class="field">
+              <label class="label">{{label}}</label>
+              <div class="value">{{{linkify value}}}</div>
+            </div>
+          {{/each}}
+        </div>
       </div>
-    </div>
-    <div class="panel">
-      <div class="panel-heading">Decomposition</div>
-      <div class="panel-body">
-        {{> decomposition tree}}
+      <div class="panel">
+        <div class="panel-heading">Decomposition</div>
+        <div class="panel-body">
+          {{> decomposition tree}}
+        </div>
       </div>
     </div>
   </div>

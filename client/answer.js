@@ -1,6 +1,7 @@
 import {getAnimationData} from '../lib/animation';
 import {Decomposition} from '../lib/decomposition';
 
+const character = new ReactiveVar();
 const metadata = new ReactiveVar();
 const stroke_order = new ReactiveVar();
 const transform = new ReactiveVar();
@@ -76,6 +77,7 @@ const refreshTemplateVariables = (row) => {
       value: formatEtymology(row.etymology),
     });
   }
+  character.set(row.character);
   metadata.set(value);
   stroke_order.set(getAnimationData(row.strokes, row.medians));
   tree.set(constructTree(row));
@@ -93,6 +95,7 @@ class Answer {
 
 Template.answer.helpers({
 	linkify: linkify,
+  character: () => character.get(),
   metadata: () => metadata.get(),
   stroke_order: () => stroke_order.get(),
   transform: () => transform.get(),
@@ -100,4 +103,3 @@ Template.answer.helpers({
 });
 
 export {Answer};
-window.x = Answer;
