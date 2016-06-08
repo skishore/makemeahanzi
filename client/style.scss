@@ -297,3 +297,10 @@ body {
     }
   }
 }
+
+#answer {
+  background-color: white;
+  transform: translateY(100%);
+  transition: transform 0.3s;
+  @include full-size;
+}
