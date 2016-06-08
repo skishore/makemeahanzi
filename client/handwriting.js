@@ -32,7 +32,7 @@ const animate = (shape, size, rotate, source, target) => {
   shape.scaleY = scale;
   if (rotate) {
     const rotation = (180 / Math.PI) * (angle(source) - angle(target));
-    shape.rotation = ((Math.round(rotation) + 180) % 360) - 180;
+    shape.rotation = ((Math.round(rotation) + 540) % 360) - 180;
   }
   return {rotation: 0, scaleX: 1, scaleY: 1, x: shape.regX, y: shape.regY};
 }
