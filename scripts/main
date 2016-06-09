@@ -14,8 +14,11 @@ const dumpParts = (parts, rows) => {
       Array.from(row.decomposition).map((character) => {
         const data = rows[character];
         if (data) {
-          row.dependencies[character] =
-              `${data.pinyin.join(', ')} - ${data.definition}`;
+          let value = data.definition || '(unknown)';
+          if (data.pinyin.length > 0) {
+            value = data.pinyin.join(', ') + ' - ' + value;
+          }
+          row.dependencies[character] = value;
         }
       });
     });
