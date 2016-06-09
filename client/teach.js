@@ -225,7 +225,6 @@ const updateItem = (card, data) => {
       stroke: row.strokes[i],
     })),
   }));
-  Meteor.setTimeout(() => Answer.show(item.tasks[0].answer));
 }
 
 // Meteor template bindings.
@@ -246,6 +245,10 @@ Template.teach.events({
     } else {
       console.error('Unable to apply option:', this);
     }
+  },
+  'click a.control.right': () => {
+    const answer = item.tasks[item.index].answer;
+    Meteor.setTimeout(() => Answer.show(answer));
   },
 });
 
