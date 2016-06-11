@@ -93,6 +93,10 @@ class Answer {
   }
 }
 
+Template.answer.events({
+  'click .header .back': () => Answer.hide(),
+});
+
 Template.answer.helpers({
 	linkify: linkify,
   character: () => character.get(),
