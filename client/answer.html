@@ -1,6 +1,9 @@
 <template name="answer">
   <div id="answer" style="transform: {{transform}}">
-    <div class="header">Details for {{character}}</div>
+    <div class="header">
+      <span>Details for {{character}}</span>
+      <a class="back">Back</a>
+    </div>
     <div class="body">
       <div class="animation">{{> animation stroke_order}}</div>
       <div class="panel">
