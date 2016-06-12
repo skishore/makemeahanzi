@@ -313,6 +313,12 @@ body {
     position: fixed;
     width: 100%;
     z-index: 1;
+
+    > a {
+      position: absolute;
+      left: auto;
+      right: $font-size / 2;
+    }
   }
 
   > .body {

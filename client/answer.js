@@ -90,11 +90,23 @@ class Answer {
   static show(row) {
     refreshTemplateVariables(row);
     transform.set('translateY(0)');
+    // Force the CSS animations for the SVG to refresh. I don't
+    // completely understand how CSS animation refresh interacts with
+    // Blaze's template rerendering process, but this seems to work.
+    let animationSVG = $('.animation > svg');
+    let wrapper = animationSVG.parent();
+    animationSVG.detach().appendTo(wrapper);
   }
 }
 
+Template.answer.events({
+  'click .header > .back': function(event) {
+    Answer.hide();
+  }
+});
+
 Template.answer.helpers({
-	linkify: linkify,
+  linkify: linkify,
   character: () => character.get(),
   metadata: () => metadata.get(),
   stroke_order: () => stroke_order.get(),
