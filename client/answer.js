@@ -81,32 +81,47 @@ const refreshTemplateVariables = (row) => {
   character.set(row.character);
   metadata.set(value);
   stroke_order.set(getAnimationData(row.strokes, row.medians));
+  transform.set('translateY(0)');
   tree.set(constructTree(row));
 }
 
 class Answer {
   static hide() {
+    character.set();
     stroke_order.set();
     transform.set();
   }
   static show(row) {
     refreshTemplateVariables(row);
-    transform.set('translateY(0)');
+    $('#answer > .body').scrollTop(0);
   }
 }
 
+// Meteor template bindings and the onhashchange event handler follow.
+
+const onHashChange = () => {
+  const hash = window.location.hash.substr(1);
+  if (hash.length === 0) {
+    Answer.hide();
+    return;
+  }
+  const next = String.fromCharCode(hash);
+  if (next.length === 0 || next === character.get()) {
+    return;
+  }
+  stroke_order.set();
+  lookupCharacter(next).then(Answer.show);
+}
+
+window.onhashchange = onHashChange;
+
+Meteor.startup(onHashChange);
+
 Template.answer.events({
-  'click .header .back': Answer.hide,
+  'click .header .back': () => history.back(),
   'click .link': (event) => {
-    // Meteor memoizes $.data('codepoint') even when it shouldn't...
     const codepoint = $(event.currentTarget).attr('data-codepoint');
-    const next = String.fromCharCode(codepoint);
-    if (next === character.get()) return;
-    stroke_order.set();
-    lookupCharacter(next).then((row) => {
-      refreshTemplateVariables(row);
-      $('#answer > .body').scrollTop(0);
-    });
+    window.location.hash = codepoint;
   },
 });
 
@@ -118,5 +133,3 @@ Template.answer.helpers({
   transform: () => transform.get(),
   tree: () => tree.get(),
 });
-
-export {Answer};

@@ -2,7 +2,6 @@
 // off of the straight segments where strokes intersects.
 import {recognize} from '../lib/recognizer';
 import {Timing} from '../model/timing';
-import {Answer} from './answer';
 import {findCorners} from './corners';
 import {Shortstraw} from './external/shortstraw';
 import {Handwriting} from './handwriting';
@@ -215,7 +214,7 @@ const updateItem = (card, data) => {
   item.card = card;
   item.index = 0;
   item.tasks = data.characters.map((row) => ({
-    answer: row,
+    character: row.character,
     mistakes: 0,
     penalties: 0,
     result: null,
@@ -247,8 +246,8 @@ Template.teach.events({
     }
   },
   'click a.control.right': () => {
-    const answer = item.tasks[item.index].answer;
-    Meteor.setTimeout(() => Answer.show(answer));
+    const codepoint = item.tasks[item.index].character.codePointAt(0);
+    Meteor.setTimeout(() => window.location.hash = codepoint);
   },
 });
 
