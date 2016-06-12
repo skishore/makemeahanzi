@@ -61,12 +61,18 @@ const linkify = (value) => {
   return result.join('');
 }
 
+const hide = () => {
+  character.set();
+  stroke_order.set();
+  transform.set();
+}
+
 const lower = (string) => {
   if (string.length === 0) return string;
   return string[0].toLowerCase() + string.substr(1);
 }
 
-const refreshTemplateVariables = (row) => {
+const show = (row) => {
   const value = [
     {label: 'Def:', value: row.definition},
     {label: 'Pin:', value: row.pinyin.join(', ')},
@@ -83,18 +89,7 @@ const refreshTemplateVariables = (row) => {
   stroke_order.set(getAnimationData(row.strokes, row.medians));
   transform.set('translateY(0)');
   tree.set(constructTree(row));
-}
-
-class Answer {
-  static hide() {
-    character.set();
-    stroke_order.set();
-    transform.set();
-  }
-  static show(row) {
-    refreshTemplateVariables(row);
-    $('#answer > .body').scrollTop(0);
-  }
+  $('#answer > .body').scrollTop(0);
 }
 
 // Meteor template bindings and the onhashchange event handler follow.
@@ -102,7 +97,7 @@ class Answer {
 const onHashChange = () => {
   const hash = window.location.hash.substr(1);
   if (hash.length === 0) {
-    Answer.hide();
+    hide();
     return;
   }
   const next = String.fromCharCode(hash);
@@ -110,7 +105,7 @@ const onHashChange = () => {
     return;
   }
   stroke_order.set();
-  lookupCharacter(next).then(Answer.show);
+  lookupCharacter(next).then(show);
 }
 
 window.onhashchange = onHashChange;
