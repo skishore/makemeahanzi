@@ -27,6 +27,8 @@ const getResult = (x) => Math.min(Math.floor(2 * x / kMaxPenalties) + 1, 3);
 const match = (task, stroke, expected) => {
   let best_result = {index: -1, score: -Infinity};
   for (let i = 0; i < task.steps.length; i++) {
+    if (task.missing.indexOf(i) < 0)
+      continue;
     const median = task.steps[i].median;
     const offset = i - expected;
     const result = recognize(stroke, median, offset);
@@ -139,14 +141,6 @@ const onStroke = (stroke) => {
       task.penalties += kMaxPenalties;
       handwriting.flash(task.steps[task.missing[0]].stroke);
     }
-    return;
-  }
-
-  // The user's input matches a stroke that was already drawn.
-  if (task.missing.indexOf(index) < 0) {
-    task.penalties += 1;
-    handwriting.undo();
-    handwriting.flash(task.steps[index].stroke);
     return;
   }
 
