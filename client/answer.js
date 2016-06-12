@@ -67,7 +67,6 @@ const lower = (string) => {
 }
 
 const refreshTemplateVariables = (row) => {
-  if (row.character === character.get()) return;
   const value = [
     {label: 'Def:', value: row.definition},
     {label: 'Pin:', value: row.pinyin.join(', ')},
@@ -87,6 +86,7 @@ const refreshTemplateVariables = (row) => {
 
 class Answer {
   static hide() {
+    stroke_order.set();
     transform.set();
   }
   static show(row) {
@@ -101,6 +101,8 @@ Template.answer.events({
     // Meteor memoizes $.data('codepoint') even when it shouldn't...
     const codepoint = $(event.currentTarget).attr('data-codepoint');
     const next = String.fromCharCode(codepoint);
+    if (next === character.get()) return;
+    stroke_order.set();
     lookupCharacter(next).then((row) => {
       refreshTemplateVariables(row);
       $('#answer > .body').scrollTop(0);
