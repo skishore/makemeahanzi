@@ -1,6 +1,6 @@
 import {loadList} from './meteoric/lists';
 
-const loadCharacter = (character) => {
+const lookupCharacter = (character) => {
   const part = Math.floor(character.charCodeAt(0) / 256);
   return new Promise((resolve, reject) => {
     $.get(`characters/part-${part}.txt`, (data, error) => {
@@ -18,7 +18,7 @@ const lookupItem = (item, callback) => {
   if (!item || !item.word || item.lists.length === 0) return;
   Promise.all([
     loadList(item.lists[0]),
-    Promise.all(Array.from(item.word).map(loadCharacter)),
+    Promise.all(Array.from(item.word).map(lookupCharacter)),
   ]).then((data) => {
     const entry = data[0].filter((x) => x.word === item.word);
     if (entry.length === 0) throw new Error(`Entry not found: ${item.word}`);
@@ -27,4 +27,4 @@ const lookupItem = (item, callback) => {
   }).catch((error) => callback(undefined, error));
 }
 
-export {lookupItem};
+export {lookupCharacter, lookupItem};

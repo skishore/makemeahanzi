@@ -1,5 +1,6 @@
 import {getAnimationData} from '../lib/animation';
 import {Decomposition} from '../lib/decomposition';
+import {lookupCharacter} from './lookup';
 
 const character = new ReactiveVar();
 const metadata = new ReactiveVar();
@@ -16,7 +17,7 @@ const augmentTreeWithLabels = (node, dependencies) => {
   } else {
     node.label = dependencies[node.value] || '(unknown)';
     if (dependencies[node.value]) {
-      node.link = `#/codepoint/${node.value.charCodeAt(0)}`;
+      node.codepoint = node.value.charCodeAt(0);
     }
   }
 }
@@ -51,7 +52,7 @@ const linkify = (value) => {
   const result = [];
   for (let character of value) {
     if (character.match(/[\u3400-\u9FBF]/)) {
-      result.push(`<a href="#/codepoint/${character.charCodeAt(0)}" ` +
+      result.push(`<a data-codepoint="${character.charCodeAt(0)}" ` +
                      `class="link">${character}</a>`);
     } else {
       result.push(character);
@@ -66,6 +67,7 @@ const lower = (string) => {
 }
 
 const refreshTemplateVariables = (row) => {
+  if (row.character === character.get()) return;
   const value = [
     {label: 'Def:', value: row.definition},
     {label: 'Pin:', value: row.pinyin.join(', ')},
@@ -94,7 +96,16 @@ class Answer {
 }
 
 Template.answer.events({
-  'click .header .back': () => Answer.hide(),
+  'click .header .back': Answer.hide,
+  'click .link': (event) => {
+    // Meteor memoizes $.data('codepoint') even when it shouldn't...
+    const codepoint = $(event.currentTarget).attr('data-codepoint');
+    const next = String.fromCharCode(codepoint);
+    lookupCharacter(next).then((row) => {
+      refreshTemplateVariables(row);
+      $('#answer > .body').scrollTop(0);
+    });
+  },
 });
 
 Template.answer.helpers({
