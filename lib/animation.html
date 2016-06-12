@@ -13,13 +13,13 @@
         {{#each animations}}
           @keyframes {{keyframes}} {
             from {
-              stroke: blue;
+              stroke: #0080ff;
               stroke-dashoffset: {{offset}};
               stroke-width: {{width}};
             }
             {{fraction}} {
               animation-timing-function: step-end;
-              stroke: blue;
+              stroke: #0080ff;
               stroke-dashoffset: 0;
               stroke-width: {{width}};
             }

@@ -307,6 +307,7 @@ body {
 
   > .header {
     background-color: $base-color;
+    box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.2);
     color: white;
     font-size: 8 * $font-size / 7;
     line-height: 16 * $font-size / 7;
@@ -318,7 +319,7 @@ body {
 
     > .back {
       left: $font-size / 3;
-      top: -$font-size / 16;
+      top: -$font-size / 15;
       position: absolute;
 
       &:hover {
@@ -344,6 +345,7 @@ body {
 
     > .animation {
       background-color: white;
+      box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.1);
       margin: 6% auto;
       width: 52%;
 
@@ -353,6 +355,7 @@ body {
     }
 
     > .panel {
+      box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.1);
       margin: 6% auto;
       width: 88%;
 
@@ -417,6 +420,11 @@ body {
 
         > .decomposition {
           margin-left: 0;
+        }
+
+        a.link {
+          color: #0080ff;
+          text-decoration: none;
         }
       }
     }
