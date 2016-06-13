@@ -2,6 +2,8 @@ import {getAnimationData} from '../lib/animation';
 import {Decomposition} from '../lib/decomposition';
 import {lookupCharacter} from './lookup';
 
+const kUnknown = '(unknown)';
+
 const character = new ReactiveVar();
 const metadata = new ReactiveVar();
 const stroke_order = new ReactiveVar();
@@ -15,7 +17,7 @@ const augmentTreeWithLabels = (node, dependencies) => {
     node.label = lower(Decomposition.ids_data[value].label);
     node.children.map((child) => augmentTreeWithLabels(child, dependencies));
   } else {
-    node.label = dependencies[node.value] || '(unknown)';
+    node.label = dependencies[node.value] || kUnknown;
     if (dependencies[node.value]) {
       node.codepoint = node.value.charCodeAt(0);
     }
@@ -87,9 +89,9 @@ const lower = (string) => {
 
 const show = (row) => {
   const value = [
-    {label: 'Def:', value: row.definition},
-    {label: 'Pin:', value: row.pinyin.join(', ')},
-    {label: 'Rad:', value: row.radical},
+    {label: 'Def:', value: row.definition || kUnknown},
+    {label: 'Pin:', value: row.pinyin.join(', ') || kUnknown},
+    {label: 'Rad:', value: row.radical || kUnknown},
   ];
   if (row.etymology) {
     value.push({
