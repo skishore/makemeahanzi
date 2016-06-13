@@ -63,7 +63,6 @@ const linkify = (value) => {
 
 const hide = () => {
   character.set();
-  stroke_order.set();
   transform.set();
 }
 
@@ -89,7 +88,15 @@ const show = (row) => {
   stroke_order.set(getAnimationData(row.strokes, row.medians));
   transform.set('translateY(0)');
   tree.set(constructTree(row));
+
+  // Scroll to the top of the page whenever a character is changed.
   $('#answer > .body').scrollTop(0);
+
+  // Force the SVG CSS animations to restart. Blaze tracks a virtual DOM and
+  // reuses as many nodes as when template variables are updated, which
+  // prevents animations from being restarted when the character changes.
+  const animation = $('#answer > .body > .animation');
+  animation.children().detach().appendTo(animation);
 }
 
 // Meteor template bindings and the onhashchange event handler follow.
@@ -104,7 +111,6 @@ const onHashChange = () => {
   if (next.length === 0 || next === character.get()) {
     return;
   }
-  stroke_order.set();
   lookupCharacter(next).then(show);
 }
 
@@ -123,7 +129,7 @@ Template.answer.events({
 });
 
 Template.answer.helpers({
-	linkify: linkify,
+  linkify: linkify,
   character: () => character.get(),
   metadata: () => metadata.get(),
   stroke_order: () => stroke_order.get(),
