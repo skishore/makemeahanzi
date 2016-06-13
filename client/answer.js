@@ -48,6 +48,20 @@ const formatEtymology = (etymology) => {
   return result.join(' ');
 }
 
+const flushNonReactiveUIState = () => {
+  // Blaze tracks a virtual DOM and reuses as many nodes as possible when
+  // template variables change (for example, when the user changes character).
+  // However, these nodes carry some non-reactive state that should not be
+  // preserved across details pages, which we clear in this function.
+
+  // Clear the "how far has the user scrolled" state on the body.
+  $('#answer > .body').scrollTop(0);
+
+  // Clear the "how long have CSS animations run for" state on the animation.
+  const animation = $('#answer > .body > .animation');
+  animation.children().detach().appendTo(animation);
+}
+
 const linkify = (value) => {
   const result = [];
   for (let character of value) {
@@ -88,15 +102,7 @@ const show = (row) => {
   stroke_order.set(getAnimationData(row.strokes, row.medians));
   transform.set('translateY(0)');
   tree.set(constructTree(row));
-
-  // Scroll to the top of the page whenever a character is changed.
-  $('#answer > .body').scrollTop(0);
-
-  // Force the SVG CSS animations to restart. Blaze tracks a virtual DOM and
-  // reuses as many nodes as when template variables are updated, which
-  // prevents animations from being restarted when the character changes.
-  const animation = $('#answer > .body > .animation');
-  animation.children().detach().appendTo(animation);
+  flushNonReactiveUIState();
 }
 
 // Meteor template bindings and the onhashchange event handler follow.
