@@ -115,6 +115,9 @@ const onHashChange = () => {
   if (hash.length === 0 || next.length === 0) {
     hide();
   } else if (next !== character.get()) {
+    // HACK: We clear the SVG animation when the user changes character to
+    // make the transition smoother. The Meteor render loop is a bit slow.
+    stroke_order.set();
     lookupCharacter(next).then(show);
   }
 }
