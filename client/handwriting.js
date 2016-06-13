@@ -16,6 +16,15 @@ const kStrokeColor  = '#000000';
 // Colors for EXCELLENT, GOOD, FAIR, and POOR result values.
 const kResultColors = ['#84b4d8', '#88c874', '#c0c080', '#e87878'];
 
+// Standard set of colors exposed as Handwriting.colors
+const kColors = {
+  HINT: kHintColor,
+  EXCELLENT: kResultColors[0],
+  GOOD: kResultColors[1],
+  FAIR: kResultColors[2],
+  POOR: kResultColors[3]
+}
+
 let ticker = null;
 
 // Helper methods used by the handwriting class.
@@ -248,8 +257,9 @@ class Handwriting {
     this._animate(child, {alpha: 0}, 150,
                   () => child.parent.removeChild(child));
   }
-  flash(path) {
-    const child = pathToShape(path, this._size, kHintColor);
+  flash(path, color) {
+    color = color || kHintColor;
+    const child = pathToShape(path, this._size, color);
     this._layers[Layer.HINT].addChild(child);
     this._animate(child, {alpha: 0}, 750,
                   () => child.parent.removeChild(child));
@@ -264,7 +274,8 @@ class Handwriting {
     this.highlight();
     this._drawable = false;
   }
-  highlight(path) {
+  highlight(path, color) {
+    color = color || kHintColor;
     if (this._layers[Layer.WATERMARK].children.length === 0 ||
         !this._settings.reveal_order) {
       return;
@@ -274,7 +285,7 @@ class Handwriting {
       this._animate(child, {alpha: 0}, 150, () => layer.removeChild(child));
     }
     if (path) {
-      const child = pathToShape(path, this._size, kHintColor);
+      const child = pathToShape(path, this._size, color);
       child.alpha = 0;
       layer.addChild(child);
       this._animate(child, {alpha: 1}, 150);
@@ -408,4 +419,5 @@ class Handwriting {
   }
 }
 
+Handwriting.colors = kColors;
 export {Handwriting};
