@@ -158,8 +158,8 @@ const onStroke = (stroke) => {
     task.result = getResult(task.penalties);
     handwriting.glow(task.result);
   } else if (task.missing[0] < index) {
-    task.penalties += 2 * (index - task.missing[0]);
-    handwriting.flash(task.steps[task.missing[0]].stroke);
+    task.strokeOrderMistakes += 1;
+    handwriting.flash(task.steps[index].stroke, Handwriting.colors.POOR);
   } else {
     task.mistakes = 0;
     handwriting.highlight(task.steps[task.missing[0]].stroke);
@@ -211,6 +211,7 @@ const updateItem = (card, data) => {
   item.tasks = data.characters.map((row) => ({
     answer: row,
     mistakes: 0,
+    strokeOrderMistakes: 0,
     penalties: 0,
     result: null,
     missing: _.range(row.medians.length),
