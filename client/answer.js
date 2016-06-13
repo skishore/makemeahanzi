@@ -111,15 +111,12 @@ const show = (row) => {
 
 const onHashChange = () => {
   const hash = window.location.hash.substr(1);
-  if (hash.length === 0) {
-    hide();
-    return;
-  }
   const next = String.fromCharCode(hash);
-  if (next.length === 0 || next === character.get()) {
-    return;
+  if (hash.length === 0 || next.length === 0) {
+    hide();
+  } else if (next !== character.get()) {
+    lookupCharacter(next).then(show);
   }
-  lookupCharacter(next).then(show);
 }
 
 window.onhashchange = onHashChange;
