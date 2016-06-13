@@ -169,7 +169,7 @@ const completeCard = (card, result) => {
     if (card.deck === 'failures') {
       Vocabulary.clearFailed(card.data);
     } else {
-      Vocabulary.updateItem(card.data, result, false /* correction */);
+      Vocabulary.updateItem(card.data, result);
     }
   } else {
     console.error('Failed to update card:', card, 'with result:', result);

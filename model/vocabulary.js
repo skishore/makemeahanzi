@@ -126,10 +126,9 @@ class Vocabulary {
   static getNewItems() {
     return new Cursor((entry) => entry[kIndices.attempts] === 0);
   }
-  static updateItem(item, result, correction) {
+  static updateItem(item, result) {
     const entry = vocabulary.index[item.word];
-    const expected = item.attempts + (correction ? 1 : 0);
-    if (!entry || entry[kIndices.attempts] !== expected) return;
+    if (!entry || entry[kIndices.attempts] !== item.attempts) return;
 
     const last = Model.timestamp();
     entry[kIndices.last] = last;
