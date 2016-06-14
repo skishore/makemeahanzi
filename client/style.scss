@@ -298,6 +298,25 @@ body {
   }
 }
 
+#answer-selection {
+  > .option {
+    background-color: $base-color;
+    color: white;
+    font-size: $font-size;
+    line-height: 2 * $font-size;
+    margin: 0 10% 3 * $font-size / 4;
+    padding: 0 6%;
+    text-align: left;
+
+    > .character {
+      display: inline-block;
+      font-size: 5 * $font-size / 4;
+      text-align: center;
+      width: 5 * $font-size / 4;
+    }
+  }
+}
+
 #answer {
   background-color: #bbb;
   text-align: left;

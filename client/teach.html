@@ -36,3 +36,13 @@
     <div class="icon" data-result="3"><i class="ion-close"></i></div>
   </div>
 </template>
+
+<template name="answer_selection">
+  <div id="answer-selection">
+    {{#each tasks}}
+      <div class="option">
+        <div class="character">{{data.character}}</div> - {{data.pinyin}}
+      </div>
+    {{/each}}
+  </div>
+</template>

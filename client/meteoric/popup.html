@@ -1,0 +1,14 @@
+<template name="popup">
+  <div class="backdrop">
+    <div class="popup-container">
+      <div class="popup">
+        <div class="popup-header">
+          <h3 class="popup-title">{{title}}</h3>
+        </div>
+        <div class="popup-body">
+          {{> Template.dynamic template=template}}
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

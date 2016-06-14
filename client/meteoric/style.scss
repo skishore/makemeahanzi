@@ -103,3 +103,17 @@ $toggle-height:                   31px !default;
     width: $loading-icon-size;
   }
 }
+
+.popup-container > .popup {
+  background-color: white;
+  width: 64%;
+
+  > .popup-header > .popup-title {
+    font-size: 6.4vw;
+    margin: 3.2vw 0;
+  }
+
+  > .popup-body {
+    padding: 0;
+  }
+}

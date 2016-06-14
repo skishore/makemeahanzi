@@ -6,6 +6,7 @@ import {findCorners} from './corners';
 import {Shortstraw} from './external/shortstraw';
 import {Handwriting} from './handwriting';
 import {lookupItem} from './lookup';
+import {Popup} from './meteoric/popup';
 
 let element = null;
 let handwriting = null;
@@ -214,7 +215,7 @@ const updateItem = (card, data) => {
   item.card = card;
   item.index = 0;
   item.tasks = data.characters.map((row) => ({
-    character: row.character,
+    data: row,
     mistakes: 0,
     penalties: 0,
     result: null,
@@ -227,6 +228,22 @@ const updateItem = (card, data) => {
 }
 
 // Meteor template bindings.
+
+const showAnswerForTask = (task) => {
+  const codepoint = task.data.character.codePointAt(0);
+  Meteor.setTimeout(() => window.location.hash = codepoint);
+}
+
+Template.answer_selection.events({
+  'click .option': function(event) {
+    Popup.hide();
+    showAnswerForTask(this);
+  },
+});
+
+Template.answer_selection.helpers({
+  tasks: () => item.tasks,
+});
 
 Template.grading.events({
   'click .icon': function(event) {
@@ -246,8 +263,11 @@ Template.teach.events({
     }
   },
   'click a.control.right': () => {
-    const codepoint = item.tasks[item.index].character.codePointAt(0);
-    Meteor.setTimeout(() => window.location.hash = codepoint);
+    if (item.tasks.length === 1) {
+      showAnswerForTask(item.tasks[0]);
+    } else {
+      Popup.show({title: 'Character Details', template: 'answer_selection'});
+    }
   },
 });
 
