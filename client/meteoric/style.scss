@@ -104,16 +104,20 @@ $toggle-height:                   31px !default;
   }
 }
 
-.popup-container > .popup {
-  background-color: white;
-  width: 64%;
+.popup-container {
+  pointer-events: auto;
 
-  > .popup-header > .popup-title {
-    font-size: 6.4vw;
-    margin: 3.2vw 0;
-  }
+  > .popup {
+    background-color: white;
+    width: 64%;
 
-  > .popup-body {
-    padding: 0;
+    > .popup-header > .popup-title {
+      font-size: 6.4vw;
+      margin: 3.2vw 0;
+    }
+
+    > .popup-body {
+      padding: 0;
+    }
   }
 }

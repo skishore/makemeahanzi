@@ -22,7 +22,7 @@ class Popup {
       title: options.title,
     };
 
-    const element = $('#layout')[0];
+    const element = $('body')[0];
     const view = Blaze.renderWithData(Template.popup, data, element);
     const backdrop = $(view.firstNode());
     backdrop.addClass('active visible');
@@ -33,5 +33,10 @@ class Popup {
     views.push(view);
   }
 }
+
+Template.popup.events({
+  'click .popup': (event) => event.stopPropagation(),
+  'click .popup-container': () => Popup.hide(50),
+});
 
 export {Popup};
