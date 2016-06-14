@@ -41,7 +41,8 @@
   <div id="answer-selection">
     {{#each tasks}}
       <div class="option">
-        <div class="character">{{data.character}}</div> - {{data.pinyin}}
+        <div class="character">{{obfuscate this}}</div>
+        - {{data.pinyin}}
       </div>
     {{/each}}
   </div>

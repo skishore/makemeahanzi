@@ -236,12 +236,13 @@ const showAnswerForTask = (task) => {
 
 Template.answer_selection.events({
   'click .option': function(event) {
-    Popup.hide();
+    Popup.hide(50);
     showAnswerForTask(this);
   },
 });
 
 Template.answer_selection.helpers({
+  obfuscate: (task) => task.missing.length > 0 ? '?' : task.data.character,
   tasks: () => item.tasks,
 });
 
