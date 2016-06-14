@@ -181,7 +181,7 @@ body {
       position: absolute;
       @include buttonlike;
 
-      &:hover {
+      &.left:hover, &.right:active {
         color: $link-color;
       }
 
