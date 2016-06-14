@@ -67,7 +67,8 @@ const flushNonReactiveUIState = () => {
 const linkify = (value) => {
   const result = [];
   for (let character of value) {
-    if (character.match(/[\u3400-\u9FBF]/)) {
+    if (character.match(/[\u2E80-\u2EFF]/) ||
+        character.match(/[\u3400-\u9FBF]/)) {
       result.push(`<a data-codepoint="${character.charCodeAt(0)}" ` +
                      `class="link">${character}</a>`);
     } else {
