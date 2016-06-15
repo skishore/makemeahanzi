@@ -214,8 +214,9 @@ const updateCard = () => {
 const updateItem = (card, data) => {
   item.card = card;
   item.index = 0;
-  item.tasks = data.characters.map((row) => ({
+  item.tasks = data.characters.map((row, i) => ({
     data: row,
+    index: i,
     mistakes: 0,
     penalties: 0,
     result: null,
@@ -229,16 +230,33 @@ const updateItem = (card, data) => {
 
 // Meteor template bindings.
 
-const showAnswerForTask = (task) => {
+const maybeShowAnswerForTask = (task) => {
+  task = item.tasks[task.index];
+  if (task.missing.length === 0) {
+    showAnswerForTask(task);
+    return;
+  }
+  const buttons = [
+    {label: 'Yes', callback: () => showAnswerForTask(task)},
+    {label: 'No', callback: Popup.hide},
+  ];
+  const text = 'Looking at character details will count as getting the ' +
+               'character wrong. Proceed?';
+  Popup.show({title: 'Character Details', text: text, buttons: buttons});
+}
+
+const showAnswerForTask = (task, skip_confirmation) => {
+  task = item.tasks[task.index];
+  if (task.missing.length > 0) {
+    task.penalties += kMaxPenalties;
+  }
   const codepoint = task.data.character.codePointAt(0);
   Meteor.setTimeout(() => window.location.hash = codepoint);
+  Popup.hide(50);
 }
 
 Template.answer_selection.events({
-  'click .option': function(event) {
-    Popup.hide(50);
-    showAnswerForTask(this);
-  },
+  'click .option': function() { maybeShowAnswerForTask(this); },
 });
 
 Template.answer_selection.helpers({
@@ -265,7 +283,7 @@ Template.teach.events({
   },
   'click a.control.right': () => {
     if (item.tasks.length === 1) {
-      showAnswerForTask(item.tasks[0]);
+      maybeShowAnswerForTask(item.tasks[0]);
     } else {
       Popup.show({title: 'Character Details', template: 'answer_selection'});
     }

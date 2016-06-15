@@ -6,8 +6,20 @@
           <h3 class="popup-title">{{title}}</h3>
         </div>
         <div class="popup-body">
-          {{> Template.dynamic template=template}}
+          {{#if template}}
+            {{> Template.dynamic template=template}}
+          {{/if}}
+          {{#if text}}
+            {{text}}
+          {{/if}}
         </div>
+        {{#if buttons}}
+          <div class="popup-buttons">
+            {{#each buttons}}
+              <div class="button" data-index="{{index}}">{{label}}</div>
+            {{/each}}
+          </div>
+        {{/if}}
       </div>
     </div>
   </div>

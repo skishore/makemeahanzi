@@ -119,5 +119,25 @@ $toggle-height:                   31px !default;
     > .popup-body {
       padding: 0;
     }
+
+    > .popup-buttons {
+      min-height: 0;
+      padding: 0 4.2vw 4.2vw;
+
+      > .button {
+        background-color: #888;
+        color: white;
+        font-size: 5.6vw;
+        line-height: 9.8vw;
+        margin: 0 0 0 4.2vw;
+        min-height: 0;
+        padding: 0;
+        vertical-align: center;
+
+        &:first-child {
+          margin-left: 0;
+        }
+      }
+    }
   }
 }
