@@ -238,9 +238,9 @@ const maybeShowAnswerForTask = (task) => {
   }
   const buttons = [
     {label: 'Yes', callback: () => showAnswerForTask(task)},
-    {label: 'No', callback: Popup.hide},
+    {label: 'No', class: 'bold', callback: Popup.hide},
   ];
-  const text = 'Looking at character details will count as getting the ' +
+  const text = 'Looking at the details page will count as getting this ' +
                'character wrong. Proceed?';
   Popup.show({title: 'Character Details', text: text, buttons: buttons});
 }

@@ -109,7 +109,7 @@ $toggle-height:                   31px !default;
 
   > .popup {
     background-color: white;
-    width: 64%;
+    width: 72%;
 
     > .popup-header > .popup-title {
       font-size: 6.4vw;
@@ -117,7 +117,8 @@ $toggle-height:                   31px !default;
     }
 
     > .popup-body {
-      padding: 0;
+      padding: 0 4.2vw 4.2vw;
+      text-align: left;
     }
 
     > .popup-buttons {
@@ -136,6 +137,10 @@ $toggle-height:                   31px !default;
 
         &:first-child {
           margin-left: 0;
+        }
+
+        &.bold {
+          background-color: $dark;
         }
       }
     }

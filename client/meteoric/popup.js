@@ -15,6 +15,7 @@ class Popup {
   static show(options) {
     const buttons = (options.buttons || []).map((button, i) => ({
       callback: button.callback,
+      class: button.class,
       index: i,
       label: button.label,
     }));
