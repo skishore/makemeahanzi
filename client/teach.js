@@ -281,7 +281,11 @@ Template.teach.events({
       console.error('Unable to apply option:', this);
     }
   },
-  'click a.control.right': () => {
+  'click a.control.left': (event) => {
+    Router.go('/');
+    event.stopPropagation();
+  },
+  'click a.control.right, click .prompt': () => {
     if (item.tasks.length === 1) {
       maybeShowAnswerForTask(item.tasks[0]);
     } else {
