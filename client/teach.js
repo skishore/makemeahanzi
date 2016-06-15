@@ -232,7 +232,7 @@ const updateItem = (card, data) => {
 
 const maybeShowAnswerForTask = (task) => {
   task = item.tasks[task.index];
-  if (task.missing.length === 0) {
+  if (!(task.missing.length > 0 && task.penalties < kMaxPenalties)) {
     showAnswerForTask(task);
     return;
   }
@@ -247,7 +247,7 @@ const maybeShowAnswerForTask = (task) => {
 
 const showAnswerForTask = (task, skip_confirmation) => {
   task = item.tasks[task.index];
-  if (task.missing.length > 0) {
+  if (task.missing.length > 0 && task.penalties < kMaxPenalties) {
     task.penalties += kMaxPenalties;
   }
   const codepoint = task.data.character.codePointAt(0);
