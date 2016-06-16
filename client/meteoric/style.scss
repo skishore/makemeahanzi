@@ -112,11 +112,13 @@ $toggle-height:                   31px !default;
     width: 72%;
 
     > .popup-header > .popup-title {
-      font-size: 6.4vw;
-      margin: 3.2vw 0;
+      font-size: 5.6vw;
+      margin: 4.2vw 0;
     }
 
     > .popup-body {
+      font-size: 4.2vw;
+      line-height: 5.6vw;
       padding: 0 4.2vw 4.2vw;
       text-align: left;
     }

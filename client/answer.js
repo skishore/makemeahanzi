@@ -129,10 +129,10 @@ window.onhashchange = onHashChange;
 Meteor.startup(onHashChange);
 
 Template.answer.events({
-  'click .header .back': () => {
+  'click .header .back, touchstart .header .back': () => {
     window.location.hash = '';
   },
-  'click .link': (event) => {
+  'click .link, touchstart .link': (event) => {
     const codepoint = $(event.currentTarget).attr('data-codepoint');
     window.location.hash = codepoint;
   },
