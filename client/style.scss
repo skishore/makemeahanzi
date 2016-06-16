@@ -12,6 +12,11 @@ $swash-width: 63vw;
   src: url("fonts/anke-calligraphic-2.00.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: arphic-gukai;
+  src: url("fonts/arphic-gukai.ttf") format("truetype");
+}
+
 @mixin buttonlike {
   cursor: pointer;
   user-select: none;
@@ -313,6 +318,7 @@ body {
 
     > .character {
       display: inline-block;
+      font-family: arphic-gukai;
       font-size: 5 * $font-size / 4;
       text-align: center;
       width: 5 * $font-size / 4;
