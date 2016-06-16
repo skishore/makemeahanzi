@@ -80,6 +80,7 @@ const linkify = (value) => {
 
 const hide = () => {
   character.set();
+  stroke_order.set();
   transform.set();
 }
 
