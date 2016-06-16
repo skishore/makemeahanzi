@@ -316,12 +316,20 @@ body {
       margin-top: 0;
     }
 
-    > .character {
+    > .character, .spacer, .pinyin {
       display: inline-block;
+      vertical-align: top;
+    }
+
+    > .character {
       font-family: arphic-gukai;
       font-size: 5 * $font-size / 4;
       text-align: center;
       width: 5 * $font-size / 4;
+    }
+
+    > .spacer {
+      margin-right: $font-size / 8;
     }
   }
 }

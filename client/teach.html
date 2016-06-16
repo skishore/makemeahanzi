@@ -42,7 +42,8 @@
     {{#each tasks}}
       <div class="option">
         <div class="character">{{obfuscate this}}</div>
-        - {{data.pinyin}}
+        <div class="spacer">-</div>
+        <div class="pinyin">{{data.pinyin}}</div>
       </div>
     {{/each}}
   </div>
