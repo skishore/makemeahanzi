@@ -288,7 +288,7 @@ Template.teach.events({
   'click a.control.right, click .prompt': () => {
     if (item.tasks.length === 1) {
       maybeShowAnswerForTask(item.tasks[0]);
-    } else {
+    } else if (item.tasks.length > 1) {
       Popup.show({title: 'Character Details', template: 'answer_selection'});
     }
   },
