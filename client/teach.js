@@ -7,6 +7,7 @@ import {Shortstraw} from './external/shortstraw';
 import {Handwriting} from './handwriting';
 import {lookupItem} from './lookup';
 import {Popup} from './meteoric/popup';
+import {StrokeRecording, ReportIssue} from './report_issue'
 
 let element = null;
 let handwriting = null;
@@ -15,7 +16,7 @@ const kMaxMistakes = 3;
 const kMaxPenalties  = 4;
 
 const helpers = new ReactiveDict();
-const item = {card: null, index: 0, tasks: []};
+const item = {card: null, index: 0, tasks: [], recording: null};
 
 // A couple small utility functions used by the logic below.
 
@@ -40,19 +41,21 @@ const match = (task, stroke, expected) => {
 }
 
 const maybeAdvance = () => {
-  const done = item.index === item.tasks.length;
-  if (item.index < item.tasks.length) {
-    const task = item.tasks[item.index];
-    if (task.missing.length > 0) {
-      return false;
-    } else if (task.result === null) {
-      return true;
-    }
-    item.index += 1;
+  if (item.index === item.tasks.length)
+    return true;
+
+  const task = item.tasks[item.index];
+  if (task.missing.length > 0) {
+    return false;
+  } else if (task.result === null) {
+    return true;
   }
+  item.index += 1;
+  item.recording = new StrokeRecording();
+
   if (item.index < item.tasks.length) {
     handwriting.moveToCorner();
-  } else if (!done) {
+  } else {
     transition();
     maybeRecordResult();
     handwriting.clear();
@@ -97,7 +100,12 @@ const onDouble = () => {
 
 const onRegrade = (result) => {
   const task = item.tasks[item.index];
+  if (task && result === -1) {
+    ReportIssue.show(item.recording, task.data);
+    return;
+  }
   if (!task || task.missing.length > 0 || task.result !== null) return;
+
   task.result = result;
   handwriting.glow(task.result);
   handwriting._stage.update();
@@ -131,6 +139,7 @@ const onStroke = (stroke) => {
   const task = item.tasks[item.index];
   const result = match(task, (new Shortstraw).run(stroke), task.missing[0]);
   const index = result.index;
+  item.recording.userStroke(stroke);
 
   // The user's input does not match any of the character's strokes.
   if (index < 0) {
@@ -152,6 +161,7 @@ const onStroke = (stroke) => {
   }
 
   // The user's input matches one of the missing strokes.
+  item.recording.matchedStroke(index);
   task.missing.splice(task.missing.indexOf(index), 1);
   const rotate = task.steps[index].median.length === 2;
   handwriting.emplace([task.steps[index].stroke, rotate,
@@ -226,6 +236,8 @@ const updateItem = (card, data) => {
       stroke: row.strokes[i],
     })),
   }));
+  item.index = 0;
+  item.recording = new StrokeRecording();
 }
 
 // Meteor template bindings.

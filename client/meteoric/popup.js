@@ -1,3 +1,5 @@
+const defaultBackdropClick = () => Popup.hide(50);
+let onBackdropClick = defaultBackdropClick;
 let callbacks = [];
 let views = [];
 
@@ -25,6 +27,7 @@ class Popup {
       text: options.text,
       title: options.title,
     };
+    onBackdropClick = options.onBackdropClick || defaultBackdropClick;
 
     callbacks.length = 0;
     views.map(Blaze.remove);
@@ -45,7 +48,7 @@ class Popup {
 
 Template.popup.events({
   'click .popup': (event) => event.stopPropagation(),
-  'click .popup-container': () => Popup.hide(50),
+  'click .popup-container': () => onBackdropClick(),
   'click .popup > .popup-buttons > .button': function(event) {
     callbacks[$(event.currentTarget).attr('data-index')]();
   },
