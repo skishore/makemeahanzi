@@ -20,25 +20,15 @@ const Character = Match.Where((x) => {
 const Stroke = [Tuple(Number, Number)]
 
 Meteor.methods({
-  reportIssue: (charDataString, description, strokeData) => {
-    check(charDataString, String);
+  reportIssue: (charData, description, strokeData) => {
+    // TODO(zhaizhai): validate charData
     check(description, String);
 
     strokeData = strokeData || [];
-    check(strokeData, [Match.Where((x) => {
-      check(x, Tuple(String, Match.Any));
-      if (x[0] === 'user') {
-        check(x[1], Stroke);
-        return true;
-      } else if (x[0] === 'match') {
-        check(x[1], Match.Integer);
-        return true;
-      }
-      return false;
-    })]);
+    check(strokeData, [Tuple(Stroke, Match.Integer)]);
 
     Issues.insert({
-      charDataString: charDataString,
+      charData: charData,
       description: description,
       strokeData: strokeData
     });

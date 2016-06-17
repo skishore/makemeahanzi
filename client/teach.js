@@ -16,7 +16,7 @@ const kMaxMistakes = 3;
 const kMaxPenalties  = 4;
 
 const helpers = new ReactiveDict();
-const item = {card: null, index: 0, tasks: [], recording: null};
+const item = {card: null, index: 0, tasks: []};
 
 // A couple small utility functions used by the logic below.
 
@@ -51,7 +51,6 @@ const maybeAdvance = () => {
     return true;
   }
   item.index += 1;
-  item.recording = new StrokeRecording();
 
   if (item.index < item.tasks.length) {
     handwriting.moveToCorner();
@@ -100,11 +99,11 @@ const onDouble = () => {
 
 const onRegrade = (result) => {
   const task = item.tasks[item.index];
-  if (task && result === -1) {
-    ReportIssue.show(item.recording, task.data);
+  if (!task || task.missing.length > 0 || task.result !== null) return;
+  if (result === -1) {
+    ReportIssue.show(task.recording, task.data);
     return;
   }
-  if (!task || task.missing.length > 0 || task.result !== null) return;
 
   task.result = result;
   handwriting.glow(task.result);
@@ -139,7 +138,7 @@ const onStroke = (stroke) => {
   const task = item.tasks[item.index];
   const result = match(task, (new Shortstraw).run(stroke), task.missing[0]);
   const index = result.index;
-  item.recording.userStroke(stroke);
+  task.recording.recordStrokeAndMatch(stroke, index);
 
   // The user's input does not match any of the character's strokes.
   if (index < 0) {
@@ -161,7 +160,6 @@ const onStroke = (stroke) => {
   }
 
   // The user's input matches one of the missing strokes.
-  item.recording.matchedStroke(index);
   task.missing.splice(task.missing.indexOf(index), 1);
   const rotate = task.steps[index].median.length === 2;
   handwriting.emplace([task.steps[index].stroke, rotate,
@@ -235,9 +233,8 @@ const updateItem = (card, data) => {
       median: findCorners([median])[0],
       stroke: row.strokes[i],
     })),
+    recording: new StrokeRecording(),
   }));
-  item.index = 0;
-  item.recording = new StrokeRecording();
 }
 
 // Meteor template bindings.

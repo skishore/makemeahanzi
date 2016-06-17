@@ -16,12 +16,8 @@ class StrokeRecording {
     this.strokeData = [];
   }
 
-  userStroke(stroke) {
-    this.strokeData.push(['user', stroke]);
-  }
-
-  matchedStroke(strokeIndex) {
-    this.strokeData.push(['match', strokeIndex]);
+  recordStrokeAndMatch(stroke, match_index) {
+    this.strokeData.push([stroke, match_index]);
   }
 }
 
@@ -77,7 +73,7 @@ Template.report_issue.events({
     console.log("Reporting issue:", ReportIssue.charData, message, ReportIssue.recording.strokeData);
     // TODO(zhaizhai): pass in a callback to handle errors and confirm
     // submission
-    Meteor.call('reportIssue', JSON.stringify(ReportIssue.charData),
+    Meteor.call('reportIssue', ReportIssue.charData,
                 message, ReportIssue.recording.strokeData);
     ReportIssue.hide(true /* thanks */);
   },
