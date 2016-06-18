@@ -1,14 +1,10 @@
 const Issues = new Meteor.Collection('issues');
 
-function Tuple(...args) {
+const Tuple = (...args) => {
   return Match.Where((x) => {
-    if (!(x instanceof Array))
-      return false;
-    if (x.length !== args.length)
-      return false;
-    for (let i = 0; i < args.length; i++)
-      check(x[i], args[i]);
-    return true;
+    check(x, Array);
+    args.forEach((y, i) => check(x[i], y));
+    return x.length === args.length;
   });
 }
 
@@ -17,20 +13,23 @@ const Character = Match.Where((x) => {
   return x.length === 1;
 });
 
-const Stroke = [Tuple(Number, Number)]
+const Stroke = [Tuple(Number, Number)];
 
 Meteor.methods({
-  reportIssue: (charData, description, strokeData) => {
-    // TODO(zhaizhai): validate charData
-    check(description, String);
-
-    strokeData = strokeData || [];
-    check(strokeData, [Tuple(Stroke, Match.Integer)]);
-
-    Issues.insert({
-      charData: charData,
-      description: description,
-      strokeData: strokeData
+  reportIssue: (issue) => {
+    // TODO(zhaizhai): Maybe do further validation of character_data here.
+    // TODO(skishore): Maybe pass other data about the character, such as the
+    // post-corner-detection medians (which may change with future updates to
+    // our recognition algorithm).
+    check(issue, {
+      character_data: Object,
+      message: String,
+      recording: [{
+        index: Match.Integer,
+        stroke: Stroke,
+      }],
     });
+    check(issue.character_data.character, Character);
+    Issues.insert(issue);
   },
 });

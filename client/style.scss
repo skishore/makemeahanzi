@@ -7,8 +7,6 @@ $link-color: #00c0ff;
 $swash-height: 18vw;
 $swash-width: 63vw;
 
-@import '.meteor/local/build/programs/server/assets/packages/meteoric_ionic-sass/_ionic';
-
 @font-face {
   font-family: anke-calligraphic;
   src: url("fonts/anke-calligraphic-2.00.ttf") format("truetype");
@@ -173,6 +171,11 @@ body {
   }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 #teach {
   > .prompt {
     background-color: white;
@@ -261,6 +264,19 @@ body {
             }
           }
         }
+
+        > .report-issue {
+          animation: fadeIn 0.1s;
+          color: #888;
+          font-size: 2 * $font-size;
+          padding: 4% 0;
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: 16%;
+          -webkit-text-stroke-color: #222;
+          -webkit-text-stroke-width: $font-size / 18;
+        }
       }
     }
   }
@@ -279,18 +295,9 @@ body {
   > .icon {
     float: left;
     font-size: 3 * $font-size;
-    padding: 2% 0;
-    width: 20%;
+    padding: 3% 0;
+    width: 25%;
     -webkit-text-stroke-width: $font-size / 12;
-
-    &[data-result="-1"] {
-      color: #e87878; // TODO
-      width: 10%;
-      margin-top: 7%;
-      margin-right: 10%;
-      font-size: 1.5 * $font-size;
-      -webkit-text-stroke-color: #600000;
-    }
 
     &[data-result="0"] {
       color: #84b4d8;
@@ -479,81 +486,12 @@ body {
 }
 
 #report-issue {
-  background-color: lightgray;
-  text-align: left;
-  @include full-size;
-
-  &.active {
-    @include animation-name(scaleOut);
-    @include animation-duration(0.2s);
-    @include animation-timing-function(ease-in-out);
-    -webkit-animation-direction: reverse;
-    -animation-direction: reverse;
-  }
-
-  &.hiding {
-    @include animation-name(scaleOut);
-    @include animation-duration(0.2s);
-    @include animation-timing-function(ease-in-out);
-  }
-
-  > .header {
-    background-color: $base-color;
-    box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.2);
-    color: white;
-    font-size: 8 * $font-size / 7;
-    line-height: 16 * $font-size / 7;
-    padding: 0 $font-size / 2;
-    position: fixed;
-    text-align: center;
-    width: 100%;
-    z-index: 1;
-  }
-
-  > .body {
-    @include full-size;
-    font-size: 0.9 * $font-size;
-    line-height: 1.1 * $font-size;
-    top: 3 * $font-size;
-    left: 6%;
-    right: 6%;
-    bottom: 16%;
-
-    > textarea {
-      position: absolute;
-      width: 100%;
-      top: 2.5 * $font-size;
-      bottom: 0;
-      margin-top: 2vw;
-      padding: 4vw;
-      resize: none;
-      border-radius: 4px;
-    }
-  }
-
-  > .footer {
-    @include full-size;
-    font-size: $font-size;
-    top: auto;
-    bottom: 0;
-    left: 6%;
-    right: 6%;
-    height: 10%;
-    margin-bottom: 3vw;
-
-    > .control {
-      position: absolute;
-      background-color: $base-color;
-      box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.2);
-      padding: 3% 3%;
-      width: 47%;
-      text-align: center;
-      font-size: 8 * $font-size / 7;
-      color: white;
-      &.right {
-        left: auto;
-        right: 0;
-      }
-    }
+  > .message {
+    background-color: #f4f4f4;
+    border: 1px solid #b8b8b8;
+    font-size: 4.2vw;
+    margin-top: 2.1vw;
+    padding: 1vw 2vw;
+    resize: none;
   }
 }

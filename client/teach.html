@@ -20,6 +20,7 @@
             {{/each}}
           </div>
           {{#if get 'grading'}}
+            <div class="icon report-issue"><i class="ion-alert"></i></div>
             {{> grading}}
           {{/if}}
         </div>
@@ -30,7 +31,6 @@
 
 <template name="grading">
   <div id="grading">
-    <div class="icon" data-result="-1"><i class="ion-alert"></i></div>
     <div class="icon" data-result="0"><i class="ion-android-star"></i></div>
     <div class="icon" data-result="1"><i class="ion-checkmark"></i></div>
     <div class="icon" data-result="2"><i class="ion-pause"></i></div>

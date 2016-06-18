@@ -1,13 +1,14 @@
-const defaultBackdropClick = () => Popup.hide(50);
-let onBackdropClick = defaultBackdropClick;
-let callbacks = [];
+const kDefaultOnClick = () => Popup.hide(50);
+
+let on_backdrop_click = null;
+let on_button_clicks = [];
 let views = [];
 
 class Popup {
   static hide(timeout) {
     const popup = $('.popup-container');
     popup.addClass('popup-hidden').removeClass('active');
-    callbacks.length = 0;
+    on_button_clicks.length = 0;
     Meteor.setTimeout(() => {
       $('body').removeClass('popup-open');
       views.map(Blaze.remove);
@@ -16,7 +17,7 @@ class Popup {
   }
   static show(options) {
     const buttons = (options.buttons || []).map((button, i) => ({
-      callback: button.callback,
+      callback: button.callback || kDefaultOnClick,
       class: button.class,
       index: i,
       label: button.label,
@@ -27,9 +28,9 @@ class Popup {
       text: options.text,
       title: options.title,
     };
-    onBackdropClick = options.onBackdropClick || defaultBackdropClick;
+    on_backdrop_click = options.on_backdrop_click || kDefaultOnClick;
 
-    callbacks.length = 0;
+    on_button_clicks.length = 0;
     views.map(Blaze.remove);
     views.length = 0;
 
@@ -41,16 +42,16 @@ class Popup {
     popup.addClass('active popup-showing');
 
     $('body').addClass('popup-open');
-    buttons.forEach((x, i) => callbacks.push(x.callback));
+    buttons.forEach((x, i) => on_button_clicks.push(x.callback));
     views.push(view);
   }
 }
 
 Template.popup.events({
   'click .popup': (event) => event.stopPropagation(),
-  'click .popup-container': () => onBackdropClick(),
+  'click .popup-container': () => on_backdrop_click(),
   'click .popup > .popup-buttons > .button': function(event) {
-    callbacks[$(event.currentTarget).attr('data-index')]();
+    on_button_clicks[$(event.currentTarget).attr('data-index')]();
   },
 });
 

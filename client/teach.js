@@ -7,7 +7,7 @@ import {Shortstraw} from './external/shortstraw';
 import {Handwriting} from './handwriting';
 import {lookupItem} from './lookup';
 import {Popup} from './meteoric/popup';
-import {StrokeRecording, ReportIssue} from './report_issue'
+import {ReportIssue} from './report_issue'
 
 let element = null;
 let handwriting = null;
@@ -41,8 +41,9 @@ const match = (task, stroke, expected) => {
 }
 
 const maybeAdvance = () => {
-  if (item.index === item.tasks.length)
+  if (item.index === item.tasks.length) {
     return true;
+  }
 
   const task = item.tasks[item.index];
   if (task.missing.length > 0) {
@@ -100,11 +101,6 @@ const onDouble = () => {
 const onRegrade = (result) => {
   const task = item.tasks[item.index];
   if (!task || task.missing.length > 0 || task.result !== null) return;
-  if (result === -1) {
-    ReportIssue.show(task.recording, task.data);
-    return;
-  }
-
   task.result = result;
   handwriting.glow(task.result);
   handwriting._stage.update();
@@ -138,7 +134,7 @@ const onStroke = (stroke) => {
   const task = item.tasks[item.index];
   const result = match(task, (new Shortstraw).run(stroke), task.missing[0]);
   const index = result.index;
-  task.recording.recordStrokeAndMatch(stroke, index);
+  task.recording.push({index: index, stroke: stroke});
 
   // The user's input does not match any of the character's strokes.
   if (index < 0) {
@@ -225,15 +221,15 @@ const updateItem = (card, data) => {
   item.tasks = data.characters.map((row, i) => ({
     data: row,
     index: i,
+    missing: _.range(row.medians.length),
     mistakes: 0,
     penalties: 0,
+    recording: [],
     result: null,
-    missing: _.range(row.medians.length),
     steps: row.medians.map((median, i) => ({
       median: findCorners([median])[0],
       stroke: row.strokes[i],
     })),
-    recording: new StrokeRecording(),
   }));
 }
 
@@ -246,8 +242,8 @@ const maybeShowAnswerForTask = (task) => {
     return;
   }
   const buttons = [
-    {label: 'Yes', callback: () => showAnswerForTask(task)},
-    {label: 'No', class: 'bold', callback: Popup.hide},
+    {callback: () => showAnswerForTask(task), label: 'Yes'},
+    {class: 'bold', label: 'No'},
   ];
   const text = 'Looking at the details page will count as getting this ' +
                'character wrong. Proceed?';
@@ -289,6 +285,11 @@ Template.teach.events({
     } else {
       console.error('Unable to apply option:', this);
     }
+  },
+  'click .flashcard > .report-issue': (event) => {
+    const task = item.tasks[item.index];
+    if (!task || task.missing.length > 0 || task.result !== null) return;
+    ReportIssue.show(task.data, task.recording);
   },
   'click a.control.left': (event) => {
     Router.go('/');
