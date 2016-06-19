@@ -1,4 +1,4 @@
-import {loadList} from './meteoric/lists';
+import {loadList} from '/client/templates/lists/code';
 
 const lookupCharacter = (character) => {
   const part = Math.floor(character.charCodeAt(0) / 256);

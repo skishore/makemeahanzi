@@ -1,4 +1,4 @@
-import {Popup} from './meteoric/popup';
+import {Popup} from '/client/templates/popup/code';
 
 const character = new ReactiveVar();
 const issue = {character_data: null, recording: null};

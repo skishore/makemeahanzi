@@ -1,6 +1,6 @@
 // Simple helpers for interacting with reactive variables.
-import {Settings} from '../model/settings';
-import {Timing} from '../model/timing';
+import {Settings} from '/model/settings';
+import {Timing} from '/model/timing';
 
 ReactiveVar.prototype.pop = function() {
   const value = this.get();

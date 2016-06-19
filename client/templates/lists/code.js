@@ -1,6 +1,6 @@
-import {Settings} from '../../model/settings';
-import {Vocabulary} from '../../model/vocabulary';
-import {Backdrop} from './backdrop';
+import {Backdrop} from '/client/meteoric/backdrop';
+import {Settings} from '/model/settings';
+import {Vocabulary} from '/model/vocabulary';
 
 const kBackdropTimeout = 500;
 const kListColumns = ['word', '', '', 'pinyin', 'definition'];

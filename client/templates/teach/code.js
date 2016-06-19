@@ -1,13 +1,13 @@
 // TODO(skishore): Do some kind of smoothing to avoid giving users hints based
 // off of the straight segments where strokes intersects.
-import {recognize} from '../lib/recognizer';
-import {Timing} from '../model/timing';
-import {findCorners} from './corners';
-import {Shortstraw} from './external/shortstraw';
-import {Handwriting} from './handwriting';
-import {lookupItem} from './lookup';
-import {Popup} from './meteoric/popup';
-import {ReportIssue} from './report_issue'
+import {findCorners} from '/client/corners';
+import {Shortstraw} from '/client/external/shortstraw';
+import {Handwriting} from '/client/handwriting';
+import {lookupItem} from '/client/lookup';
+import {Popup} from '/client/templates/popup/code';
+import {ReportIssue} from '/client/templates/report-issue/code'
+import {recognize} from '/lib/recognizer';
+import {Timing} from '/model/timing';
 
 let element = null;
 let handwriting = null;

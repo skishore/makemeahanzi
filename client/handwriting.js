@@ -1,5 +1,5 @@
-import {Settings} from '../model/settings';
-import Sketch from './external/sketch';
+import Sketch from '/client/external/sketch';
+import {Settings} from '/model/settings';
 
 const kCanvasSize = 512;
 

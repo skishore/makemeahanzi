@@ -1,5 +1,5 @@
-import {Settings} from '../../model/settings';
-import {toggleListState} from './lists';
+import {Settings} from '/model/settings';
+import {toggleListState} from '/client/templates/lists/code';
 
 Template.ionRange.events({
   'change, input input[type="range"]': function(event) {

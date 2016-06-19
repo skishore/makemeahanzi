@@ -1,7 +1,7 @@
 // This module defines one public method, findCorners, which takes a list of
 // medians and returns a list of corners for each one.
-import {match} from '../lib/recognizer';
-import {Shortstraw} from './external/shortstraw';
+import {Shortstraw} from '/client/external/shortstraw';
+import {match} from '/lib/recognizer';
 
 const kMinFirstSegmentFraction = 0.1;
 const kMinLastSegmentFraction = 0.05;

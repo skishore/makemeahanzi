@@ -1,6 +1,6 @@
-import {getAnimationData} from '../lib/animation';
-import {Decomposition} from '../lib/decomposition';
-import {lookupCharacter} from './lookup';
+import {lookupCharacter} from '/client/lookup';
+import {getAnimationData} from '/lib/animation';
+import {Decomposition} from '/lib/decomposition';
 
 const kUnknown = '(unknown)';
 
