@@ -1,0 +1,187 @@
+@import 'client/style.scss';
+
+@font-face {
+  font-family: arphic-gukai;
+  src: url("fonts/arphic-gukai.ttf") format("truetype");
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+#teach {
+  > .prompt {
+    background-color: white;
+    position: fixed;
+    text-align: center;
+    width: 100%;
+
+    > .control {
+      color: $fade-color;
+      font-size: 8 * $font-size / 7;
+      left: 0;
+      padding: 3% 4%;
+      position: absolute;
+      @include buttonlike;
+
+      &.left:hover, &.right:active {
+        color: $link-color;
+      }
+
+      &.right {
+        left: auto;
+        right: 0;
+      }
+    }
+
+    > .pinyin, > .definition {
+      font-size: $font-size;
+      line-height: 5 * $font-size / 4;
+      margin: 3%;
+      min-height: 5 * $font-size / 4;
+    }
+  }
+
+  > .scroller {
+    width: 100%;
+    @include full-size;
+    right: auto;
+    top: 37vw;
+
+    > .wrapper {
+      transform: translateY(50%);
+      @include full-size;
+
+      > .flashcard {
+        background-color: white;
+        display: block;
+        overflow: hidden;
+        transform: translateY(-50%);
+        @include full-size;
+        bottom: auto;
+        left: 6%;
+        right: 6%;
+
+        &.errors {
+          > canvas { display: none; }
+          > .error { display: block; }
+        }
+
+        > canvas {
+          vertical-align: middle;
+        }
+
+        > .error {
+          display: none;
+          font-size: $font-size;
+          line-height: 5 * $font-size / 4;
+          padding: 6% 0;
+          min-height: 5 * $font-size / 4;
+
+          > .option {
+            background-color: $base-color;
+            color: white;
+            display: block;
+            font-size: 5 * $font-size / 6;
+            margin: 6% auto 2%;
+            padding: $font-size / 3;
+            width: 84%;
+            @include buttonlike;
+
+            &:first-child {
+              margin-top: 8%;
+            }
+
+            &:hover {
+              background-color: $link-color;
+            }
+          }
+        }
+
+        > .report-issue {
+          animation: fadeIn 0.1s;
+          color: #888;
+          font-size: 2 * $font-size;
+          padding: 4% 0;
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: 16%;
+          -webkit-text-stroke-color: #222;
+          -webkit-text-stroke-width: $font-size / 18;
+        }
+      }
+    }
+  }
+}
+
+#grading {
+  animation: slideUp 0.1s;
+  @include full-size;
+  top: auto;
+
+  > .icon {
+    float: left;
+    font-size: 3 * $font-size;
+    padding: 3% 0;
+    width: 25%;
+    -webkit-text-stroke-width: $font-size / 12;
+
+    &[data-result="0"] {
+      color: #84b4d8;
+      -webkit-text-stroke-color: #003054;
+    }
+
+    &[data-result="1"] {
+      color: #88c874;
+      -webkit-text-stroke-color: #183804;
+    }
+
+    &[data-result="2"] {
+      color: #c0c080;
+      -webkit-text-stroke-color: #404000;
+    }
+
+    &[data-result="3"] {
+      color: #e87878;
+      -webkit-text-stroke-color: #600000;
+    }
+  }
+}
+
+#answer-selection {
+  > .option {
+    background-color: $base-color;
+    color: white;
+    font-size: $font-size;
+    line-height: 2 * $font-size;
+    margin-top: 3 * $font-size / 4;
+    padding: 0 6%;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    > .character, .spacer, .pinyin {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    > .character {
+      font-family: arphic-gukai;
+      font-size: 5 * $font-size / 4;
+      text-align: center;
+      width: 5 * $font-size / 4;
+    }
+
+    > .spacer {
+      margin-right: $font-size / 8;
+    }
+  }
+}

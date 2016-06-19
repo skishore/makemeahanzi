@@ -1,0 +1,44 @@
+.popup-container {
+  pointer-events: auto;
+
+  > .popup {
+    background-color: white;
+    width: 76%;
+
+    > .popup-header > .popup-title {
+      font-size: 5.6vw;
+      margin: 4.2vw 0;
+    }
+
+    > .popup-body {
+      font-size: 4.2vw;
+      line-height: 5.6vw;
+      padding: 0 4.2vw 4.2vw;
+      text-align: left;
+    }
+
+    > .popup-buttons {
+      min-height: 0;
+      padding: 0 4.2vw 4.2vw;
+
+      > .button {
+        background-color: #888;
+        color: white;
+        font-size: 5.6vw;
+        line-height: 9.8vw;
+        margin: 0 0 0 4.2vw;
+        min-height: 0;
+        padding: 0;
+        vertical-align: center;
+
+        &:first-child {
+          margin-left: 0;
+        }
+
+        &.bold {
+          background-color: #444;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,134 @@
+@import 'client/style.scss';
+
+#answer {
+  background-color: lightgray;
+  text-align: left;
+  transform: translateY(100%);
+  transition: transform 0.3s;
+  @include full-size;
+
+  > .header {
+    background-color: $base-color;
+    box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.2);
+    color: white;
+    font-size: 8 * $font-size / 7;
+    line-height: 16 * $font-size / 7;
+    padding: 0 $font-size / 2;
+    position: fixed;
+    text-align: center;
+    width: 100%;
+    z-index: 1;
+
+    > .back {
+      left: $font-size / 3;
+      top: -$font-size / 15;
+      position: absolute;
+
+      &:hover {
+        color: $link-color;
+      }
+
+      > .icon {
+        font-size: 6 * $font-size / 4;
+        vertical-align: middle;
+      }
+
+      > .text {
+        display: inline-block;
+        font-size: 6 * $font-size / 7;
+      }
+    }
+  }
+
+  > .body {
+    overflow-y: scroll;
+    @include full-size;
+    top: 16 * $font-size / 7;
+
+    > .animation {
+      background-color: white;
+      box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.1);
+      margin: 6% auto;
+      width: 52%;
+
+      svg {
+        vertical-align: middle;
+      }
+    }
+
+    > .panel {
+      box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.1);
+      margin: 6% auto;
+      width: 88%;
+
+      > .panel-heading {
+        background-color: $base-color;
+        border-color: $base-color;
+        border-radius: $font-size / 4 $font-size / 4 0 0;
+        color: white;
+        padding: $font-size / 4 $font-size / 2;
+      }
+
+      > .panel-body {
+        background-color: white;
+        border: $font-size / 16 solid $base-color;
+        border-radius: 0 0 $font-size / 4 $font-size / 4;
+        padding: 0 $font-size / 2;
+
+        > .field {
+          margin: 3 * $font-size / 4 0;
+
+          > .label, > .value {
+            font-size: 3 * $font-size / 4;
+            line-height: $font-size;
+          }
+
+          > .label {
+            float: left;
+            font-weight: bold;
+            margin-right: 0.3 * $font-size;
+            text-align: right;
+            width: 2.1 * $font-size;
+          }
+
+          > .value {
+            margin-left: 2.4 * $font-size;
+          }
+        }
+
+        .decomposition {
+          font-size: 3 * $font-size / 4;
+          line-height: $font-size;
+          margin: 3 * $font-size / 4 0;
+          margin-left: $font-size;
+
+          .header {
+            float: left;
+
+            &.ids { font-weight: bold; }
+
+            .value {
+              display: inline-block;
+              text-align: center;
+              width: $font-size;
+            }
+          }
+
+          .text {
+            display: block;
+            margin-left: 7 * $font-size / 4;
+          }
+        }
+
+        > .decomposition {
+          margin-left: 0;
+        }
+
+        a.link {
+          color: #0098f8;
+          text-decoration: none;
+        }
+      }
+    }
+  }
+}

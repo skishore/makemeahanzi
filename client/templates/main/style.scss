@@ -1,0 +1,149 @@
+@import 'client/style.scss';
+
+$header-height: 5 * $font-size / 4;
+$swash-height: 18vw;
+$swash-width: 63vw;
+
+@font-face {
+  font-family: anke-calligraphic;
+  src: url("fonts/anke-calligraphic-2.00.ttf") format("truetype");
+}
+
+body {
+  background-color: $base-color;
+  color: $font-color;
+  font-family: Georgia, serif;
+  margin: 0;
+  overflow: hidden;
+  text-align: center;
+
+  .ionic-body {
+    text-align: left;
+  }
+}
+
+#header {
+  background-color: #666;
+  height: $header-height;
+  line-height: $header-height;
+
+  > .info {
+    color: white;
+    font-family: sans-serif;
+    font-size: $header-height / 2;
+    margin: 0 $header-height / 4;
+
+    &.left { float: left; }
+    &.right { float: right; }
+  }
+}
+
+#layout {
+  top: $header-height !important;
+
+  &, > .background, > .foreground {
+    @include full-size;
+  }
+
+  &.theme-flat {
+    > .background {
+      background-color: #a4d4ff;
+    }
+
+    #teach {
+      > .prompt, > .wrapper > .flashcard {
+        background-color: #f5f5f5;
+      }
+    }
+  }
+
+  &.theme-painterly, &.theme-textured {
+    > .background {
+      background-image: url("background.jpg");
+      background-position-y: -100px;
+      background-size: cover;
+    }
+
+    #teach {
+      > .prompt, > .wrapper > .flashcard {
+        box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.5);
+        opacity: 0.92;
+      }
+    }
+  }
+
+  &.theme-textured {
+    > .foreground {
+      background-image: url("foreground.jpg");
+      background-size: cover;
+      mix-blend-mode: difference;
+    }
+  }
+
+  > .foreground {
+    pointer-events: none;
+    z-index: 9999999999;
+  }
+}
+
+#index {
+  background-color: $base-color;
+  color: white;
+  @include full-size;
+
+  > .wrapper {
+    @include full-size;
+    bottom: auto;
+    top: 50%;
+    transform: translateY(-50%);
+
+    > .title {
+      font-family: anke-calligraphic;
+      font-size: 4 * $font-size;
+      line-height: 4 * $font-size;
+      margin-bottom: 20%;
+    }
+
+    > .teach, > .options > .option {
+      text-decoration: none;
+      @include buttonlike;
+    }
+
+    > .teach {
+      -webkit-mask-image: url("swash.svg");
+      -webkit-mask-position-x: 0.025 * $swash-width;
+      -webkit-mask-position-y: 0.025 * $swash-height;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-size: $swash-width $swash-height;
+      background-color: white;
+      color: $base-color;
+      display: inline-block;
+      font-size: 2 * $swash-height / 3;
+      font-weight: bold;
+      height: $swash-height;
+      line-height: $swash-height;
+      margin-bottom: 10%;
+      width: $swash-width;
+
+      &:hover {
+        background-color: $link-color;
+      }
+    }
+
+    > .options > .option {
+      color: white;
+      display: inline-block;
+      font-size: 0.8 * $font-size;
+      margin: 4%;
+      width: 20%;
+
+      &:hover {
+        color: $link-color;
+      }
+
+      > .icon {
+        font-size: 2 * $font-size;
+      }
+    }
+  }
+}
