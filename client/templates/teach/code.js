@@ -1,12 +1,10 @@
 // TODO(skishore): Do some kind of smoothing to avoid giving users hints based
 // off of the straight segments where strokes intersects.
-import {findCorners} from '/client/corners';
-import {Shortstraw} from '/client/external/shortstraw';
 import {Handwriting} from '/client/handwriting';
 import {lookupItem} from '/client/lookup';
 import {Popup} from '/client/templates/popup/code';
 import {ReportIssue} from '/client/templates/report-issue/code'
-import {recognize} from '/lib/recognizer';
+import {Matcher} from '/lib/stroke-matcher/matcher'
 import {Timing} from '/model/timing';
 
 let element = null;
@@ -25,20 +23,6 @@ const defer = (callback) => Meteor.setTimeout(callback, 20);
 const fixMedianCoordinates = (median) => median.map((x) => [x[0], 900 - x[1]]);
 
 const getResult = (x) => Math.min(Math.floor(2 * x / kMaxPenalties) + 1, 3);
-
-const match = (task, stroke, expected) => {
-  let best_result = {index: -1, score: -Infinity};
-  for (let i = 0; i < task.steps.length; i++) {
-    const median = task.steps[i].median;
-    const offset = i - expected;
-    const result = recognize(stroke, median, offset);
-    if (result.score > best_result.score) {
-      best_result = result;
-      best_result.index = i;
-    }
-  }
-  return best_result;
-}
 
 const maybeAdvance = () => {
   if (item.index === item.tasks.length) {
@@ -88,14 +72,14 @@ const onClick = () => {
   if (maybeAdvance()) return;
   const task = item.tasks[item.index];
   task.penalties += kMaxPenalties;
-  handwriting.flash(task.steps[task.missing[0]].stroke);
+  handwriting.flash(task.strokes[task.missing[0]]);
 }
 
 const onDouble = () => {
   if (maybeAdvance()) return;
   const task = item.tasks[item.index];
-  handwriting.reveal(task.steps.map((x) => x.stroke));
-  handwriting.highlight(task.steps[task.missing[0]].stroke);
+  handwriting.reveal(task.strokes);
+  handwriting.highlight(task.strokes[task.missing[0]]);
 }
 
 const onRegrade = (result) => {
@@ -132,17 +116,17 @@ const onRequestRegrade = (stroke) => {
 const onStroke = (stroke) => {
   if (onRequestRegrade(stroke) || maybeAdvance()) return;
   const task = item.tasks[item.index];
-  const result = match(task, (new Shortstraw).run(stroke), task.missing[0]);
+  const result = task.matcher.match(stroke, task.missing);
   const index = result.index;
   task.recording.push({index: index, stroke: stroke});
-
+6
   // The user's input does not match any of the character's strokes.
   if (index < 0) {
     task.mistakes += 1;
     handwriting.fade();
     if (task.mistakes >= kMaxMistakes) {
       task.penalties += kMaxPenalties;
-      handwriting.flash(task.steps[task.missing[0]].stroke);
+      handwriting.flash(task.strokes[task.missing[0]]);
     }
     return;
   }
@@ -151,15 +135,16 @@ const onStroke = (stroke) => {
   if (task.missing.indexOf(index) < 0) {
     task.penalties += 1;
     handwriting.undo();
-    handwriting.flash(task.steps[index].stroke);
+    handwriting.flash(task.strokes[index]);
     return;
   }
 
   // The user's input matches one of the missing strokes.
   task.missing.splice(task.missing.indexOf(index), 1);
-  const rotate = task.steps[index].median.length === 2;
-  handwriting.emplace([task.steps[index].stroke, rotate,
-                       result.source, result.target]);
+  const rotate = result.simplified_median.length === 2;
+  handwriting.emplace([task.strokes[index], rotate,
+                       result.source_segment,
+                       result.target_segment]);
   if (result.warning) {
     task.penalties += result.penalties;
     handwriting.warn(result.warning);
@@ -169,10 +154,10 @@ const onStroke = (stroke) => {
     handwriting.glow(task.result);
   } else if (task.missing[0] < index) {
     task.penalties += 2 * (index - task.missing[0]);
-    handwriting.flash(task.steps[task.missing[0]].stroke);
+    handwriting.flash(task.strokes[task.missing[0]]);
   } else {
     task.mistakes = 0;
-    handwriting.highlight(task.steps[task.missing[0]].stroke);
+    handwriting.highlight(task.strokes[task.missing[0]]);
   }
 }
 
@@ -219,15 +204,13 @@ const updateItem = (card, data) => {
   item.tasks = data.characters.map((row, i) => ({
     data: row,
     index: i,
+    strokes: row.strokes,
     missing: _.range(row.medians.length),
     mistakes: 0,
     penalties: 0,
     recording: [],
     result: null,
-    steps: row.medians.map((median, i) => ({
-      median: findCorners([median])[0],
-      stroke: row.strokes[i],
-    })),
+    matcher: new Matcher(row),
   }));
 }
 
