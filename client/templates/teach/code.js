@@ -186,12 +186,7 @@ const onErrorCard = (card) => {
   updateItem(card, {characters: []});
 }
 
-const onItemData = (data, error) => {
-  if (error) {
-    console.error('Card data request error:', error);
-    defer(Timing.shuffle);
-    return;
-  }
+const onItemData = (data) => {
   const card = Timing.getNextCard();
   if (!card || data.word !== card.data.word) {
     console.log('Moved on from card:', card);
@@ -206,12 +201,15 @@ const onItemData = (data, error) => {
 
 const updateCard = () => {
   const card = Timing.getNextCard();
-  if (!card) return;
+  if (!card || !card.data) return;
   handwriting && handwriting.clear();
   if (card.deck === 'errors') {
     onErrorCard(card);
   } else {
-    defer(() => lookupItem(card.data, onItemData));
+    defer(() => lookupItem(card.data).then(onItemData).catch((error) => {
+      console.error('Card data request error:', error);
+      defer(Timing.shuffle);
+    }));
   }
 }
 

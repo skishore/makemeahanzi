@@ -1,9 +1,9 @@
 import {Backdrop} from '/client/backdrop';
+import {lookupList} from '/client/lookup';
 import {Settings} from '/model/settings';
 import {Vocabulary} from '/model/vocabulary';
 
 const kBackdropTimeout = 500;
-const kListColumns = ['word', '', '', 'pinyin', 'definition'];
 
 const characters = {};
 
@@ -30,7 +30,7 @@ const groups = [
 
 const enableList = (list, callback) => {
   Backdrop.show();
-  loadList(list).then((rows) => {
+  lookupList(list).then((rows) => {
     rows.map((row) => {
       if (!_.all(row.word, (x) => characters[x])) return;
       Vocabulary.addItem(row.word, list);
@@ -40,25 +40,6 @@ const enableList = (list, callback) => {
   }).catch((error) => {
     Backdrop.hide(kBackdropTimeout);
     console.error(error);
-  });
-}
-
-const loadList = (list) => {
-  return new Promise((resolve, reject) => {
-    $.get(`lists/${list}.list`, (data, code) => {
-      if (code !== 'success') throw new Error(code);
-      const result = [];
-      data.split('\n').map((line) => {
-        const values = line.split('\t');
-        if (values.length != kListColumns.length) return;
-        const row = {};
-        kListColumns.map((column, i) => {
-          if (column !== '') row[column] = values[i];
-        });
-        result.push(row);
-      });
-      resolve(result);
-    });
   });
 }
 
@@ -84,4 +65,4 @@ groups.map((x) => x.lists.map((y) => y.variable = `lists.${y.list}`));
 
 Template.lists.helpers({groups: () => groups});
 
-export {loadList, toggleListState};
+export {toggleListState};
