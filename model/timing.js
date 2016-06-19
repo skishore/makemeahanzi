@@ -2,9 +2,9 @@
 // Inkstone session and supports queries like:
 //  - How many flash cards are left in this session?
 //  - What is the next flash card?
-import {Model} from './model';
-import {Settings} from './settings';
-import {Vocabulary} from './vocabulary';
+import {Model} from '/model/model';
+import {Settings} from '/model/settings';
+import {Vocabulary} from '/model/vocabulary';
 
 // Timing state tier 1: a Ground collection storing a single record with raw
 // counts for usage in this session and a timestamp of when the session began.

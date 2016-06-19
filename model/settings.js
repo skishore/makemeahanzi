@@ -1,7 +1,7 @@
 // Schema: settings is a key-value store with records containing:
 //  - key: string
 //  - value: any
-import {Model} from './model';
+import {Model} from '/model/model';
 
 const settings = Model.collection('settings');
 
