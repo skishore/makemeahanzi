@@ -157,7 +157,7 @@ if (Meteor.isClient) {
     dirty();
     Meteor.autorun(() => {
       sentinel.get();
-      Meteor.setTimeout(() => {
+      Meteor.defer(() => {
         vocabulary.chunks.forEach((chunk, i) => {
           if (!chunk.dirty) return;
           delete chunk.dirty;

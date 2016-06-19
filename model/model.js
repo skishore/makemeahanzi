@@ -17,8 +17,7 @@ class Model {
   }
   static startup(callback) {
     let done = false;
-    this.autorun(() => Meteor.setTimeout(
-        () => done = done || callback() || true));
+    this.autorun(() => Meteor.defer(() => done = done || callback() || true));
   }
   static timestamp() {
     return Math.floor(new Date().getTime() / 1000);

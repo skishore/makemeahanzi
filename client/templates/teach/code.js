@@ -254,7 +254,7 @@ const showAnswerForTask = (task, skip_confirmation) => {
     task.penalties += kMaxPenalties;
   }
   const codepoint = task.data.character.codePointAt(0);
-  Meteor.setTimeout(() => window.location.hash = codepoint);
+  Meteor.defer(() => window.location.hash = codepoint);
   Popup.hide(50);
 }
 
