@@ -1,4 +1,4 @@
-import {Backdrop} from '/client/meteoric/backdrop';
+import {Backdrop} from '/client/backdrop';
 import {Settings} from '/model/settings';
 import {Vocabulary} from '/model/vocabulary';
 
