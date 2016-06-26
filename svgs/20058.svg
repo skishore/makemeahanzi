@@ -1,0 +1,45 @@
+<svg version="1.1" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1" transform="scale(4, 4)">
+    <line x1="0" y1="0" x2="256" y2="256"></line>
+    <line x1="256" y1="0" x2="0" y2="256"></line>
+    <line x1="128" y1="0" x2="128" y2="256"></line>
+    <line x1="0" y1="128" x2="256" y2="128"></line>
+  </g>
+  <g transform="scale(1, -1) translate(0, -900)">
+    <style scoped="true" type="text/css">
+      
+        @keyframes keyframes0 {
+          from {
+            stroke: blue;
+            stroke-dashoffset: 1637;
+            stroke-width: 128;
+          }
+          84% {
+            animation-timing-function: step-end;
+            stroke: blue;
+            stroke-dashoffset: 0;
+            stroke-width: 128;
+          }
+          to {
+            stroke: black;
+            stroke-width: 1024;
+          }
+        }
+        #make-me-a-hanzi-animation-0 {
+          animation: keyframes0 1.5821940104166667s both;
+          animation-delay: 0s;
+          animation-timing-function: linear;
+        }
+      
+    </style>
+    
+      <path d="M 294 470 Q 300 562 312 622 L 325 680 Q 328 694 320 704 Q 304 720 269 733 Q 224 750 211 737 Q 207 733 206 729 Q 206 723 218 705 Q 243 664 242 615 L 242 449 Q 242 220 267 179 Q 280 149 316 118 Q 398 46 664 43 Q 750 42 817 50 Q 937 63 953 95 Q 955 98 955 101 Q 956 109 947 127 Q 913 190 890 284 Q 886 296 878 304 Q 866 316 864 293 L 845 188 Q 835 147 813 130 Q 791 121 672 114 Q 548 110 456 125 Q 402 135 369 153 Q 322 177 308 229 Q 296 283 294 470 Z" fill="lightgray"></path>
+    
+    
+      <clipPath id="make-me-a-hanzi-clip-0">
+        <path d="M 294 470 Q 300 562 312 622 L 325 680 Q 328 694 320 704 Q 304 720 269 733 Q 224 750 211 737 Q 207 733 206 729 Q 206 723 218 705 Q 243 664 242 615 L 242 449 Q 242 220 267 179 Q 280 149 316 118 Q 398 46 664 43 Q 750 42 817 50 Q 937 63 953 95 Q 955 98 955 101 Q 956 109 947 127 Q 913 190 890 284 Q 886 296 878 304 Q 866 316 864 293 L 845 188 Q 835 147 813 130 Q 791 121 672 114 Q 548 110 456 125 Q 402 135 369 153 Q 322 177 308 229 Q 296 283 294 470 Z"></path>
+      </clipPath>
+      <path clip-path="url(#make-me-a-hanzi-clip-0)" d="M 217 728 L 250 709 L 278 679 L 267 472 L 276 255 L 282 219 L 300 176 L 338 137 L 411 103 L 497 86 L 653 77 L 825 90 L 883 125 L 878 272 L 871 299" fill="none" id="make-me-a-hanzi-animation-0" stroke-dasharray="1509 3018" stroke-linecap="round"></path>
+    
+  </g>
+</svg>

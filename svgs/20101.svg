@@ -1,0 +1,45 @@
+<svg version="1.1" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1" transform="scale(4, 4)">
+    <line x1="0" y1="0" x2="256" y2="256"></line>
+    <line x1="256" y1="0" x2="0" y2="256"></line>
+    <line x1="128" y1="0" x2="128" y2="256"></line>
+    <line x1="0" y1="128" x2="256" y2="128"></line>
+  </g>
+  <g transform="scale(1, -1) translate(0, -900)">
+    <style scoped="true" type="text/css">
+      
+        @keyframes keyframes0 {
+          from {
+            stroke: blue;
+            stroke-dashoffset: 1164;
+            stroke-width: 128;
+          }
+          79% {
+            animation-timing-function: step-end;
+            stroke: blue;
+            stroke-dashoffset: 0;
+            stroke-width: 128;
+          }
+          to {
+            stroke: black;
+            stroke-width: 1024;
+          }
+        }
+        #make-me-a-hanzi-animation-0 {
+          animation: keyframes0 1.197265625s both;
+          animation-delay: 0s;
+          animation-timing-function: linear;
+        }
+      
+    </style>
+    
+      <path d="M 461 695 Q 483 423 458 144 Q 455 113 443 105 Q 437 99 358 97 Q 321 104 327 94 Q 330 88 377 61.5 Q 424 35 444 7.5 Q 464 -20 482 -18 Q 498 -16 509 19 Q 528 72 521 186 Q 512 335 521 578 Q 526 713 538 735 Q 555 765 493 799 Q 484 805 438 810 Q 415 813 436 779 Q 457 744 461 695 Z" fill="lightgray"></path>
+    
+    
+      <clipPath id="make-me-a-hanzi-clip-0">
+        <path d="M 461 695 Q 483 423 458 144 Q 455 113 443 105 Q 437 99 358 97 Q 321 104 327 94 Q 330 88 377 61.5 Q 424 35 444 7.5 Q 464 -20 482 -18 Q 498 -16 509 19 Q 528 72 521 186 Q 512 335 521 578 Q 526 713 538 735 Q 555 765 493 799 Q 484 805 438 810 Q 415 813 436 779 Q 457 744 461 695 Z"></path>
+      </clipPath>
+      <path clip-path="url(#make-me-a-hanzi-clip-0)" d="M 438 794 L 447 794 L 474 773 L 496 737 L 489 120 L 483 90 L 467 59 L 332 95" fill="none" id="make-me-a-hanzi-animation-0" stroke-dasharray="1036 2072" stroke-linecap="round"></path>
+    
+  </g>
+</svg>

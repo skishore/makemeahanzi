@@ -134,13 +134,13 @@ rely on the fact that the two files will always come in the same order.
 ### TODOs and Future Work
 
 - Right now, all stroke order information is based on the People's Republic
-  of China (PRC) stroke order. Some characters are written with a different
-  stroke order in Japan, Taiwan, and other countries. We should include data
-  for these orders as well.
+  of China (PRC) stroke order. Some characters are written with different
+  stroke orders in Japan, Taiwan, and elsewhere. We should build data for
+  these orders as well.
 
-- As an experimental next step, we have produced a tarball containing an
-  animated SVG for each character we have data for. It's easy to embed these
-  SVGs in a website. A minimal example is as follows:
+- As an experimental next step, we have produced an animated SVG image for
+  each character that we have data for (see the svgs directory). It's easy to
+  It's easy to embed these SVGs in a website. A minimal example is as follows:
 
       <body><embed src="31119.svg" width="200px" height="200px"/></body>
 
