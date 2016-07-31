@@ -1,4 +1,8 @@
-"use strict";
+import {AbstractStage} from '/client/lib/abstract';
+import {cjklib} from '/lib/cjklib';
+import {decomposition_util} from '/lib/decomposition_util';
+import {Glyphs} from '/lib/glyphs';
+import {pinyin_util} from '/lib/pinyin_util';
 
 let stage = undefined;
 
@@ -150,7 +154,7 @@ const guessPhoneticAndSemanticComponents = (glyph, components) => {
   return result;
 }
 
-stages.analysis = class AnalysisStage extends stages.AbstractStage {
+class AnalysisStage extends AbstractStage {
   constructor(glyph) {
     super('analysis');
     this.strokes = glyph.stages.strokes;
@@ -385,3 +389,5 @@ Meteor.startup(() => Meteor.setTimeout(() => {
     Meteor.subscribe('getAllGlyphs', components);
   })).catch(console.error.bind(console));
 }, 0));
+
+export {AnalysisStage};

@@ -1,6 +1,7 @@
-"use strict";
+import {AbstractStage} from '/client/lib/abstract';
+import {getAnimationData} from '/lib/animation';
 
-stages.verified = class VerifiedStage extends stages.AbstractStage {
+class VerifiedStage extends AbstractStage {
   constructor(glyph) {
     super('verified');
     const strokes = glyph.stages.order.map(
@@ -18,3 +19,5 @@ stages.verified = class VerifiedStage extends stages.AbstractStage {
 Template.verified_stage.helpers({
   data: () => Session.get('stages.verified.data'),
 });
+
+export {VerifiedStage};

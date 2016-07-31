@@ -1,4 +1,5 @@
-"use strict";
+import {getPWD} from '/lib/base';
+import {Progress} from '/lib/glyphs';
 
 const child_process = Npm.require('child_process');
 const path = Npm.require('path');

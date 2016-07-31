@@ -1,4 +1,9 @@
-"use strict";
+import {getAnimationData} from '/lib/animation';
+import {assert, getPWD, Point} from '/lib/base';
+import {cjklib} from '/lib/cjklib';
+import {Glyphs} from '/lib/glyphs';
+import {stroke_extractor} from '/lib/stroke_extractor';
+import {svg} from '/lib/svg';
 
 const addFrequencyField = (glyph) => {
   const data = cjklib.getCharacterData(glyph.character);

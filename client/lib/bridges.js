@@ -1,4 +1,6 @@
-"use strict";
+import {AbstractStage} from '/client/lib/abstract';
+import {Point} from '/lib/base';
+import {stroke_extractor} from '/lib/stroke_extractor';
 
 const bridgeKey = (bridge) => bridge.map(Point.key).join('-');
 
@@ -9,7 +11,7 @@ const removeBridge = (bridges, bridge) => {
   return bridges.filter((bridge) => !keys[bridgeKey(bridge)]);
 }
 
-stages.bridges = class BridgesStage extends stages.AbstractStage {
+class BridgesStage extends AbstractStage {
   constructor(glyph) {
     super('bridges');
     const bridges = stroke_extractor.getBridges(glyph.stages.path);
@@ -82,3 +84,5 @@ stages.bridges = class BridgesStage extends stages.AbstractStage {
     Session.set('stage.status', strokes.log.concat([entry]));
   }
 }
+
+export {BridgesStage};

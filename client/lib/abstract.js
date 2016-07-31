@@ -1,5 +1,4 @@
-if (this.stages !== undefined) throw new Error('Redifining stages global!');
-this.stages = {};
+import {assert} from '/lib/base';
 
 // Each stage is supposed to compute a particular field for the glyph.
 // It computes an initial value for this field based only on previous stages,
@@ -7,7 +6,7 @@ this.stages = {};
 //
 // NOTE: No stage methods should update the glyph. The framework will do so by
 // calling getStageOutput when appropriate.
-stages.AbstractStage = class AbstractStage {
+class AbstractStage {
   // Initialize this stage's values based only off previous stages. Then, if the
   // glyph already has a value for this stage's field and it is possible to set
   // up the internal state of this stage to achieve that value, set that state.
@@ -74,3 +73,5 @@ stages.AbstractStage = class AbstractStage {
     assert(log && log.filter((x) => x.cls === 'error').length === 0);
   }
 }
+
+export {AbstractStage};

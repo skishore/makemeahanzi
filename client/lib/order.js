@@ -1,4 +1,9 @@
-"use strict";
+import {AbstractStage} from '/client/lib/abstract';
+import {assert, Point} from '/lib/base';
+import {decomposition_util} from '/lib/decomposition_util';
+import {Glyphs} from '/lib/glyphs';
+import {Hungarian} from '/lib/hungarian';
+import {median_util} from '/lib/median_util';
 
 let stage = undefined;
 
@@ -158,7 +163,7 @@ const scoreStrokes = (stroke1, stroke2) => {
   return Math.max(option1, option2);
 }
 
-stages.order = class OrderStage extends stages.AbstractStage {
+class OrderStage extends AbstractStage {
   constructor(glyph) {
     super('order');
     this.adjusted = glyph.stages.order;
@@ -339,3 +344,5 @@ Meteor.startup(() => {
     }
   });
 });
+
+export {OrderStage};

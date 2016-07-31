@@ -1,4 +1,7 @@
-"use strict";
+import {AbstractStage} from '/client/lib/abstract';
+import {assert} from '/lib/base';
+import {cjklib} from '/lib/cjklib';
+import {stroke_extractor} from '/lib/stroke_extractor';
 
 const getStatusLine = (actual, expected) => {
   const actual_text = `Selected ${actual} stroke${actual === 1 ? '' : 's'}`;
@@ -20,7 +23,7 @@ const getStrokePaths = (strokes, include, colors) => {
   return result;
 }
 
-stages.strokes = class StrokesStage extends stages.AbstractStage {
+class StrokesStage extends AbstractStage {
   constructor(glyph) {
     super('strokes');
     const include = this.include = {};
@@ -48,3 +51,5 @@ stages.strokes = class StrokesStage extends stages.AbstractStage {
     Session.set('stage.status', [getStatusLine(actual, expected)]);
   }
 }
+
+export {StrokesStage};

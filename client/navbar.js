@@ -1,4 +1,4 @@
-"use strict";
+import {Progress} from '/lib/glyphs';
 
 Template.navbar.events({
   'click .backup': () => {

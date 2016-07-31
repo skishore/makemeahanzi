@@ -1,8 +1,13 @@
-"use strict";
+import opentype from '/client/external/opentype/0.4.10/opentype';
+
+import {AbstractStage} from '/client/lib/abstract';
+import {assert, Point} from '/lib/base';
+import {Glyphs} from '/lib/glyphs';
+import {svg} from '/lib/svg';
 
 let stage = undefined;
 
-stages.path = class PathStage extends stages.AbstractStage {
+class PathStage extends AbstractStage {
   constructor(glyph) {
     super('path');
     this.adjusted = glyph.stages.path;
@@ -89,3 +94,5 @@ Meteor.startup(() => {
     }
   });
 });
+
+export {PathStage};

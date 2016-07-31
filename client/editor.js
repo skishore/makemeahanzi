@@ -1,11 +1,27 @@
-"use strict";
+import {AbstractStage} from '/client/lib/abstract';
+import {AnalysisStage} from '/client/lib/analysis';
+import {BridgesStage} from '/client/lib/bridges';
+import {OrderStage} from '/client/lib/order';
+import {PathStage} from '/client/lib/path';
+import {StrokesStage} from '/client/lib/strokes';
+import {VerifiedStage} from '/client/lib/verified';
+import {assert} from '/lib/base';
+import {cjklib} from '/lib/cjklib';
 
 Session.set('editor.glyph', undefined);
 
+const stages = {
+  analysis: AnalysisStage,
+  bridges: BridgesStage,
+  order: OrderStage,
+  path: PathStage,
+  strokes: StrokesStage,
+  verified: VerifiedStage,
+};
 const types = ['path', 'bridges', 'strokes', 'analysis', 'order', 'verified'];
 let last_glyph = undefined;
 let last_json = undefined;
-let stage = new stages.AbstractStage;
+let stage = new AbstractStage;
 
 const changeGlyph = (method, argument) => {
   argument = argument || Session.get('editor.glyph');

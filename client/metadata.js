@@ -1,4 +1,6 @@
-"use strict";
+import {assert} from '/lib/base';
+import {cjklib} from '/lib/cjklib';
+import {pinyin_util} from '/lib/pinyin_util';
 
 const unknown = '(unknown)';
 

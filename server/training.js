@@ -1,4 +1,5 @@
-"use strict";
+import {assert} from '/lib/base';
+import {Glyphs} from '/lib/glyphs';
 
 function evaluate(glyphs, classifier) {
   var num_correct = 0;
