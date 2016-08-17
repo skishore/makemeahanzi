@@ -1,4 +1,5 @@
 import {AbstractStage} from '/client/lib/abstract';
+import {assert} from '/lib/base';
 import {cjklib} from '/lib/cjklib';
 import {decomposition_util} from '/lib/decomposition_util';
 import {Glyphs} from '/lib/glyphs';
