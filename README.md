@@ -1,11 +1,11 @@
 ![Make Me a Hanzi annotation tool](example.gif)
 
-### [Make Me a Hanzi Demo](http://makemeahanzi.mod.bz)
+### [Make Me a Hanzi Demo](https://makemeahanzi.herokuapp.com)
 
 Make Me a Hanzi provides dictionary and graphical data for over 9000 of the
 most common simplified and traditional Chinese characters. Among other things,
 this data includes stroke-order vector graphics for all these characters. You
-can see the project output at the [demo site](http://makemeahanzi.mod.bz),
+can see the project output at the [demo site](https://makemeahanzi.herokuapp.com)
 where you can look up a characters by drawing them. You can also download the
 data for use in your own site or app.
 
