@@ -2,6 +2,8 @@
 
 ### [Make Me a Hanzi Demo](https://makemeahanzi.herokuapp.com)
 
+### [New: Inkstone Chinese writing app](https://skishore.github.io/inkstone/)
+
 Make Me a Hanzi provides dictionary and graphical data for over 9000 of the
 most common simplified and traditional Chinese characters. Among other things,
 this data includes stroke-order vector graphics for all these characters. You
