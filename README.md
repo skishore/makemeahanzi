@@ -2,7 +2,7 @@
 
 ### [Make Me a Hanzi Demo](https://makemeahanzi.herokuapp.com)
 
-### [New: Inkstone Chinese writing app](https://skishore.github.io/inkstone/)
+### [New: Inkstone Chinese writing app](https://www.skishore.me/inkstone/)
 
 Make Me a Hanzi provides dictionary and graphical data for over 9000 of the
 most common simplified and traditional Chinese characters. Among other things,
@@ -11,7 +11,7 @@ can see the project output at the [demo site](https://makemeahanzi.herokuapp.com
 where you can look up a characters by drawing them. You can also download the
 data for use in your own site or app.
 
-See the [project site](http://skishore.github.io/makemeahanzi) for general
+See the [project site](https://www.skishore.me/makemeahanzi) for general
 information and updates on the project.
 
 Make Me a Hanzi data is split into two data files,
