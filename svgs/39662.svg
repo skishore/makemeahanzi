@@ -11,29 +11,6 @@
         @keyframes keyframes0 {
           from {
             stroke: blue;
-            stroke-dashoffset: 529;
-            stroke-width: 128;
-          }
-          63% {
-            animation-timing-function: step-end;
-            stroke: blue;
-            stroke-dashoffset: 0;
-            stroke-width: 128;
-          }
-          to {
-            stroke: black;
-            stroke-width: 1024;
-          }
-        }
-        #make-me-a-hanzi-animation-0 {
-          animation: keyframes0 0.6805013020833334s both;
-          animation-delay: 0s;
-          animation-timing-function: linear;
-        }
-      
-        @keyframes keyframes1 {
-          from {
-            stroke: blue;
             stroke-dashoffset: 438;
             stroke-width: 128;
           }
@@ -48,9 +25,32 @@
             stroke-width: 1024;
           }
         }
+        #make-me-a-hanzi-animation-0 {
+          animation: keyframes0 0.6064453125s both;
+          animation-delay: 0s;
+          animation-timing-function: linear;
+        }
+      
+        @keyframes keyframes1 {
+          from {
+            stroke: blue;
+            stroke-dashoffset: 529;
+            stroke-width: 128;
+          }
+          63% {
+            animation-timing-function: step-end;
+            stroke: blue;
+            stroke-dashoffset: 0;
+            stroke-width: 128;
+          }
+          to {
+            stroke: black;
+            stroke-width: 1024;
+          }
+        }
         #make-me-a-hanzi-animation-1 {
-          animation: keyframes1 0.6064453125s both;
-          animation-delay: 0.6805013020833334s;
+          animation: keyframes1 0.6805013020833334s both;
+          animation-delay: 0.6064453125s;
           animation-timing-function: linear;
         }
       
@@ -355,9 +355,9 @@
       
     </style>
     
-      <path d="M 340 551 Q 337 588 335 619 L 334 637 Q 331 674 330 696 L 330 713 Q 330 740 331 766 L 323 790 L 321 792 Q 300 807 276 814 Q 264 818 256 813 Q 250 807 256 794 Q 275 760 284 724 Q 291 687 306 544 L 340 551 Z" fill="lightgray"></path>
-    
       <path d="M 331 766 Q 361 762 470 787 Q 477 790 488 792 Q 509 798 512 801 Q 519 808 515 815 Q 508 824 485 828 Q 464 831 390 804 Q 360 797 325 791 Q 322 791 323 790 L 331 766 Z" fill="lightgray"></path>
+    
+      <path d="M 340 551 Q 337 588 335 619 L 334 637 Q 331 674 330 696 L 330 713 Q 330 740 331 766 L 323 790 L 321 792 Q 300 807 276 814 Q 264 818 256 813 Q 250 807 256 794 Q 275 760 284 724 Q 291 687 306 544 L 340 551 Z" fill="lightgray"></path>
     
       <path d="M 330 696 Q 357 684 449 703 Q 462 706 477 709 Q 496 713 499 716 Q 506 722 502 728 Q 498 735 477 741 Q 455 745 435 736 Q 384 721 333 714 Q 330 714 330 713 L 330 696 Z" fill="lightgray"></path>
     
@@ -387,14 +387,14 @@
     
     
       <clipPath id="make-me-a-hanzi-clip-0">
-        <path d="M 340 551 Q 337 588 335 619 L 334 637 Q 331 674 330 696 L 330 713 Q 330 740 331 766 L 323 790 L 321 792 Q 300 807 276 814 Q 264 818 256 813 Q 250 807 256 794 Q 275 760 284 724 Q 291 687 306 544 L 340 551 Z"></path>
-      </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-0)" d="M 263 806 L 293 779 L 303 760 L 321 571 L 320 563 L 309 556" fill="none" id="make-me-a-hanzi-animation-0" stroke-dasharray="401 802" stroke-linecap="round"></path>
-    
-      <clipPath id="make-me-a-hanzi-clip-1">
         <path d="M 331 766 Q 361 762 470 787 Q 477 790 488 792 Q 509 798 512 801 Q 519 808 515 815 Q 508 824 485 828 Q 464 831 390 804 Q 360 797 325 791 Q 322 791 323 790 L 331 766 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-1)" d="M 327 785 L 353 780 L 475 809 L 505 810" fill="none" id="make-me-a-hanzi-animation-1" stroke-dasharray="310 620" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-0)" d="M 327 785 L 353 780 L 475 809 L 505 810" fill="none" id="make-me-a-hanzi-animation-0" stroke-dasharray="310 620" stroke-linecap="round"></path>
+    
+      <clipPath id="make-me-a-hanzi-clip-1">
+        <path d="M 340 551 Q 337 588 335 619 L 334 637 Q 331 674 330 696 L 330 713 Q 330 740 331 766 L 323 790 L 321 792 Q 300 807 276 814 Q 264 818 256 813 Q 250 807 256 794 Q 275 760 284 724 Q 291 687 306 544 L 340 551 Z"></path>
+      </clipPath>
+      <path clip-path="url(#make-me-a-hanzi-clip-1)" d="M 263 806 L 293 779 L 303 760 L 321 571 L 320 563 L 309 556" fill="none" id="make-me-a-hanzi-animation-1" stroke-dasharray="401 802" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-2">
         <path d="M 330 696 Q 357 684 449 703 Q 462 706 477 709 Q 496 713 499 716 Q 506 722 502 728 Q 498 735 477 741 Q 455 745 435 736 Q 384 721 333 714 Q 330 714 330 713 L 330 696 Z"></path>
