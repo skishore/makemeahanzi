@@ -193,8 +193,11 @@ stroke orders in Japan, Taiwan, and elsewhere. We should build data for
 these orders as well.</p></li>
 <li>
 <p>As an experimental next step, we have produced an animated SVG image for
-each character that we have data for (see the svgs directory). It's easy to
-It's easy to embed these SVGs in a website. A minimal example is as follows:</p>
+each character that we have data for (see the svgs directory).The SVGs are
+named by the Unicode codepoint of the character they correspond to.
+Using Javascript, you can find the codepoint of a character `x` by calling
+`x.charCodeAt(0)`. It's easy to embed these SVGs in a website. A minimal
+example is as follows:</p>
 
 <pre><code>&lt;body&gt;&lt;embed src="31119.svg" width="200px" height="200px"/&gt;&lt;/body&gt;
 </code></pre>
