@@ -141,8 +141,11 @@ rely on the fact that the two files will always come in the same order.
   these orders as well.
 
 - As an experimental next step, we have produced an animated SVG image for
-  each character that we have data for (see the svgs directory). It's easy to
-  It's easy to embed these SVGs in a website. A minimal example is as follows:
+  each character that we have data for (see the svgs directory). The SVGs are
+  named by the Unicode codepoint of the character they correspond to.
+  Using Javascript, you can find the codepoint of a character `x` by calling
+  `x.charCodeAt(0)`. It's easy to embed these SVGs in a website. A minimal
+  example is as follows:
 
       <body><embed src="31119.svg" width="200px" height="200px"/></body>
 
