@@ -135,11 +135,6 @@ rely on the fact that the two files will always come in the same order.
 
 ### TODOs and Future Work
 
-- Right now, all stroke order information is based on the People's Republic
-  of China (PRC) stroke order. Some characters are written with different
-  stroke orders in Japan, Taiwan, and elsewhere. We should build data for
-  these orders as well.
-
 - As an experimental next step, we have produced an animated SVG image for
   each character that we have data for (see the svgs directory). The SVGs are
   named by the Unicode codepoint of the character they correspond to.
@@ -155,5 +150,18 @@ rely on the fact that the two files will always come in the same order.
   when the first is complete. However, the images are still the easiest way
   to make use of this data..
 
-These TODOs will be addressed based on prospective clients' needs, so if you
-want something done, please let me know!
+There are quite a few clients using the Make Me a Hanzi data. Many of them
+have had to do additional preprocessing of it for their use case. If you might
+find this data useful, please feel free to contact me by email - I may be able
+to give tips or suggest algorithms for making use of it.
+
+### Related projects
+
+- This project is focused on building stroke order diagrams that follow the
+  People's Republic of China (PRC) stroke order. Some characters are written
+  with different stroke orders in Japan, Taiwan, and elsewhere. I don't have
+  the time or knowledge to produce similar data for those orderings, but
+  there are other resources that you can try:
+
+    - parsimohni's animCJK project provides Japanese stroke order data: [GitHub](https://github.com/parsimonhi/animCJK) and [Demo](http://gooo.free.fr/animCJK/official/)
+    - KanjiVG also has Japanese stroke order data, and isn't based on Arphic's font: [Website](http://kanjivg.tagaini.net/)
