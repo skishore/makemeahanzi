@@ -28,7 +28,7 @@ const changeGlyph = (method, argument) => {
   Meteor.call(method, argument, function(error, data) {
     assert(!error, error);
     Session.set('editor.glyph', data);
-    window.location.hash = data.character;
+    window.location.hash = encodeURIComponent(data.character);
   });
 }
 
@@ -95,7 +95,7 @@ const incrementStage = (amount) => {
 }
 
 const loadCharacter = () => {
-  const character = window.location.hash[1];
+  const character = decodeURIComponent(window.location.hash.slice(1));
   const glyph = Session.get('editor.glyph');
   if (!character) {
     changeGlyph('getNextGlyph');
