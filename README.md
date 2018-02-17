@@ -171,3 +171,4 @@ to give tips or suggest algorithms for making use of it.
 
     - gugray maintains HanDeDict, a Chinese-German dictionary that uses these animations: [GitHub](https://github.com/gugray/HanDeDict/) and [Website](https://handedict.zydeo.net/de)
     - meshonline wrote a free iOS app for learning Chinese characters using this data: [GitHub](https://github.com/meshonline/Hanzi) and [App Store](https://itunes.apple.com/us/app/%E7%B9%81%E4%BD%93%E5%AD%97%E5%B8%96/id1333520855?l=zh&ls=1&mt=8)
+    - embermitre uses Make Me a Hanzi animations in Hanping Chinese Dictionary: [Lite version](https://play.google.com/store/apps/details?id=com.embermitre.hanping.app.lite) and [Pro version](https://play.google.com/store/apps/details?id=com.embermitre.hanping.app.pro)
