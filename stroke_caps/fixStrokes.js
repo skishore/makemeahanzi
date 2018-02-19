@@ -26,7 +26,8 @@ const getPossibleClipPoints = (pathString) => {
 };
 
 const CLIP_THRESH = 2;
-const COS_SIM_THRESH = 0.95;
+const LOWER_COS_SIM_THRESH = 0.89;
+const UPPER_COS_SIM_THRESH = 0.97;
 
 const getCharClipData = (strokes) => {
   const outlines = strokes.map(stroke => getOutlinePoints(stroke));
@@ -41,12 +42,12 @@ const getCharClipData = (strokes) => {
     possibleClipPoints.forEach(clipPointData => {
       const clipPoints = clipPointData.clipPoints;
       // this clip point is super tiny, it's probably just a glitch, skip it
-      if (dist(clipPoints[0], clipPoints[1]) < 1) return;
+      if (dist(clipPoints[0], clipPoints[1]) < 3.1) return;
       const clipPoint = clipPointData.clipPoints;
       const cosSim0 = getCosSimAroundPoint(clipPoint[0], strokeOutline);
       const cosSim1 = getCosSimAroundPoint(clipPoint[1], strokeOutline);
       // The angle around this clip point is flat, skip it
-      if (cosSim0 > COS_SIM_THRESH && cosSim1 > COS_SIM_THRESH) return;
+      if (Math.min(cosSim0, cosSim1) > LOWER_COS_SIM_THRESH && Math.max(cosSim0, cosSim1) > UPPER_COS_SIM_THRESH) return;
       outlines.forEach((otherOutline, j) => {
         if (i === j) return;
         const dist0 = distToPath(clipPoint[0], otherOutline);
@@ -65,7 +66,7 @@ const getCharClipData = (strokes) => {
               existingData.middlePoint = clipPoints[0]; // eslint-disable-line no-param-reassign
               existingData.at.estTanPoints = [existingData.at.estTanPoints[0], clipPointData.estTanPoints[1]]; // eslint-disable-line no-param-reassign
               existingData.at.clipPoints = [existingData.at.clipPoints[0], clipPoints[1]]; // eslint-disable-line no-param-reassign
-              existingData.pointString += clipPointData.pointString.replace(/.*L/, ' L'); // eslint-disable-line no-param-reassign
+              existingData.at.pointString += clipPointData.pointString.replace(/.*L/, ' L'); // eslint-disable-line no-param-reassign
             }
           });
           if (!isDoubleClipped) {
@@ -99,6 +100,9 @@ const getNewStrokeTip = (strokeClipData) => {
   let distControl0 = Math.min(maxDistControl0, 30);
   let distControl1 = Math.min(maxDistControl1, 30);
 
+  if (isNaN(distControl0)) distControl0 = 30;
+  if (isNaN(distControl1)) distControl1 = 30;
+
   if (strokeClipData.isDouble) {
     const midDist0 = dist(strokeClipData.middlePoint, clipPoints[0]);
     const midDist1 = dist(strokeClipData.middlePoint, clipPoints[1]);
@@ -119,7 +123,7 @@ const fixStrokes = (strokes) => {
   const summary = {
     modified: false,
     hasDoubleClippedStroke: false,
-    modifiedStrokes: [],
+    modifiedStrokes: new Set(),
   };
   const fixedStrokes = strokes.slice(0);
   const charClipData = getCharClipData(strokes);
@@ -130,7 +134,7 @@ const fixStrokes = (strokes) => {
     const newTip = getNewStrokeTip(strokeClipData);
     fixedStrokes[strokeNum] = roundPathPoints(fixedStrokes[strokeNum].replace(clipPointData.pointString, newTip));
     if (strokeClipData.isDouble) summary.hasDoubleClippedStroke = true;
-    summary.modifiedStrokes.push(strokeNum);
+    summary.modifiedStrokes.add(strokeNum);
   });
   summary.strokes = fixedStrokes;
   return summary;
