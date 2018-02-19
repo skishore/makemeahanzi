@@ -5,7 +5,7 @@ const norm = (vect) => dist(vect, {x: 0, y: 0});
 const subtract = (p1, p2) => ({x: p1.x - p2.x, y: p1.y - p2.y});
 const ptEq = (p1, p2) => p1.x === p2.x && p1.y === p2.y;
 
-const getOutlinePoints = (pathString, count = 5000) => {
+const getOutlinePoints = (pathString, count = 1000) => {
   const path = svgPathUtils(pathString);
   const delta = path.length() / count;
   const outline = [];
@@ -46,8 +46,8 @@ const getIndexAtDelta = (index, delta, pathOutline) => {
 const getCosSimAroundPoint = (point, pathOutline) => {
   // if this is 1, the point is on a flat line.
   const pointIndex = getPointIndex(point, pathOutline);
-  const preIndex = getIndexAtDelta(pointIndex, -5, pathOutline);
-  const postIndex = getIndexAtDelta(pointIndex, 5, pathOutline);
+  const preIndex = getIndexAtDelta(pointIndex, -3, pathOutline);
+  const postIndex = getIndexAtDelta(pointIndex, 3, pathOutline);
   const vect1 = subtract(pathOutline[pointIndex], pathOutline[preIndex]);
   const vect2 = subtract(pathOutline[postIndex], pathOutline[pointIndex]);
   return (vect1.x * vect2.x + vect1.y * vect2.y) / (norm(vect1) * norm(vect2));
@@ -80,8 +80,8 @@ const estimateTanPoints = (pathOutline, clipPoints) => {
   const cpIndex0 = getPointIndex(clipPoints[0], pathOutline);
   const cpIndex1 = getPointIndex(clipPoints[1], pathOutline);
   return [
-    pathOutline[getIndexAtDelta(cpIndex0, -40, pathOutline)],
-    pathOutline[getIndexAtDelta(cpIndex1, 40, pathOutline)],
+    pathOutline[getIndexAtDelta(cpIndex0, -15, pathOutline)],
+    pathOutline[getIndexAtDelta(cpIndex1, 15, pathOutline)],
   ];
 };
 
