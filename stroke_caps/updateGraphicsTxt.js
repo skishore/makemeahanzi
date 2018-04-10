@@ -30,7 +30,7 @@ inputLines.forEach(line => {
   log(`${count}/${total}:\t${data.character}`);
   const correction = fixStrokes(data.strokes);
   if (correction.modified) {
-    log(`modified ${correction.modifiedStrokes.size} strokes`);
+    log(`modified ${correction.modifiedStrokes.length} strokes`);
     modifiedChars.push(data.character);
     
     if (correction.hasDoubleClippedStroke) {
