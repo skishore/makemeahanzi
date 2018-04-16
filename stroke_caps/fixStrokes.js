@@ -79,6 +79,7 @@ class Clip {
     let distControl0 = Math.min(maxDistControl0, 30);
     let distControl1 = Math.min(maxDistControl1, 30);
 
+    // if the 2 lines are parallel, there will be no intersection point. Just use 30 in that case.
     if (isNaN(distControl0)) distControl0 = 30;
     if (isNaN(distControl1)) distControl1 = 30;
 
