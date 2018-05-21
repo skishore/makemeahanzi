@@ -1,0 +1,11 @@
+"ignore": [
+    "**/deps/**",
+    "**/node_modules/**",
+    "**/thirdparty/**",
+    "**/third_party/**",
+    "**/build/**"
+  ]
+  
+"critics": {
+  "lint": {"engine": "eslint"}
+}
