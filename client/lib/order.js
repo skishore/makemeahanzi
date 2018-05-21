@@ -167,8 +167,8 @@ class OrderStage extends AbstractStage {
   constructor(glyph) {
     super('order');
     this.adjusted = glyph.stages.order;
-    this.medians = glyph.stages.strokes.map(median_util.findStrokeMedian);
-    this.strokes = glyph.stages.strokes;
+    this.medians = glyph.stages.strokes.raw.map(median_util.findStrokeMedian);
+    this.strokes = glyph.stages.strokes.corrected;
 
     const tree = decomposition_util.convertDecompositionToTree(
         glyph.stages.analysis.decomposition);
@@ -285,7 +285,7 @@ Template.order_stage.helpers({
       const color = colors[index % colors.length];
       result.paths.push({
         cls: 'selectable',
-        d: character.stages.strokes[element.stroke],
+        d: character.stages.strokes.corrected[element.stroke],
         fill: index < 0 ? 'lightgray' : color,
         stroke: index < 0 ? 'lightgray' : 'black',
         stroke_index: element.stroke,
@@ -307,7 +307,7 @@ Template.order_stage.helpers({
         continue;
       }
       const component = [];
-      for (let stroke of glyph.stages.strokes) {
+      for (let stroke of glyph.stages.strokes.corrected) {
         component.push({d: stroke, fill: color, stroke: 'black'});
       }
       result.push({glyph: {paths: component}, top: `${138*index + 8}px`});

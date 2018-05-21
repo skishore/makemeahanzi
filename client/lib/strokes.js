@@ -1,6 +1,7 @@
 import {AbstractStage} from '/client/lib/abstract';
 import {assert} from '/lib/base';
 import {cjklib} from '/lib/cjklib';
+import {fixStrokes} from '/lib/stroke_caps/fixStrokes';
 import {stroke_extractor} from '/lib/stroke_extractor';
 
 const getStatusLine = (actual, expected) => {
@@ -26,27 +27,33 @@ const getStrokePaths = (strokes, include, colors) => {
 class StrokesStage extends AbstractStage {
   constructor(glyph) {
     super('strokes');
-    const include = this.include = {};
-    this.original = stroke_extractor.getStrokes(
+    const raw = stroke_extractor.getStrokes(
         glyph.stages.path, glyph.stages.bridges).strokes;
-    this.original.map((x) => this.include[x] = true);
-    if (glyph.stages.strokes &&
-        glyph.stages.strokes.filter((x) => !include[x]).length === 0) {
-      this.original.map((x) => this.include[x] = false);
-      glyph.stages.strokes.map((x) => include[x] = true);
+    this.include = {};
+    this.original = {corrected: fixStrokes(raw), raw};
+    this.original.corrected.map((x) => this.include[x] = true);
+    if (glyph.stages.strokes) {
+      this.original.corrected.map((x) => this.include[x] = false);
+      glyph.stages.strokes.corrected.map((x) => this.include[x] = true);
     }
-    this.adjusted = this.original.filter((x) => this.include[x]);
+  }
+  getStageOutput() {
+    const fn = (_, i) => this.include[this.original.corrected[i]];
+    return {
+      raw: this.original.raw.filter(fn),
+      corrected: this.original.corrected.filter(fn),
+    };
   }
   handleEvent(event, template) {
     assert(this.include.hasOwnProperty(template.d));
     this.include[template.d] = !this.include[template.d];
-    this.adjusted = this.original.filter((x) => this.include[x]);
   }
   refreshUI(character, metadata) {
+    const strokes = this.original.corrected;
     Session.set('stage.paths',
-                getStrokePaths(this.original, this.include, this.colors));
+                getStrokePaths(strokes, this.include, this.colors));
     const data = cjklib.getCharacterData(character);
-    const actual = this.adjusted.length;
+    const actual = this.getStageOutput().corrected.length;
     const expected = metadata.strokes || data.strokes;
     Session.set('stage.status', [getStatusLine(actual, expected)]);
   }

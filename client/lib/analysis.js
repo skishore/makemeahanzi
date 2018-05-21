@@ -158,7 +158,7 @@ const guessPhoneticAndSemanticComponents = (glyph, components) => {
 class AnalysisStage extends AbstractStage {
   constructor(glyph) {
     super('analysis');
-    this.strokes = glyph.stages.strokes;
+    this.strokes = glyph.stages.strokes.corrected;
     const analysis = glyph.stages.analysis || {};
     this.tree = initializeDecompositionTree(analysis, glyph.character);
     const components = collectComponents(this.tree);

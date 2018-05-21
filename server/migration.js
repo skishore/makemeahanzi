@@ -2,6 +2,7 @@ import {getAnimationData} from '/lib/animation';
 import {assert, getPWD, Point} from '/lib/base';
 import {cjklib} from '/lib/cjklib';
 import {Glyphs} from '/lib/glyphs';
+import {fixStrokes} from '/lib/stroke_caps/fixStrokes';
 import {stroke_extractor} from '/lib/stroke_extractor';
 import {svg} from '/lib/svg';
 
@@ -15,6 +16,13 @@ const addSimplifiedAndTraditionalFields = (glyph) => {
   const data = cjklib.getCharacterData(glyph.character);
   glyph.simplified = data.simplified;
   glyph.traditional = data.traditional;
+  Glyphs.save(glyph);
+}
+
+const addStrokeCaps = (glyph) => {
+  const raw = glyph.stages.strokes;
+  if (raw.raw || raw.corrected) return;
+  glyph.stages.strokes = {corrected: fixStrokes(raw), raw};
   Glyphs.save(glyph);
 }
 
@@ -52,7 +60,7 @@ const dumpGlyph = (dictionary, graphics) => (glyph) => {
   const data = cjklib.getCharacterData(glyph.character);
   const pinyin = (glyph.metadata.pinyin || data.pinyin || '')
                      .split(',').map((x) => x.trim()).filter((x) => x);
-  const strokes = order.map((x) => glyph.stages.strokes[x.stroke]);
+  const strokes = order.map((x) => glyph.stages.strokes.corrected[x.stroke]);
   const medians = order.map((x) => x.median);
   strokes.map((x) => assert(x));
   medians.map((x) => assert(x));
