@@ -177,7 +177,7 @@ const exportSVGs = () => {
     const codepoint = glyph.character.codePointAt(0);
     const medians = glyph.stages.order.map((x) => x.median);
     const strokes = glyph.stages.order.map(
-        (x) => glyph.stages.strokes[x.stroke]);
+        (x) => glyph.stages.strokes.corrected[x.stroke]);
     const raw = SSR.render('animation', getAnimationData(strokes, medians));
     const svg = raw.replace(/\n  /g, '\n').split('\n').slice(1, -2).join('\n');
     fs.writeFileSync(path.join(directory, `${codepoint}.svg`), svg);
