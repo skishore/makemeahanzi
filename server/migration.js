@@ -255,6 +255,17 @@ Meteor.methods({
 
 Meteor.startup(() => {
   SSR.compileTemplate('animation', Assets.getText('animation.html'));
+
+  const bytes = x => Npm.require('fs').readFileSync(`${getPWD()}/${x}`);
+  const lines = x => bytes(x).toString().trim().split('\n');
+  lines('diffs.txt').forEach(line => {
+    const glyph = Glyphs.get(String.fromCharCode(parseInt(line, 10)));
+    console.log(glyph.character);
+    const raw = glyph.stages.strokes.raw;
+    glyph.stages.strokes.corrected = fixStrokes(fixStrokes(raw));
+    Glyphs.save(glyph);
+  });
+
   const completion_callback = undefined;
   const per_glyph_callback = undefined;
   if (!per_glyph_callback && !completion_callback) {
