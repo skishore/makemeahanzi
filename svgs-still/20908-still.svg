@@ -1,0 +1,53 @@
+<svg version="1.1" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1" transform="scale(4, 4)">
+    <line x1="0" y1="0" x2="256" y2="256"/>
+    <line x1="256" y1="0" x2="0" y2="256"/>
+    <line x1="128" y1="0" x2="128" y2="256"/>
+    <line x1="0" y1="128" x2="256" y2="128"/>
+  </g>
+  <g transform="scale(1, -1) translate(0, -900)">
+    <style type="text/css">
+        .stroke1 {fill: #BF0909;}
+        .stroke2 {fill: #BFBF09;}
+        .stroke3 {fill: #09BF09;}
+        .stroke4 {fill: #09BFBF;}
+        .stroke5 {fill: #0909BF;}
+        .stroke6 {fill: #BF09BF;}
+        .stroke7 {fill: #42005e;}
+        .stroke8 {fill: #ff3333;}
+        .stroke9 {fill: #BFBFBF;}
+        .stroke10 {fill: #00a53f;}
+        .stroke11 {fill: #fff000;}
+        .stroke12 {fill: #6600a5;}
+        .stroke13 {fill: #0053a5;}
+        .stroke14 {fill: #62c22b;}
+        .stroke15 {fill: #BF09BF;}
+        .stroke16 {fill: #BF0909;}
+        .stroke17 {fill: #BFBF09;}
+        .stroke18 {fill: #09BF09;}
+        .stroke19 {fill: #09BFBF;}
+        .stroke20 {fill: #0909BF;}
+        text {
+            font-family: Helvetica;
+            font-size: 50px;
+            fill: #FFFFFF;
+            paint-order: stroke;
+            stroke: #000000;
+            stroke-width: 4px;
+            stroke-linecap: butt;
+            stroke-linejoin: miter;
+            font-weight: 800;
+        }
+    </style>
+
+    <path d="M 430 680 Q 454 723 514 798 Q 526 811 511 828 Q 469 867 441 864 Q 429 863 430 847 Q 433 724 291 586 Q 260 562 222 525 Q 212 509 229 513 Q 256 516 312 559 L 328 571 Q 374 613 413 657 L 430 680 Z" class="stroke1"/>
+    <path d="M 520 459 Q 580 525 645 615 Q 664 643 693 661 Q 709 668 711 678 Q 711 691 682 711 Q 646 738 631 739 Q 618 739 606 731 Q 494 688 445 682 Q 436 682 430 680 C 400 676 384 665 413 657 Q 461 632 564 676 Q 583 680 590 674 Q 594 670 573 627 Q 534 552 475 492 L 450 465 Q 306 323 93 257 Q 81 253 82 248 Q 82 244 90 242 Q 117 238 178 251 Q 241 263 309 298 Q 391 337 473 412 Q 482 421 492 430 L 520 459 Z" class="stroke2"/>
+    <path d="M 492 430 Q 516 411 543 386 Q 619 322 717 258 Q 739 239 772 244 Q 872 257 950 280 Q 990 292 985 302 Q 984 308 940 314 Q 730 341 668 371 Q 614 395 520 459 L 475 492 Q 444 516 412 541 Q 369 577 332 572 Q 329 572 328 571 C 298 570 296 570 312 559 Q 315 555 327 548 Q 370 530 450 465 L 492 430 Z" class="stroke3"/>
+    <path d="M 445 250 Q 493 222 544 188 Q 560 178 575 180 Q 585 181 589 196 Q 590 212 578 240 Q 568 265 524 281 Q 425 305 411 295 Q 407 291 410 278 Q 416 268 445 250 Z" class="stroke4"/>
+    <path d="M 419 79 Q 486 25 557 -40 Q 570 -53 588 -53 Q 598 -53 605 -39 Q 609 -24 601 8 Q 594 47 537 80 Q 479 108 415 130 Q 399 134 392 131 Q 386 127 388 114 Q 392 102 419 79 Z" class="stroke5"/>
+    <text x="442" y="851" style="transform-origin:442px 851px; transform:scale(1,-1);">1</text>
+    <text x="420" y="660" style="transform-origin:420px 660px; transform:scale(1,-1);">2</text>
+    <text x="318" y="560" style="transform-origin:318px 560px; transform:scale(1,-1);">3</text>
+    <text x="416" y="290" style="transform-origin:416px 290px; transform:scale(1,-1);">4</text>
+    <text x="398" y="123" style="transform-origin:398px 123px; transform:scale(1,-1);">5</text></g>
+</svg>
