@@ -1,0 +1,47 @@
+<svg version="1.1" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1" transform="scale(4, 4)">
+    <line x1="0" y1="0" x2="256" y2="256"/>
+    <line x1="256" y1="0" x2="0" y2="256"/>
+    <line x1="128" y1="0" x2="128" y2="256"/>
+    <line x1="0" y1="128" x2="256" y2="128"/>
+  </g>
+  <g transform="scale(1, -1) translate(0, -900)">
+    <style type="text/css">
+        .stroke1 {fill: #BF0909;}
+        .stroke2 {fill: #BFBF09;}
+        .stroke3 {fill: #09BF09;}
+        .stroke4 {fill: #09BFBF;}
+        .stroke5 {fill: #0909BF;}
+        .stroke6 {fill: #BF09BF;}
+        .stroke7 {fill: #42005e;}
+        .stroke8 {fill: #ff3333;}
+        .stroke9 {fill: #BFBFBF;}
+        .stroke10 {fill: #00a53f;}
+        .stroke11 {fill: #fff000;}
+        .stroke12 {fill: #6600a5;}
+        .stroke13 {fill: #0053a5;}
+        .stroke14 {fill: #62c22b;}
+        .stroke15 {fill: #BF09BF;}
+        .stroke16 {fill: #BF0909;}
+        .stroke17 {fill: #BFBF09;}
+        .stroke18 {fill: #09BF09;}
+        .stroke19 {fill: #09BFBF;}
+        .stroke20 {fill: #0909BF;}
+        text {
+            font-family: Helvetica;
+            font-size: 50px;
+            fill: #FFFFFF;
+            paint-order: stroke;
+            stroke: #000000;
+            stroke-width: 4px;
+            stroke-linecap: butt;
+            stroke-linejoin: miter;
+            font-weight: 800;
+        }
+    </style>
+
+    <path d="M 792 167 Q 503 155 285 107 Q 251 100 260 139 Q 267 238 275 341 Q 279 372 265 390 Q 244 412 213 429 Q 197 436 185 433 Q 170 426 182 402 Q 225 309 213 217 Q 204 127 169 87 Q 144 65 154 47 Q 167 26 189 12 Q 207 3 222 13 Q 268 64 601 110 Q 751 129 781 115 C 811 110 822 168 792 167 Z" class="stroke1"/>
+    <path d="M 781 115 Q 781 94 804 49 Q 814 31 828 45 Q 855 76 854 172 Q 863 376 872 399 Q 873 408 877 414 Q 886 432 872 447 Q 850 463 811 483 Q 796 490 783 483 Q 774 479 778 463 Q 814 408 794 178 Q 793 174 792 167 L 781 115 Z" class="stroke2"/>
+    <text x="192" y="419" style="transform-origin:192px 419px; transform:scale(1,-1);">1</text>
+    <text x="791" y="470" style="transform-origin:791px 470px; transform:scale(1,-1);">2</text></g>
+</svg>

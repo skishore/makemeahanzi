@@ -1,0 +1,49 @@
+<svg version="1.1" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1" transform="scale(4, 4)">
+    <line x1="0" y1="0" x2="256" y2="256"/>
+    <line x1="256" y1="0" x2="0" y2="256"/>
+    <line x1="128" y1="0" x2="128" y2="256"/>
+    <line x1="0" y1="128" x2="256" y2="128"/>
+  </g>
+  <g transform="scale(1, -1) translate(0, -900)">
+    <style type="text/css">
+        .stroke1 {fill: #BF0909;}
+        .stroke2 {fill: #BFBF09;}
+        .stroke3 {fill: #09BF09;}
+        .stroke4 {fill: #09BFBF;}
+        .stroke5 {fill: #0909BF;}
+        .stroke6 {fill: #BF09BF;}
+        .stroke7 {fill: #42005e;}
+        .stroke8 {fill: #ff3333;}
+        .stroke9 {fill: #BFBFBF;}
+        .stroke10 {fill: #00a53f;}
+        .stroke11 {fill: #fff000;}
+        .stroke12 {fill: #6600a5;}
+        .stroke13 {fill: #0053a5;}
+        .stroke14 {fill: #62c22b;}
+        .stroke15 {fill: #BF09BF;}
+        .stroke16 {fill: #BF0909;}
+        .stroke17 {fill: #BFBF09;}
+        .stroke18 {fill: #09BF09;}
+        .stroke19 {fill: #09BFBF;}
+        .stroke20 {fill: #0909BF;}
+        text {
+            font-family: Helvetica;
+            font-size: 50px;
+            fill: #FFFFFF;
+            paint-order: stroke;
+            stroke: #000000;
+            stroke-width: 4px;
+            stroke-linecap: butt;
+            stroke-linejoin: miter;
+            font-weight: 800;
+        }
+    </style>
+
+    <path d="M 482 514 Q 497 657 508 682 Q 515 704 496 711 Q 441 745 412 733 Q 397 727 406 711 Q 438 662 425 541 L 416 463 Q 377 315 261 221 Q 255 218 227 192 Q 216 181 229 179 Q 245 179 278 198 Q 335 229 374 274 Q 440 342 475 472 L 482 514 Z" class="stroke1"/>
+    <path d="M 475 472 Q 506 431 553 377 Q 650 265 710 214 Q 737 187 760 190 L 893 216 Q 919 221 919 227 Q 919 231 913 235 Q 901 243 825 269 Q 715 307 681 333 Q 578 412 482 514 C 461 536 457 496 475 472 Z" class="stroke2"/>
+    <path d="M 208 633 L 213 710 Q 205 719 176 733 Q 123 757 108 739 Q 95 733 112 711 Q 128 693 136 547 Q 149 198 108 103 Q 103 94 94 86 Q 70 65 85 45 Q 92 25 110 12 Q 129 -4 149 12 Q 161 25 198 39 Q 288 71 450 80 Q 511 85 587 86 Q 759 86 866 73 Q 921 66 923 90 Q 923 109 883 133 Q 843 157 819 156 Q 815 156 808 155 Q 597 148 367 120 Q 204 92 196 103 Q 189 110 194 237 Q 194 454 208 633 Z" class="stroke3"/>
+    <text x="416" y="720" style="transform-origin:416px 720px; transform:scale(1,-1);">1</text>
+    <text x="486" y="506" style="transform-origin:486px 506px; transform:scale(1,-1);">2</text>
+    <text x="125" y="727" style="transform-origin:125px 727px; transform:scale(1,-1);">3</text></g>
+</svg>

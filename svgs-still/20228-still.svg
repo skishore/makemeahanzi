@@ -1,0 +1,55 @@
+<svg version="1.1" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="lightgray" stroke-dasharray="1,1" stroke-width="1" transform="scale(4, 4)">
+    <line x1="0" y1="0" x2="256" y2="256"/>
+    <line x1="256" y1="0" x2="0" y2="256"/>
+    <line x1="128" y1="0" x2="128" y2="256"/>
+    <line x1="0" y1="128" x2="256" y2="128"/>
+  </g>
+  <g transform="scale(1, -1) translate(0, -900)">
+    <style type="text/css">
+        .stroke1 {fill: #BF0909;}
+        .stroke2 {fill: #BFBF09;}
+        .stroke3 {fill: #09BF09;}
+        .stroke4 {fill: #09BFBF;}
+        .stroke5 {fill: #0909BF;}
+        .stroke6 {fill: #BF09BF;}
+        .stroke7 {fill: #42005e;}
+        .stroke8 {fill: #ff3333;}
+        .stroke9 {fill: #BFBFBF;}
+        .stroke10 {fill: #00a53f;}
+        .stroke11 {fill: #fff000;}
+        .stroke12 {fill: #6600a5;}
+        .stroke13 {fill: #0053a5;}
+        .stroke14 {fill: #62c22b;}
+        .stroke15 {fill: #BF09BF;}
+        .stroke16 {fill: #BF0909;}
+        .stroke17 {fill: #BFBF09;}
+        .stroke18 {fill: #09BF09;}
+        .stroke19 {fill: #09BFBF;}
+        .stroke20 {fill: #0909BF;}
+        text {
+            font-family: Helvetica;
+            font-size: 50px;
+            fill: #FFFFFF;
+            paint-order: stroke;
+            stroke: #000000;
+            stroke-width: 4px;
+            stroke-linecap: butt;
+            stroke-linejoin: miter;
+            font-weight: 800;
+        }
+    </style>
+
+    <path d="M 234 519 Q 271 568 312 632 Q 337 675 359 697 Q 369 707 364 722 Q 360 735 329 760 Q 301 779 282 778 Q 263 777 271 754 Q 284 724 273 699 Q 239 615 188 538 Q 139 463 71 380 Q 61 370 58 363 Q 54 351 69 354 Q 105 358 199 476 Q 203 482 208 487 L 234 519 Z" class="stroke1"/>
+    <path d="M 208 487 Q 211 478 216 470 Q 247 412 228 229 Q 222 177 209 123 Q 194 74 231 26 Q 232 23 236 20 Q 255 4 267 32 Q 282 74 282 122 Q 279 372 286 429 Q 293 457 283 468 Q 265 490 251 504 Q 244 513 234 519 C 210 538 196 514 208 487 Z" class="stroke2"/>
+    <path d="M 751 567 Q 782 651 817 675 Q 835 694 820 712 Q 804 727 750 753 Q 732 762 710 753 Q 595 710 444 694 Q 426 693 428 682 Q 431 675 450 667 Q 465 661 526 670 L 584 680 Q 708 708 721 697 Q 736 679 699 569 C 690 541 740 539 751 567 Z" class="stroke3"/>
+    <path d="M 610 505 Q 677 515 771 525 Q 783 526 784 537 Q 784 546 751 567 L 699 569 Q 698 570 696 569 Q 653 559 611 547 L 555 535 Q 494 525 441 515 C 412 509 430 468 459 477 Q 483 486 556 496 L 610 505 Z" class="stroke4"/>
+    <path d="M 609 357 Q 763 388 801 379 Q 814 378 821 366 Q 827 351 785 223 Q 782 211 770 213 Q 746 220 717 230 Q 690 243 706 214 Q 745 159 750 135 Q 756 119 771 119 Q 784 118 803 129 Q 836 163 860 249 Q 873 312 904 340 Q 923 361 910 374 Q 885 399 849 424 Q 834 434 761 417 Q 632 398 609 392 L 555 383 Q 507 376 475 366 Q 447 359 430 361 Q 423 362 425 377 Q 437 435 459 477 C 468 497 466 498 441 515 Q 429 525 414 533 Q 404 542 393 534 Q 384 530 392 510 Q 402 483 391 447 Q 370 380 351 356 Q 339 340 349 322 Q 358 297 371 288 Q 381 282 406 299 Q 449 335 555 349 L 609 357 Z" class="stroke5"/>
+    <path d="M 555 349 Q 548 -5 568 -40 L 569 -41 Q 575 -48 583 -46 Q 601 -34 605 26 Q 608 63 609 357 L 609 392 Q 609 444 610 505 L 611 547 Q 612 575 615 591 Q 619 616 623 636 Q 626 655 611 664 Q 596 674 584 680 C 558 695 512 696 526 670 Q 527 669 529 666 Q 533 656 540 645 Q 553 620 555 584 Q 555 562 555 535 L 556 496 Q 556 444 555 383 L 555 349 Z" class="stroke6"/>
+    <text x="282" y="764" style="transform-origin:282px 764px; transform:scale(1,-1);">1</text>
+    <text x="234" y="510" style="transform-origin:234px 510px; transform:scale(1,-1);">2</text>
+    <text x="437" y="684" style="transform-origin:437px 684px; transform:scale(1,-1);">3</text>
+    <text x="449" y="511" style="transform-origin:449px 511px; transform:scale(1,-1);">4</text>
+    <text x="403" y="523" style="transform-origin:403px 523px; transform:scale(1,-1);">5</text>
+    <text x="538" y="664" style="transform-origin:538px 664px; transform:scale(1,-1);">6</text></g>
+</svg>
