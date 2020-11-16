@@ -2,8 +2,6 @@
 
 ### [Make Me a Hanzi Demo](https://makemeahanzi.herokuapp.com)
 
-### [New: Inkstone Chinese writing app](https://www.skishore.me/inkstone/)
-
 ### [New: No more cut-off strokes (due to @chanind)!](https://github.com/skishore/makemeahanzi/pull/32)
 
 Make Me a Hanzi provides dictionary and graphical data for over 9000 of the
