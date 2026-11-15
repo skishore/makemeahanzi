@@ -126,10 +126,10 @@
         @keyframes keyframes5 {
           from {
             stroke: blue;
-            stroke-dashoffset: 470;
+            stroke-dashoffset: 451;
             stroke-width: 128;
           }
-          60% {
+          59% {
             animation-timing-function: step-end;
             stroke: blue;
             stroke-dashoffset: 0;
@@ -141,7 +141,7 @@
           }
         }
         #make-me-a-hanzi-animation-5 {
-          animation: keyframes5 0.6324869791666666s both;
+          animation: keyframes5 0.6170247395833334s both;
           animation-delay: 4.307454427083334s;
           animation-timing-function: linear;
         }
@@ -165,7 +165,7 @@
         }
         #make-me-a-hanzi-animation-6 {
           animation: keyframes6 1.2526041666666667s both;
-          animation-delay: 4.939941406250001s;
+          animation-delay: 4.924479166666667s;
           animation-timing-function: linear;
         }
       
@@ -214,7 +214,7 @@
       <clipPath id="make-me-a-hanzi-clip-5">
         <path d="M 705 408 Q 736 417 838 455 Q 860 465 885 469 Q 907 473 902 493 Q 895 512 873 533 Q 854 552 841 552 Q 828 553 829 540 Q 826 515 732 448 Q 720 441 706 430 C 682 412 676 399 705 408 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-5)" d="M 838 543 L 846 531 L 850 500 L 764 447 L 719 427 L 708 413" fill="none" id="make-me-a-hanzi-animation-5" stroke-dasharray="342 684" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-5)" d="M 874 515 L 850 500 L 764 447 L 704 421" fill="none" id="make-me-a-hanzi-animation-5" stroke-dasharray="323 646" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-6">
         <path d="M 972 88 Q 987 103 969 130 Q 948 178 939 242 Q 938 252 930 260 Q 920 264 918 242 Q 890 137 889 135 Q 885 125 868 121 Q 840 112 802 117 Q 774 118 755 128 Q 719 144 712 202 Q 702 296 705 408 L 706 430 Q 713 622 734 652 Q 741 674 722 686 Q 695 711 659 719 Q 640 722 632 713 Q 625 704 632 695 Q 653 677 656 606 Q 656 225 672 164 Q 681 119 718 89 Q 776 44 905 57 Q 915 60 924 61 Q 958 71 972 88 Z"></path>

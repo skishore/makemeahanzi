@@ -11,10 +11,10 @@
         @keyframes keyframes0 {
           from {
             stroke: blue;
-            stroke-dashoffset: 472;
+            stroke-dashoffset: 453;
             stroke-width: 128;
           }
-          61% {
+          60% {
             animation-timing-function: step-end;
             stroke: blue;
             stroke-dashoffset: 0;
@@ -26,7 +26,7 @@
           }
         }
         #make-me-a-hanzi-animation-0 {
-          animation: keyframes0 0.6341145833333334s both;
+          animation: keyframes0 0.61865234375s both;
           animation-delay: 0s;
           animation-timing-function: linear;
         }
@@ -50,7 +50,7 @@
         }
         #make-me-a-hanzi-animation-1 {
           animation: keyframes1 0.97998046875s both;
-          animation-delay: 0.6341145833333334s;
+          animation-delay: 0.61865234375s;
           animation-timing-function: linear;
         }
       
@@ -73,7 +73,7 @@
         }
         #make-me-a-hanzi-animation-2 {
           animation: keyframes2 0.8196614583333334s both;
-          animation-delay: 1.6140950520833335s;
+          animation-delay: 1.5986328125s;
           animation-timing-function: linear;
         }
       
@@ -96,7 +96,7 @@
         }
         #make-me-a-hanzi-animation-3 {
           animation: keyframes3 0.5478515625s both;
-          animation-delay: 2.433756510416667s;
+          animation-delay: 2.4182942708333335s;
           animation-timing-function: linear;
         }
       
@@ -119,7 +119,7 @@
         }
         #make-me-a-hanzi-animation-4 {
           animation: keyframes4 0.5657552083333334s both;
-          animation-delay: 2.981608072916667s;
+          animation-delay: 2.9661458333333335s;
           animation-timing-function: linear;
         }
       
@@ -142,7 +142,7 @@
         }
         #make-me-a-hanzi-animation-5 {
           animation: keyframes5 0.8961588541666666s both;
-          animation-delay: 3.5473632812500004s;
+          animation-delay: 3.531901041666667s;
           animation-timing-function: linear;
         }
       
@@ -165,7 +165,7 @@
         }
         #make-me-a-hanzi-animation-6 {
           animation: keyframes6 0.7073567708333334s both;
-          animation-delay: 4.443522135416667s;
+          animation-delay: 4.428059895833334s;
           animation-timing-function: linear;
         }
       
@@ -188,7 +188,7 @@
         }
         #make-me-a-hanzi-animation-7 {
           animation: keyframes7 0.89208984375s both;
-          animation-delay: 5.15087890625s;
+          animation-delay: 5.135416666666667s;
           animation-timing-function: linear;
         }
       
@@ -211,7 +211,7 @@
         }
         #make-me-a-hanzi-animation-8 {
           animation: keyframes8 1.00927734375s both;
-          animation-delay: 6.04296875s;
+          animation-delay: 6.027506510416667s;
           animation-timing-function: linear;
         }
       
@@ -234,7 +234,7 @@
         }
         #make-me-a-hanzi-animation-9 {
           animation: keyframes9 0.9148763020833334s both;
-          animation-delay: 7.05224609375s;
+          animation-delay: 7.036783854166667s;
           animation-timing-function: linear;
         }
       
@@ -264,7 +264,7 @@
       <clipPath id="make-me-a-hanzi-clip-0">
         <path d="M 249 651 Q 277 675 354 752 Q 369 770 390 783 Q 408 796 395 810 Q 380 823 354 833 Q 329 842 318 838 Q 306 834 313 822 Q 320 800 239 663 Q 238 662 236 658 C 221 632 226 631 249 651 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-0)" d="M 320 829 L 347 796 L 244 657" fill="none" id="make-me-a-hanzi-animation-0" stroke-dasharray="344 688" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-0)" d="M 361 815 L 347 796 L 244 657" fill="none" id="make-me-a-hanzi-animation-0" stroke-dasharray="325 650" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-1">
         <path d="M 225 313 Q 238 376 244 408 L 247 431 Q 251 473 253 513 L 255 540 Q 258 604 261 613 C 265 640 265 640 257 645 Q 253 649 249 651 L 236 658 Q 199 676 187 670 Q 177 663 183 651 Q 202 627 203 562 Q 203 394 173 283 Q 146 199 81 77 Q 77 70 75 65 Q 74 55 83 57 Q 114 64 178 181 Q 187 202 198 226 Q 208 256 218 288 L 225 313 Z"></path>

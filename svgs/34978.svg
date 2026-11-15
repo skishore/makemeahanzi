@@ -149,10 +149,10 @@
         @keyframes keyframes6 {
           from {
             stroke: blue;
-            stroke-dashoffset: 447;
+            stroke-dashoffset: 416;
             stroke-width: 128;
           }
-          59% {
+          58% {
             animation-timing-function: step-end;
             stroke: blue;
             stroke-dashoffset: 0;
@@ -164,7 +164,7 @@
           }
         }
         #make-me-a-hanzi-animation-6 {
-          animation: keyframes6 0.61376953125s both;
+          animation: keyframes6 0.5885416666666666s both;
           animation-delay: 4.008951822916667s;
           animation-timing-function: linear;
         }
@@ -188,7 +188,7 @@
         }
         #make-me-a-hanzi-animation-7 {
           animation: keyframes7 0.71142578125s both;
-          animation-delay: 4.622721354166667s;
+          animation-delay: 4.597493489583334s;
           animation-timing-function: linear;
         }
       
@@ -211,7 +211,7 @@
         }
         #make-me-a-hanzi-animation-8 {
           animation: keyframes8 0.9010416666666666s both;
-          animation-delay: 5.334147135416667s;
+          animation-delay: 5.308919270833334s;
           animation-timing-function: linear;
         }
       
@@ -234,7 +234,7 @@
         }
         #make-me-a-hanzi-animation-9 {
           animation: keyframes9 1.1891276041666667s both;
-          animation-delay: 6.235188802083334s;
+          animation-delay: 6.209960937500001s;
           animation-timing-function: linear;
         }
       
@@ -294,7 +294,7 @@
       <clipPath id="make-me-a-hanzi-clip-6">
         <path d="M 777 696 Q 771 683 713 598 Q 706 582 721 586 Q 763 628 844 677 Q 850 681 858 685 Q 877 695 866 712 Q 853 727 826 739 Q 804 749 791 747 Q 779 744 784 732 Q 788 716 777 696 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-6)" d="M 792 738 L 818 702 L 738 615 L 723 606 L 721 595" fill="none" id="make-me-a-hanzi-animation-6" stroke-dasharray="319 638" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-6)" d="M 834 720 L 818 702 L 738 615 L 723 606" fill="none" id="make-me-a-hanzi-animation-6" stroke-dasharray="288 576" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-7">
         <path d="M 666 458 Q 795 486 798 489 Q 807 496 803 504 Q 796 516 768 524 Q 738 530 666 505 L 613 491 Q 558 481 494 476 Q 458 470 483 454 Q 523 430 588 445 Q 598 448 613 448 L 666 458 Z"></path>

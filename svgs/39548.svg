@@ -149,10 +149,10 @@
         @keyframes keyframes6 {
           from {
             stroke: blue;
-            stroke-dashoffset: 528;
+            stroke-dashoffset: 510;
             stroke-width: 128;
           }
-          63% {
+          62% {
             animation-timing-function: step-end;
             stroke: blue;
             stroke-dashoffset: 0;
@@ -164,7 +164,7 @@
           }
         }
         #make-me-a-hanzi-animation-6 {
-          animation: keyframes6 0.6796875s both;
+          animation: keyframes6 0.6650390625s both;
           animation-delay: 4.852864583333333s;
           animation-timing-function: linear;
         }
@@ -188,7 +188,7 @@
         }
         #make-me-a-hanzi-animation-7 {
           animation: keyframes7 1.1272786458333333s both;
-          animation-delay: 5.532552083333333s;
+          animation-delay: 5.517903645833333s;
           animation-timing-function: linear;
         }
       
@@ -244,7 +244,7 @@
       <clipPath id="make-me-a-hanzi-clip-6">
         <path d="M 588 257 Q 621 272 760 348 Q 782 363 808 370 Q 832 377 823 397 Q 811 416 786 435 Q 764 453 750 452 Q 737 452 739 437 Q 739 406 595 283 Q 592 282 590 279 C 567 260 561 244 588 257 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-6)" d="M 749 441 L 758 431 L 767 399 L 683 330 L 610 285 L 589 262" fill="none" id="make-me-a-hanzi-animation-6" stroke-dasharray="400 800" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-6)" d="M 789 417 L 767 399 L 683 330 L 610 285 L 589 262" fill="none" id="make-me-a-hanzi-animation-6" stroke-dasharray="382 764" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-7">
         <path d="M 932 113 Q 916 135 888 206 Q 885 222 877 226 Q 870 229 868 210 Q 850 128 836 103 Q 803 67 702 70 Q 663 71 633 83 Q 606 95 599 112 Q 578 154 588 257 L 590 279 Q 596 337 608 401 Q 612 419 602 429 Q 589 442 566 451 Q 553 455 545 451 Q 538 447 543 429 Q 556 390 552 353 Q 536 151 552 93 Q 555 71 577 53 Q 643 -4 822 23 Q 834 26 848 29 Q 888 39 930 66 Q 951 85 932 113 Z"></path>

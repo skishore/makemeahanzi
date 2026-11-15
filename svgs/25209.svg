@@ -126,10 +126,10 @@
         @keyframes keyframes5 {
           from {
             stroke: blue;
-            stroke-dashoffset: 483;
+            stroke-dashoffset: 462;
             stroke-width: 128;
           }
-          61% {
+          60% {
             animation-timing-function: step-end;
             stroke: blue;
             stroke-dashoffset: 0;
@@ -141,7 +141,7 @@
           }
         }
         #make-me-a-hanzi-animation-5 {
-          animation: keyframes5 0.64306640625s both;
+          animation: keyframes5 0.6259765625s both;
           animation-delay: 4.14794921875s;
           animation-timing-function: linear;
         }
@@ -165,7 +165,7 @@
         }
         #make-me-a-hanzi-animation-6 {
           animation: keyframes6 1.28515625s both;
-          animation-delay: 4.791015625s;
+          animation-delay: 4.77392578125s;
           animation-timing-function: linear;
         }
       
@@ -214,7 +214,7 @@
       <clipPath id="make-me-a-hanzi-clip-5">
         <path d="M 688 421 Q 722 433 825 476 Q 849 489 875 493 Q 900 499 892 519 Q 882 540 859 561 Q 838 580 824 580 Q 811 581 812 567 Q 809 539 743 486 Q 716 467 688 444 C 665 425 660 411 688 421 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-5)" d="M 822 570 L 831 557 L 838 525 L 699 438 L 690 427" fill="none" id="make-me-a-hanzi-animation-5" stroke-dasharray="355 710" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-5)" d="M 862 540 L 838 525 L 699 438 L 690 427" fill="none" id="make-me-a-hanzi-animation-5" stroke-dasharray="334 668" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-6">
         <path d="M 688 444 Q 688 537 707 651 Q 714 690 721 700 Q 728 721 710 734 Q 683 758 647 767 Q 628 771 621 762 Q 612 753 620 744 Q 639 725 643 674 Q 643 236 652 199 Q 670 94 822 87 Q 937 81 976 120 Q 992 133 976 161 Q 958 210 954 273 Q 954 283 946 292 Q 936 298 933 275 Q 896 164 877 154 Q 873 153 868 151 Q 837 142 793 146 Q 760 147 739 157 Q 699 175 693 235 Q 686 320 688 421 L 688 444 Z"></path>
