@@ -333,10 +333,10 @@
         @keyframes keyframes14 {
           from {
             stroke: blue;
-            stroke-dashoffset: 491;
+            stroke-dashoffset: 473;
             stroke-width: 128;
           }
-          62% {
+          61% {
             animation-timing-function: step-end;
             stroke: blue;
             stroke-dashoffset: 0;
@@ -348,7 +348,7 @@
           }
         }
         #make-me-a-hanzi-animation-14 {
-          animation: keyframes14 0.6495768229166666s both;
+          animation: keyframes14 0.6349283854166666s both;
           animation-delay: 9.407389322916666s;
           animation-timing-function: linear;
         }
@@ -372,7 +372,7 @@
         }
         #make-me-a-hanzi-animation-15 {
           animation: keyframes15 1.0361328125s both;
-          animation-delay: 10.056966145833332s;
+          animation-delay: 10.042317708333332s;
           animation-timing-function: linear;
         }
       
@@ -484,7 +484,7 @@
       <clipPath id="make-me-a-hanzi-clip-14">
         <path d="M 706 250 Q 733 265 850 336 Q 869 349 894 358 Q 916 365 907 384 Q 895 402 871 418 Q 849 434 836 432 Q 823 431 827 418 Q 827 385 707 276 C 685 256 680 235 706 250 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-14)" d="M 835 423 L 845 412 L 855 383 L 808 338 L 723 278 L 713 260" fill="none" id="make-me-a-hanzi-animation-14" stroke-dasharray="363 726" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-14)" d="M 874 401 L 855 383 L 808 338 L 705 265" fill="none" id="make-me-a-hanzi-animation-14" stroke-dasharray="345 690" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-15">
         <path d="M 707 276 Q 710 325 718 382 Q 722 400 710 410 Q 697 423 674 430 Q 661 434 653 429 Q 646 425 652 408 Q 665 369 664 332 Q 660 157 675 108 Q 679 86 699 68 Q 763 8 902 34 Q 908 37 917 38 Q 948 48 978 73 Q 997 86 987 112 Q 977 137 963 212 Q 964 228 957 234 Q 951 238 945 220 Q 909 141 889 119 Q 882 107 856 100 Q 802 85 748 106 Q 708 127 705 205 Q 705 227 706 250 L 707 276 Z"></path>

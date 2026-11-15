@@ -126,10 +126,10 @@
         @keyframes keyframes5 {
           from {
             stroke: blue;
-            stroke-dashoffset: 450;
+            stroke-dashoffset: 432;
             stroke-width: 128;
           }
-          59% {
+          58% {
             animation-timing-function: step-end;
             stroke: blue;
             stroke-dashoffset: 0;
@@ -141,7 +141,7 @@
           }
         }
         #make-me-a-hanzi-animation-5 {
-          animation: keyframes5 0.6162109375s both;
+          animation: keyframes5 0.6015625s both;
           animation-delay: 3.4350585937499996s;
           animation-timing-function: linear;
         }
@@ -165,7 +165,7 @@
         }
         #make-me-a-hanzi-animation-6 {
           animation: keyframes6 0.7610677083333334s both;
-          animation-delay: 4.05126953125s;
+          animation-delay: 4.03662109375s;
           animation-timing-function: linear;
         }
       
@@ -188,7 +188,7 @@
         }
         #make-me-a-hanzi-animation-7 {
           animation: keyframes7 1.0198567708333333s both;
-          animation-delay: 4.812337239583333s;
+          animation-delay: 4.797688802083333s;
           animation-timing-function: linear;
         }
       
@@ -211,7 +211,7 @@
         }
         #make-me-a-hanzi-animation-8 {
           animation: keyframes8 0.5681966145833334s both;
-          animation-delay: 5.832194010416666s;
+          animation-delay: 5.817545572916666s;
           animation-timing-function: linear;
         }
       
@@ -234,7 +234,7 @@
         }
         #make-me-a-hanzi-animation-9 {
           animation: keyframes9 0.5030924479166666s both;
-          animation-delay: 6.400390624999999s;
+          animation-delay: 6.385742187499999s;
           animation-timing-function: linear;
         }
       
@@ -257,7 +257,7 @@
         }
         #make-me-a-hanzi-animation-10 {
           animation: keyframes10 0.5177408854166666s both;
-          animation-delay: 6.903483072916666s;
+          animation-delay: 6.888834635416666s;
           animation-timing-function: linear;
         }
       
@@ -280,7 +280,7 @@
         }
         #make-me-a-hanzi-animation-11 {
           animation: keyframes11 0.6251627604166666s both;
-          animation-delay: 7.421223958333333s;
+          animation-delay: 7.406575520833333s;
           animation-timing-function: linear;
         }
       
@@ -303,7 +303,7 @@
         }
         #make-me-a-hanzi-animation-12 {
           animation: keyframes12 0.6536458333333334s both;
-          animation-delay: 8.04638671875s;
+          animation-delay: 8.03173828125s;
           animation-timing-function: linear;
         }
       
@@ -326,7 +326,7 @@
         }
         #make-me-a-hanzi-animation-13 {
           animation: keyframes13 0.56494140625s both;
-          animation-delay: 8.700032552083334s;
+          animation-delay: 8.685384114583334s;
           animation-timing-function: linear;
         }
       
@@ -349,7 +349,7 @@
         }
         #make-me-a-hanzi-animation-14 {
           animation: keyframes14 0.5104166666666666s both;
-          animation-delay: 9.264973958333334s;
+          animation-delay: 9.250325520833334s;
           animation-timing-function: linear;
         }
       
@@ -372,7 +372,7 @@
         }
         #make-me-a-hanzi-animation-15 {
           animation: keyframes15 0.9026692708333334s both;
-          animation-delay: 9.775390625s;
+          animation-delay: 9.7607421875s;
           animation-timing-function: linear;
         }
       
@@ -395,7 +395,7 @@
         }
         #make-me-a-hanzi-animation-16 {
           animation: keyframes16 0.82373046875s both;
-          animation-delay: 10.678059895833334s;
+          animation-delay: 10.663411458333334s;
           animation-timing-function: linear;
         }
       
@@ -418,7 +418,7 @@
         }
         #make-me-a-hanzi-animation-17 {
           animation: keyframes17 0.7911783854166666s both;
-          animation-delay: 11.501790364583334s;
+          animation-delay: 11.487141927083334s;
           animation-timing-function: linear;
         }
       
@@ -489,7 +489,7 @@
       <clipPath id="make-me-a-hanzi-clip-5">
         <path d="M 562 675 Q 592 703 610 723 Q 656 780 676 792 Q 694 805 680 819 Q 664 832 638 840 Q 613 847 602 843 Q 590 839 597 827 Q 606 802 539 674 Q 538 673 538 671 C 526 643 540 654 562 675 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-5)" d="M 604 834 L 633 804 L 561 688 L 546 685" fill="none" id="make-me-a-hanzi-animation-5" stroke-dasharray="322 644" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-5)" d="M 646 824 L 633 804 L 553 674" fill="none" id="make-me-a-hanzi-animation-5" stroke-dasharray="304 608" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-6">
         <path d="M 501 668 Q 498 672 492 674 Q 485 681 472 685 Q 463 689 453 686 Q 447 682 452 670 Q 453 663 457 656 Q 481 608 462 427 Q 443 351 475 313 Q 485 301 494 312 Q 507 331 508 399 Q 511 633 514 639 C 516 658 516 658 501 668 Z"></path>

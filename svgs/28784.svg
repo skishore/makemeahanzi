@@ -80,10 +80,10 @@
         @keyframes keyframes3 {
           from {
             stroke: blue;
-            stroke-dashoffset: 491;
+            stroke-dashoffset: 468;
             stroke-width: 128;
           }
-          62% {
+          60% {
             animation-timing-function: step-end;
             stroke: blue;
             stroke-dashoffset: 0;
@@ -95,7 +95,7 @@
           }
         }
         #make-me-a-hanzi-animation-3 {
-          animation: keyframes3 0.6495768229166666s both;
+          animation: keyframes3 0.630859375s both;
           animation-delay: 2.589192708333333s;
           animation-timing-function: linear;
         }
@@ -119,7 +119,7 @@
         }
         #make-me-a-hanzi-animation-4 {
           animation: keyframes4 0.9685872395833334s both;
-          animation-delay: 3.2387695312499996s;
+          animation-delay: 3.220052083333333s;
           animation-timing-function: linear;
         }
       
@@ -142,7 +142,7 @@
         }
         #make-me-a-hanzi-animation-5 {
           animation: keyframes5 0.8416341145833334s both;
-          animation-delay: 4.207356770833333s;
+          animation-delay: 4.188639322916666s;
           animation-timing-function: linear;
         }
       
@@ -179,7 +179,7 @@
       <clipPath id="make-me-a-hanzi-clip-3">
         <path d="M 708 444 Q 693 420 623 332 Q 611 313 631 317 Q 658 332 755 393 Q 777 412 804 423 Q 828 433 816 454 Q 801 473 772 490 Q 745 506 731 502 Q 716 501 721 485 Q 725 464 708 444 Z"></path>
       </clipPath>
-      <path clip-path="url(#make-me-a-hanzi-clip-3)" d="M 730 491 L 751 469 L 759 448 L 729 414 L 626 324" fill="none" id="make-me-a-hanzi-animation-3" stroke-dasharray="363 726" stroke-linecap="round"></path>
+      <path clip-path="url(#make-me-a-hanzi-clip-3)" d="M 779 470 L 759 448 L 729 414 L 626 324" fill="none" id="make-me-a-hanzi-animation-3" stroke-dasharray="340 680" stroke-linecap="round"></path>
     
       <clipPath id="make-me-a-hanzi-clip-4">
         <path d="M 554 265 Q 572 326 585 418 Q 589 448 595 461 Q 602 468 596 479 Q 590 486 559 499 Q 525 517 508 510 Q 495 504 506 486 Q 545 338 464 188 Q 460 184 457 177 Q 412 96 260 15 Q 235 0 266 1 Q 285 0 324 14 Q 373 27 417 55 Q 492 97 544 234 L 554 265 Z"></path>
